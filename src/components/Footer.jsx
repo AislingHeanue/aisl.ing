@@ -27,7 +27,7 @@ function Footer() {
 								</svg>
 							</a>
 							<a 
-								href="https://linkedin.com/in/forrestpknight"
+								href="https://linkedin.com/in/AislingHeanue"
 								className="bg-stone-400 p-2 font-semibold text-white inline-flex items-center space-x-2 rounded-full">
 								<svg
 								className="w-5 h-5 fill-current"
@@ -41,7 +41,7 @@ function Footer() {
 								</svg>
 							</a>
 							<a 
-								href="https://github.com/forrestknight"
+								href="https://github.com/AislingHeanue"
 								className="bg-stone-400 p-2 font-semibold text-white inline-flex items-center space-x-2 rounded-full">
 								<svg
 								xmlns="http://www.w3.org/2000/svg"

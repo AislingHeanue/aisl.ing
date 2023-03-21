@@ -1,20 +1,26 @@
 export default [
     {
         title: "Rubik's Cube Simulator",
-        imgURL: "https://thecatapi.com/api/images/get?format=src&type=png",
-        stack: ['Java','JavaFX'],
-        link: "https://youtube.com"
+        imgURL: "assets/Rubiks Cube Screenshot.png",
+        stack: ["Java","JavaFX"],
+        link: "https://github.com/AislingHeanue/Misc-Projects"
     },
     {
         title: "Quantum Computing Circuits",
-        imgURL: "https://thecatapi.com/api/images/get?format=src&type=png",
-        stack: ['Python','Qiskit'],
-        link: "https://youtube.com"
+        imgURL: "assets/Quantum Screenshot.png",
+        stack: ["Python","Qiskit"],
+        link: "https://github.com/AislingHeanue/Quantum-Computing-Circuits"
     },
     {
-        title: "Aisling Codes Portfolio",
-        imgURL: "https://thecatapi.com/api/images/get?format=src&type=png",
-        stack: ['React','Tailwind','Vite'],
-        link: "https://aisling.codes"
+        title: "Conway's Game of Life",
+        imgURL: "assets/Game of Life Screenshot.png",
+        stack: ["Python","Pygame"],
+        link: "https://github.com/AislingHeanue/Misc-Projects"
+    },
+    {
+        title: "Advent of Code Solutions",
+        imgURL: "assets/AoC Screenshot.png",
+        stack: ["Python"],
+        link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/2022/Advent%20of%20Code%202022.ipynb"
     }
 ]
