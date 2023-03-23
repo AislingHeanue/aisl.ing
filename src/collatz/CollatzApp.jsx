@@ -8,6 +8,8 @@ function App() {
 	const [r,setR] = useState(2.5)
 	const [angle,setAngle] = useState(0.15)
 	const [n,setN] = useState(800/4000)
+	const [alpha,setAlpha] = useState(0.7)
+	const [rotation,setRotation] = useState(Math.PI/2)
 
 	useEffect(() => {
 		setTheme("dark"); 
@@ -17,6 +19,14 @@ function App() {
 	const handleThemeSwitch = () => {
 		setTheme(theme === "dark" ? "light" : "dark");
 	};
+
+	const changeRotation = (e) => {
+		setRotation(e.target.value)
+	}
+
+	const changeAlpha = (e) => {
+		setAlpha(e.target.value)
+	}
 
 	const changeAngle = (e) => {
 		setAngle(e.target.value)
@@ -84,19 +94,40 @@ function App() {
         {theme === "dark"?sun:moon}
       </button>
       <div className="bg-white dark:bg-stone-900 dark:text-stone-300 text-stone-900 min-h-screen font-inter font-medium ">
-        <div className="max-w-5xl w-11/12 mx-auto">
-			<Title>Collatz Tree Visualiser</Title>
-			<p><a href='/'>Back to homepage</a></p>
-			<p>Todo: Add a README here.</p>
-			<label for="angle-range" className="block mb-2 text-sm text-stone-900 dark:text-white dark:text-white">Angle (0 to 0.3)</label>
-			<input id="angle-range" onChange={changeAngle} type="range" min="0" max="0.3" step = "any" value = {angle} className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
-			<label for="length-range" className="block mb-2 text-smtext-stone-900 dark:text-white dark:text-white">Line length (0 to 5)</label>
-			<input id="length-range" onChange={changeLength} type="range" min="0" max="5" value = {r} step="any" className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
-			<label for="n-range" className="block mb-2 text-s text-stone-900 dark:text-white dark:text-white">N (0 to 1600)</label>
-			<input id="n-range" onChange={changeN} type="range" min="0" max="1" step="any" value={n} className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
-			<View r={r} angle={angle} n={n}/>     
-			<Footer/>     
+        <div className="grid lg:grid-cols-2 md:grid-cols-1 w-full md:w-5/6 mx-auto gap-4">
+			<div className=''>
+				<Title>Collatz Tree Visualiser</Title>
+				<button tpye="button" className='mb-2 fort-semibold text-white bg-stone-900 dark:bg-white dark:text-stone-900 rounded pl-2 pr-2'><a href='/'>Back to homepage</a></button>
+				<p className='mb-4'>The Collatz conjecture states that preformng the operation "multiply n by 3 and add 1if it is odd, or half it if is even"
+					will always eventually reach the final value of 1. This has been shown to be true for many values of n, but the general conjecture
+					remains unproven. This tree diagram
+					represents the possible sets of operations a sequence can take to get from its starting value to 1 (which is specified as the root node) for a set list
+					of values of n. A left turn in the direction facing away from 1 (the root node) indicates n -&gt;2n, and a right turn indicates "n -&gt; 2(n-1)/3"
+				</p>
+				
+				<div className="mt-2 w-full flex-col md:flex-row items-center">
+					<div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+						<label for="angle-range" className="block text-sm text-stone-900 dark:text-white dark:text-white">Branhing Angle (0° to 90°)</label>
+						<input id="angle-range" onChange={changeAngle} type="range" min="0" max={Math.PI/2} step = {Math.PI/180} value = {angle} className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+						<label for="angle-range" className="block text-sm text-stone-900 dark:text-white dark:text-white">Global Rotaion</label>
+						<input id="angle-range" onChange={changeRotation} type="range" min="0" max={2*Math.PI} step = {Math.PI/180} value = {rotation} className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+						<label for="length-range" className="block text-smtext-stone-900 dark:text-white dark:text-white">Line length (0 to 7)</label>
+						<input id="length-range" onChange={changeLength} type="range" min="0" max="7" value = {r} step="any" className="w-full h-2 mt-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+						<label for="n-range" className="block text-s text-stone-900 dark:text-white dark:text-white">N (0 to 4000)</label>
+						<input id="n-range" onChange={changeN} type="range" min="0" max="1" step="any" value={n} className="w-full h-2 mt-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+						<label for="alpha-range" className="block text-s text-stone-900 dark:text-white dark:text-white">Line Opacity (0 to 1)</label>
+						<input id="alpha-range" onChange={changeAlpha} type="range" min="0" max="1" step="any" value={alpha} className="w-full h-2 mt-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+					</div>
+				</div>
+			</div>
+			<div>
+				<View r={r} angle={angle} n={n} alpha={alpha} rotation = {rotation}/>  
+			</div>
+			   
+   
         </div>
+
+		<Footer/>  
       </div>
     </>
   )

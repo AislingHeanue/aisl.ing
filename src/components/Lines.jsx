@@ -1,14 +1,14 @@
 import React from "react";
 
-function Lines(r,angle,n,rootx,rooty) {
-    const lines = makeCoordinates(n,angle,r,rootx,rooty)
+function Lines(r,angle,n,rootx,rooty,rotation) {
+    const lines = makeCoordinates(n,angle,r,rootx,rooty,rotation)
 
     return {"lines":lines}
 }
 
-function makeCoordinates(n,angle,r,rootx,rooty) {
+function makeCoordinates(n,angle,r,rootx,rooty,rotation) {
     const firstElement =  [rootx,rooty].join(",")
-    const firstAngle = Math.PI/2
+    const firstAngle = rotation
     let lines = []
     for (let i = 2; i < n+1; i++) {
         let currentAngle = firstAngle

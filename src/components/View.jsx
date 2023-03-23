@@ -1,10 +1,10 @@
 import React from "react";
 import Lines from "./Lines"
 
-function View({r,angle,n}) {
-    let linesAndCircles = Lines(r,Math.round(1000*angle)/1000,Math.floor(n*4000),75,200)
+function View({r,angle,n,alpha,rotation}) {
+    let linesAndCircles = Lines(r,Math.round(1000*angle)/1000,Math.floor(n*4000),75,200,rotation)
     return (
-        <div className = "lg:w-3/4 md:w-full sm:w-full flex items-center justrify-center flex-col text-center pt-20 pb-6">
+        <div className = "w-full flex items-center justrify-center flex-col text-center lg:mt-20 pb-6">
            <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="white"
@@ -17,7 +17,7 @@ function View({r,angle,n}) {
             <rect  width="200" height="250" strokeWidth="2" strokeOpacity="1" fillOpacity="0.01"/>
 
             {linesAndCircles["lines"].map(points => (
-                <polyline points={points} fill="none" strokeWidth="0.1" strokeOpacity="0.7" />
+                <polyline points={points} fill="none" strokeWidth="0.1" strokeOpacity={alpha} />
             ))}
             
 		</svg>
