@@ -9,6 +9,10 @@ function App() {
 	const [angle,setAngle] = useState(0.15)
 	const [n,setN] = useState(800/4000)
 
+	useEffect(() => {
+		setTheme("dark"); 
+	}, []);
+
 
 	const handleThemeSwitch = () => {
 		setTheme(theme === "dark" ? "light" : "dark");

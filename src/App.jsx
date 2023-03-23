@@ -5,11 +5,11 @@ import Portfolio from './components/Portfolio'
 import Footer from './components/Footer'
 
 function App() {
-  const [theme, setTheme] = useState(null);
-  document.documentElement.classList.add("dark")
+  const [theme, setTheme] = useState("dark");
+  
 
 	useEffect(() => {
-			setTheme("dark"); 
+		setTheme("dark"); 
 	}, []);
 
 	const handleThemeSwitch = () => {
