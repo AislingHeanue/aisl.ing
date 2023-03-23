@@ -107,9 +107,9 @@ function App() {
 				
 				<div className="mt-2 w-full flex-col md:flex-row items-center">
 					<div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-						<label for="angle-range" className="block text-sm text-stone-900 dark:text-white dark:text-white">Branhing Angle (0° to 90°)</label>
+						<label for="angle-range" className="block text-s text-stone-900 dark:text-white dark:text-white">Branhing Angle (0° to 90°)</label>
 						<input id="angle-range" onChange={changeAngle} type="range" min="0" max={Math.PI/2} step = {Math.PI/180} value = {angle} className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
-						<label for="angle-range" className="block text-sm text-stone-900 dark:text-white dark:text-white">Global Rotaion</label>
+						<label for="angle-range" className="block text-s text-stone-900 dark:text-white dark:text-white">Global Rotaion</label>
 						<input id="angle-range" onChange={changeRotation} type="range" min="0" max={2*Math.PI} step = {Math.PI/180} value = {rotation} className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
 						<label for="length-range" className="block text-smtext-stone-900 dark:text-white dark:text-white">Line length (0 to 7)</label>
 						<input id="length-range" onChange={changeLength} type="range" min="0" max="7" value = {r} step="any" className="w-full h-2 mt-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
