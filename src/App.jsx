@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 
 function App() {
   const [theme, setTheme] = useState(null);
+  document.documentElement.classList.add("dark")
 
 	useEffect(() => {
 			setTheme("dark"); 
