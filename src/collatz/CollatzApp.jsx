@@ -5,10 +5,9 @@ import Footer from "../components/Footer"
 
 function App() {
 	const [theme, setTheme] = useState("dark");
-	document.documentElement.classList.add("dark")
 	const [r,setR] = useState(2.5)
 	const [angle,setAngle] = useState(0.15)
-	const [n,setN] = useState(800)
+	const [n,setN] = useState(800/4000)
 
 
 	const handleThemeSwitch = () => {
@@ -90,7 +89,7 @@ function App() {
 			<label for="length-range" className="block mb-2 text-smtext-stone-900 dark:text-white dark:text-white">Line length (0 to 5)</label>
 			<input id="length-range" onChange={changeLength} type="range" min="0" max="5" value = {r} step="any" className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
 			<label for="n-range" className="block mb-2 text-s text-stone-900 dark:text-white dark:text-white">N (0 to 1600)</label>
-			<input id="n-range" onChange={changeN} type="range" min="0" max="4000" step="any" value={n} className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
+			<input id="n-range" onChange={changeN} type="range" min="0" max="1" step="any" value={n} className="w-1/2 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"></input>
 			<View r={r} angle={angle} n={n}/>     
 			<Footer/>     
         </div>

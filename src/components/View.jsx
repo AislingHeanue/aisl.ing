@@ -2,7 +2,7 @@ import React from "react";
 import Lines from "./Lines"
 
 function View({r,angle,n}) {
-    let linesAndCircles = Lines(r,Math.round(1000*angle)/1000,Math.floor(n),75,200)
+    let linesAndCircles = Lines(r,Math.round(1000*angle)/1000,Math.floor(n*4000),75,200)
     return (
         <div className = "lg:w-3/4 md:w-full sm:w-full flex items-center justrify-center flex-col text-center pt-20 pb-6">
            <svg
