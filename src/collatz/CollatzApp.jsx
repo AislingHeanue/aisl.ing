@@ -108,12 +108,12 @@ function App() {
         <div className="grid lg:grid-cols-2 md:grid-cols-1 w-full md:w-5/6 mx-auto gap-4">
 			<div className=''>
 				<Title>Collatz Tree Visualiser</Title>
-				<button tpye="button" className='mb-2 fort-semibold text-white bg-stone-900 dark:bg-white dark:text-stone-900 rounded pl-2 pr-2'><a href='/'>Back to homepage</a></button>
+				<button tpye="button" className='mb-2 fort-semibold text-white bg-stone-900 dark:bg-white dark:text-stone-900 rounded ml-1 pl-2 pr-2'><a href='/'>Back to homepage</a></button>
 				<p className='mb-4'>The Collatz conjecture states that preformng the operation "multiply n by 3 and add 1 if it is odd, or half it if is even"
 					will always eventually reach the final value of 1 (before looping indefinitely between 1, 4 and 2). This has been shown to be true for many values of n, but the general conjecture
 					remains unproven. This tree diagram
 					represents the possible sets of operations a sequence can take to get from its starting value to 1 (which is specified as the root node) for a set list
-					of values of n (from 2 to N). A left turn in the direction facing away from 1 (the root node) indicates "n -&gt;2n", and a right turn indicates "n -&gt; 2(n-1)/3".
+					of values of n (from 2 to N). A right turn in the direction facing away from 1 (the root node) indicates "n -&gt;2n", and a left turn indicates "n -&gt; (2n-1)/3".
 				</p>
 				
 				<div className="mt-2 w-full flex-col md:flex-row items-center">

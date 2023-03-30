@@ -12,7 +12,6 @@ function View({r,angle,n,alpha,rotation,rootx,rooty}) {
                 xmlns="http://www.w3.org/2000/svg"
                 fill="white"
                 viewBox="0 0 200 250"
-
                 className="w-200 h-250 stroke-stone-800 dark:stroke-white"
 		    >
             <rect  width="200" height="250" strokeWidth="2" strokeOpacity="1" fillOpacity="0.01"/>
