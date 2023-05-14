@@ -8,7 +8,7 @@ function Intro() {
             <p className="text-sm max-w-3xl mb-6 font-bold">
                 I am studying Computer Science at University College Dublin, and I am on track to graduate this September. 
                 I have strong Python and Java programming skills, as well as experience with JavaScript, MATLAB and Bash scripting.
-                I am currently looking for an internship in Software Development or a related field for the summer.
+                I am currently taking part in a Software Engineering internship program with Adaptemy.
             </p>
         </div>
     )
