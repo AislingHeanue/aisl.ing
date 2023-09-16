@@ -6,9 +6,9 @@ function Intro() {
             <h1 className="text-4xl md:text-6xl dark:text-white mb:1 md:mb-3 font-bold">Aisling Heanue</h1>
             <p className="text-base md:text-xl mb-3 font-medium">Computer Science Student</p>
             <p className="text-sm max-w-3xl mb-6 font-bold">
-                I am studying Computer Science at University College Dublin, and I am on track to graduate this September. 
-                I have strong Python and Java programming skills, as well as experience with JavaScript, MATLAB and Bash scripting.
-                I am currently taking part in a Software Engineering internship program with Adaptemy.
+                Having completed my master's in Computer Science at University College Dublin, I am now working as a cloud engineer for HP Enterprise. 
+                I have strong Python, Java and NodeJS programming skills, as well as experience with Go, MATLAB and Bash scripting. 
+                I am always looking for more opportunities to learn more and try new coding challenges.
             </p>
         </div>
     )
