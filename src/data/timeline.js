@@ -27,7 +27,7 @@ export default [
         title: "MSc Computer Science (Negotiated Learning)",
         location: "University College Dublin",
         duration: "1 Year",
-        GPA: "GPA: 3.98/4.2",
+        GPA: "GPA: 3.9/4.2",
         details: "My master's degree has given me a lot of experience with individual and group coding projects.\
                 Some modules I have completed or am currently enrolled in include Distributed Systems, Advanced Data Structures, Numerical Algorithms, \
                 Contemporary Software Development and Performance Engineering."
