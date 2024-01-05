@@ -10,14 +10,17 @@ const publicDir = resolve(__dirname,"public")
 export default defineConfig({
   root,
   publicDir,
-  plugins: [react()],
+  plugins: [
+    react(),
+  ],
   build: {
     outDir,
     emptyOutDir: true,
     rollupOptions: {
       input : {
         main: resolve(root,"index.html"),
-        demo: resolve(root,"collatz","index.html")
+        demo: resolve(root,"collatz","index.html"),
+        jelly: resolve(root,"jelly","index.html")
       }
     }
   }
