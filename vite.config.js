@@ -19,8 +19,7 @@ export default defineConfig({
     rollupOptions: {
       input : {
         main: resolve(root,"index.html"),
-        demo: resolve(root,"collatz","index.html"),
-        jelly: resolve(root,"jelly","index.html")
+        demo: resolve(root,"collatz","index.html")
       }
     }
   }
