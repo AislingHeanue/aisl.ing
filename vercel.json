@@ -16,6 +16,5 @@
   "env": {
     "PATH": "/usr/local/go/bin:$PATH"
   },
-  "buildCommand": "npm run build",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "buildCommand": "npm run build"
 }
