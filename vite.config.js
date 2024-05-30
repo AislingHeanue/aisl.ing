@@ -18,8 +18,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input : {
-        main: resolve(root,"index.html"),
-        demo: resolve(root,"collatz","index.html")
+        main: resolve(root,"index.html")
       }
     }
   }
