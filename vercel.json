@@ -1,5 +1,21 @@
 {
-    "rewrites":  [
-      {"source": "/(.*)", "destination": "/"}
-    ]
-  }
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs14.x"
+    }
+  },
+  "env": {
+    "PATH": "/usr/local/go/bin:$PATH"
+  },
+  "buildCommand": "npm run build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}

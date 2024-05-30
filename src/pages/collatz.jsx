@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Footer from "../components/Footer";
 import ThemeSwitcher from "../components/ThemeSwitcher.jsx";
 import CollatzApp from "../components/CollatzApp";
 
@@ -12,6 +11,7 @@ const Collatz = () => {
       document.documentElement.classList.remove("dark");
     }
   }, [theme]);
+  console.log("loading 3");
 
   return (
     <>
