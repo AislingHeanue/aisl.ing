@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prebuild": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm ",
+    "go": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm ",
     "start": "nodemon --exec \"npm run prebuild && npm run dev\" --ext go,js,jsx,ts,tsx",
     "dev": "vite",
     "build": "vite build",
