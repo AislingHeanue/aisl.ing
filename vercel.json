@@ -8,13 +8,9 @@
       }
     }
   ],
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs14.x"
-    }
-  },
   "env": {
     "PATH": "/usr/local/go/bin:$PATH"
   },
-  "buildCommand": "npm run build"
+  "buildCommand": "npm run build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
