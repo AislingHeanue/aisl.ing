@@ -1,12 +1,16 @@
 {
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
-  },
+  ],
   "env": {
     "PATH": "/usr/local/go/bin:$PATH"
   },
-  "buildCommand": "npm run build",
+  "buildCommand": "dnf update -y -q && dnf install golang -y -q && npm run build",
   "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
