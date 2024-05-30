@@ -1,8 +1,5 @@
 {
-    "rewrites":[
-        {
-            "source":"/collatz",
-            "destination":"/index.html"
-        }
+    "rewrites":  [
+      {"source": "/(.*)", "destination": "/"}
     ]
-}
+  }
