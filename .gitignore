@@ -24,4 +24,7 @@ dist-ssr
 *.sw?
 
 # compiled wasm
-# *.wasm
+*.wasm
+
+# for test vercel deploys
+.vercel

@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "go": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm ",
+    "prebuild": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm ",
     "start": "nodemon --exec \"npm run prebuild && npm run dev\" --ext go,js,jsx,ts,tsx",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite build && vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
