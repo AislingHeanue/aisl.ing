@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import WasmApp from "../components/WasmApp";
+import Footer from "../components/Footer";
 
 const Wasm = () => {
   const [theme, setTheme] = useState("dark");
@@ -10,12 +12,14 @@ const Wasm = () => {
       document.documentElement.classList.remove("dark");
     }
   }, [theme]);
-  console.log("loading 3");
 
   return (
     <>
-      <script src="../public/wasm_exec.js"></script>
-      <WasmApp theme={theme} />
+      <div className="bg-white dark:bg-stone-900 dark:text-stone-300 text-stone-900 min-h-screen font-inter lg:justify-center lg:flex">
+        <script src="../public/wasm_exec.js"></script>
+        <ThemeSwitcher theme={theme} setTheme={setTheme} />
+        <WasmApp theme={theme} />
+      </div>
     </>
   );
 };

@@ -14,24 +14,30 @@ import (
 var done chan struct{}
 
 var cvs *canvas.Canvas2d
-var height float64
-var width float64
+var height float64 = 200
+var width float64 = 200
 var t float64 = 0
 
-var renderDelay = 30 * time.Millisecond
+var renderDelay = 1000 * time.Millisecond
 
 func main() {
+	doc := js.Global().Get("document")
+	cvsBody := doc.Call("getElementById", "wasm-canvas")
 	cvs, _ = canvas.NewCanvas2d(false)
+	cvs.Set(cvsBody, int(width), int(height))
+
 	FrameRate := time.Second / renderDelay
 	println("Hello Browser FPS:", FrameRate)
-	cvs.Create(int(js.Global().Get("innerWidth").Float()*0.9), int(js.Global().Get("innerHeight").Float()*0.9))
 
-	height = float64(cvs.Height())
-	width = float64(cvs.Width())
-
-	cvs.Start(60, Render)
+	cvs.Start(1, Render)
 
 	<-done
+}
+
+func doEveryFrame(f func(time.Time)) {
+	for x := range time.Tick(renderDelay) {
+		f(x)
+	}
 }
 
 func Render(gc *draw2dimg.GraphicContext) bool {
@@ -50,3 +56,14 @@ func Render(gc *draw2dimg.GraphicContext) bool {
 
 	return true
 }
+
+// func updateHeightWidth(_ time.Time) {
+// 	newHeight := int(js.Global().Get("innerHeight").Float())
+// 	newWidth := int(js.Global().Get("innerWidth").Float())
+// 	if newHeight != int(height) || newWidth != int(width) {
+// 		width = float64(newWidth)
+// 		height = float64(newHeight)
+// 		cvs.Create(newWidth, newHeight)
+// 	}
+
+// }
