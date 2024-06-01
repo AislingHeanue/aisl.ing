@@ -5,6 +5,10 @@ import Footer from "./Footer";
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
 const WasmApp = () => {
+  const [red, setRed] = useState(255);
+  const [green, setGreen] = useState(0);
+  const [blue, setBlue] = useState(255);
+
   useEffect(() => {
     const loadWasm = async () => {
       // Load wasm_exec.js dynamically
@@ -29,18 +33,10 @@ const WasmApp = () => {
     loadWasm();
   }, []);
 
-  const [red, setRed] = useState(255);
-  const [green, setGreen] = useState(0);
-  const [blue, setBlue] = useState(255);
-
-  const changeRed = (e) => {
-    setRed(e.target.value);
-  };
-
   return (
     <>
       <div className="h-full w-full lg:flex justify-center">
-        <div className="grid lg:grid-cols-3 md:grid-cols-1 w-full h-fit lg:w-10/12 lg:pl-[11rem] md:w-5/6 mx-auto gap-4 ">
+        <div className="grid lg:grid-cols-3 md:grid-cols-1 w-full h-fit lg:w-11/12 lg:pl-[11rem] md:w-5/6 mx-auto gap-4 ">
           <div className="col-span-1">
             <Title>Go Wasm Demo</Title>
             <button
@@ -60,7 +56,7 @@ const WasmApp = () => {
                   Red
                 </label>
                 <input
-                  id="red-range"
+                  id="red"
                   onChange={(e) => setRed(e.target.value)}
                   type="range"
                   min="0"
@@ -77,7 +73,7 @@ const WasmApp = () => {
                   Green
                 </label>
                 <input
-                  id="green-range"
+                  id="green"
                   onChange={(e) => setGreen(e.target.value)}
                   type="range"
                   min="0"
@@ -91,10 +87,10 @@ const WasmApp = () => {
             <div className="mt-2 flex-col md:flex-row items-center">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                 <label className="block md:text-sm text-xs text-stone-900 dark:text-white">
-                  Red
+                  Blue
                 </label>
                 <input
-                  id="angle-range"
+                  id="blue"
                   onChange={(e) => setBlue(e.target.value)}
                   type="range"
                   min="0"
@@ -110,9 +106,7 @@ const WasmApp = () => {
             <div className="flex flex-col max-h-full aspect-square lg:pt-[5rem] lg:pr-[11rem] lg:pb-[6rem]">
               <canvas
                 id="wasm-canvas"
-                width={200}
-                height={200}
-                className="flex-grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600"
+                className="w-100 flex-grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600"
               />
             </div>
           </div>
