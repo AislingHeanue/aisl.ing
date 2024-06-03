@@ -5,7 +5,6 @@ import (
 	"strings"
 	"syscall/js"
 
-	_ "github.com/AislingHeanue/aisling-codes/wasm-demo/animation"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
 	"github.com/llgcode/draw2d/draw2dimg"
 	"github.com/markfarnan/go-canvas/canvas"
@@ -33,12 +32,15 @@ func InitCanvas(c *model.GameContext, _ js.Value, _ []js.Value) {
 	}
 	c.Cvs, _ = canvas.NewCanvas2d(false)
 	c.Cvs.Set(c.CvsElement, int(c.Width), int(c.Height))
+	if !c.Animator.IsActive() {
+		c.Animator.Init(c)
+	}
 	c.Cvs.Start(c.Fps, render(c))
 }
 
 func render(c *model.GameContext) func(*draw2dimg.GraphicContext) bool {
 	return func(gc *draw2dimg.GraphicContext) bool {
-		val := c.Animation(gc, c)
+		val := c.Animator.Render(gc, c)
 		c.T += c.RenderDelay
 
 		return val

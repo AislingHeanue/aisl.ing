@@ -9,18 +9,23 @@ import (
 	"github.com/markfarnan/go-canvas/canvas"
 )
 
-type AnimationFunc func(gc *draw2dimg.GraphicContext, c *GameContext) bool
-type Projector interface {
-	DoFirstRotation(v *Vector, anchor Vector)
-	GetCoords(v Vector, height float64, width float64, anchor Vector) (float64, float64)
+type Animator interface {
+	Init(*GameContext)
+	Render(*draw2dimg.GraphicContext, *GameContext) bool
+	IsActive() bool
 }
+
+type Projector interface {
+	GetCoords(v Vector, height float64, width float64, angleX float64, angleY float64, anchor Vector) *Vector
+}
+
 type GameContext struct {
 	Height float64
 	Width  float64
 	T      time.Duration
 	Colour color.RGBA
 
-	Animation   AnimationFunc
+	Animator    Animator
 	Projector   Projector
 	Cvs         *canvas.Canvas2d
 	CvsElement  js.Value
@@ -29,7 +34,8 @@ type GameContext struct {
 	Fps         float64
 	RenderDelay time.Duration
 
-	Cube Shape
+	Cube      *Cube
+	Dimension int
 
 	AngleX       float64
 	AngleY       float64

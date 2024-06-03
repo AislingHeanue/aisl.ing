@@ -17,46 +17,58 @@ type OrthographicProjector struct{}
 
 var _ model.Projector = OrthographicProjector{}
 
-func (o OrthographicProjector) DoFirstRotation(_ *model.Vector, _ model.Vector) {}
+func (o OrthographicProjector) FirstRotation() (float64, model.Axis) {
+	return 0, model.X
+}
 
-func (o OrthographicProjector) GetCoords(v model.Vector, height float64, width float64, anchor model.Vector) (float64, float64) {
+func (o OrthographicProjector) GetCoords(v model.Vector, height float64, width float64, angleX float64, angleY float64, anchor model.Vector) *model.Vector {
+	v.Rotate(anchor, angleX, model.X)
+	v.Rotate(anchor, angleY, model.Y)
 	x := v.X() + 1/math.Sqrt2*v.Z()
 	y := v.Y() + 1/math.Sqrt2*v.Z()
-	return x, height - y
+	return &model.Vector{x, height - y, v.Z()}
 }
 
 type IsometricProjector struct{}
 
 var _ model.Projector = IsometricProjector{}
 
-func (i IsometricProjector) DoFirstRotation(v *model.Vector, anchor model.Vector) {
+func (i IsometricProjector) GetCoords(v model.Vector, height float64, width float64, angleX float64, angleY float64, anchor model.Vector) *model.Vector {
 	v.Rotate(anchor, -math.Pi/4, model.Y)
 
-}
+	v.Rotate(anchor, angleX, model.X)
+	v.Rotate(anchor, angleY, model.Y)
 
-func (i IsometricProjector) GetCoords(v model.Vector, height float64, width float64, anchor model.Vector) (float64, float64) {
-	v.Rotate(anchor, -math.Asin(math.Tan(math.Pi/6)), model.X)
-	return v[0], height - v[1]
+	// v.Rotate(anchor, -math.Asin(math.Tan(math.Pi/6)), model.X)
+	v.Rotate(anchor, -math.Pi/6, model.X)
+
+	return &model.Vector{v[0], height - v[1], v[2]}
 }
 
 type PerspectiveProjector struct{}
 
 var _ model.Projector = PerspectiveProjector{}
 
-func (i PerspectiveProjector) DoFirstRotation(v *model.Vector, anchor model.Vector) {
-	v.Rotate(anchor, -math.Pi/4, model.Y)
+func (i PerspectiveProjector) FirstRotation() (float64, model.Axis) {
+	return -math.Pi / 4, model.Y
 
 }
 
-func (i PerspectiveProjector) GetCoords(v model.Vector, height float64, width float64, anchor model.Vector) (float64, float64) {
-	v.Rotate(anchor, -math.Asin(math.Tan(math.Pi/6)), model.X)
+func (i PerspectiveProjector) GetCoords(v model.Vector, height float64, width float64, angleX float64, angleY float64, anchor model.Vector) *model.Vector {
+	v.Rotate(anchor, -math.Pi/4, model.Y)
+
+	v.Rotate(anchor, angleX, model.X)
+	v.Rotate(anchor, angleY, model.Y)
+
+	v.Rotate(anchor, -math.Pi/6, model.X)
+	// v.Rotate(anchor, -math.Asin(math.Tan(math.Pi/6)), model.X)
 	vanishingPoint := model.Vector{width / 2, height / 2, 3 * height}
 
 	if v[2] < vanishingPoint[2] {
 		v[0] += (vanishingPoint[0] - v[0]) * (v[2] / vanishingPoint[2])
 		v[1] += (vanishingPoint[1] - v[1]) * (v[2] / vanishingPoint[2])
 	} else {
-		return height / 2, height / 2
+		return &vanishingPoint
 	}
-	return v[0], height - v[1]
+	return &model.Vector{v[0], height - v[1], v[2]}
 }

@@ -18,9 +18,10 @@ func main() {
 	c.RenderDelay = time.Second / time.Duration(c.Fps)
 	c.Document = js.Global().Get("document")
 	c.Window = js.Global().Get("window")
-	c.Animation = animation.Cube
+	c.Animator = &animation.CubeCube{}
 	c.Projector = animation.PerspectiveProjector{}
 	c.Colour.A = 255
+	c.Dimension = 2
 
 	println("Hello Browser FPS:", c.Fps)
 

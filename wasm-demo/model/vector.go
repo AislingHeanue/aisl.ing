@@ -95,3 +95,15 @@ func (p Vector) Z() float64 {
 func (p Vector) String() string {
 	return fmt.Sprintf("(%d %d %d)", int(p[0]), int(p[1]), int(p[2]))
 }
+
+func (v1 Vector) Cross(v2 Vector) *Vector {
+	return &Vector{
+		v1[1]*v2[2] - v1[2]*v2[1],
+		v1[2]*v2[0] - v1[0]*v2[2],
+		v1[0]*v2[1] - v1[1]*v2[0],
+	}
+}
+
+func (v Vector) GetZOrthogonal(x, y float64) float64 {
+	return -(v[0]*x + v[1]*y) / v[2]
+}

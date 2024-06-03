@@ -5,9 +5,7 @@ import Footer from "./Footer";
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
 const WasmApp = () => {
-  const [red, setRed] = useState(255);
-  const [green, setGreen] = useState(0);
-  const [blue, setBlue] = useState(255);
+  const [dimension, setDimension] = useState(2);
 
   useEffect(() => {
     const loadWasm = async () => {
@@ -53,50 +51,16 @@ const WasmApp = () => {
             <div className="mt-2 flex-col md:flex-row items-center">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                 <label className="block md:text-sm text-xs text-stone-900 dark:text-white">
-                  Red
+                  Cube dimension
                 </label>
                 <input
-                  id="red"
-                  onChange={(e) => setRed(e.target.value)}
+                  id="dimension"
+                  onChange={(e) => setDimension(e.target.value)}
                   type="range"
-                  min="0"
-                  max="255"
+                  min="1"
+                  max="10"
                   step="1"
-                  value={red}
-                  className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"
-                ></input>
-              </div>
-            </div>
-            <div className="mt-2 flex-col md:flex-row items-center">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                <label className="block md:text-sm text-xs text-stone-900 dark:text-white">
-                  Green
-                </label>
-                <input
-                  id="green"
-                  onChange={(e) => setGreen(e.target.value)}
-                  type="range"
-                  min="0"
-                  max="255"
-                  step="1"
-                  value={green}
-                  className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"
-                ></input>
-              </div>
-            </div>
-            <div className="mt-2 flex-col md:flex-row items-center">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                <label className="block md:text-sm text-xs text-stone-900 dark:text-white">
-                  Blue
-                </label>
-                <input
-                  id="blue"
-                  onChange={(e) => setBlue(e.target.value)}
-                  type="range"
-                  min="0"
-                  max="255"
-                  step="1"
-                  value={blue}
+                  value={dimension}
                   className="w-full h-2 mt-1  bg-stone-200 rounded-lg appearance-none cursor-pointer dark:bg-stone-700"
                 ></input>
               </div>
