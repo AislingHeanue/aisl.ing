@@ -5,7 +5,7 @@ import Footer from "./Footer";
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
 const WasmApp = () => {
-  const [dimension, setDimension] = useState(2);
+  const [dimension, setDimension] = useState(3);
 
   useEffect(() => {
     const loadWasm = async () => {

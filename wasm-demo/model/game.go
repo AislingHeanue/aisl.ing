@@ -1,40 +1,46 @@
 package model
 
 import (
-	"image/color"
-	"syscall/js"
-	"time"
-
-	"github.com/llgcode/draw2d/draw2dimg"
-	"github.com/markfarnan/go-canvas/canvas"
+	"github.com/gowebapi/webapi"
+	"github.com/gowebapi/webapi/dom"
+	"github.com/gowebapi/webapi/graphics/webgl"
 )
+
+type RenderFunc func(*webgl.RenderingContext, *webgl.Program, *GameContext)
+
+type BufferSet struct {
+	Vertices *webgl.Buffer
+	Indices  *webgl.Buffer
+	Colours  *webgl.Buffer
+	VCount   int
+	ICount   int
+	CCount   int
+}
 
 type Animator interface {
 	Init(*GameContext)
-	Render(*draw2dimg.GraphicContext, *GameContext) bool
-	IsActive() bool
-}
-
-type Projector interface {
-	GetCoords(v Vector, height float64, width float64, angleX float64, angleY float64, anchor Vector) *Vector
+	// CreateBuffers(*webgl.RenderingContext, *GameContext)
+	CreateShaders(*webgl.RenderingContext, *GameContext) *webgl.Program
+	Render(*webgl.RenderingContext, *webgl.Program, *GameContext)
+	// RefreshCoords(*GameContext)
+	// IsActive() bool
+	// IsRedrawRequired() bool
 }
 
 type GameContext struct {
 	Height float64
 	Width  float64
-	T      time.Duration
-	Colour color.RGBA
+	T      float64
 
-	Animator    Animator
-	Projector   Projector
-	Cvs         *canvas.Canvas2d
-	CvsElement  js.Value
-	Document    js.Value
-	Window      js.Value
-	Fps         float64
-	RenderDelay time.Duration
+	Animator        Animator
+	CvsElement      *dom.Element
+	Document        *webapi.Document
+	Window          *webapi.Window
+	ResolutionScale float64
 
-	Cube      *Cube
+	Gl      *webgl.RenderingContext
+	Program *webgl.Program
+
 	Dimension int
 
 	AngleX       float64

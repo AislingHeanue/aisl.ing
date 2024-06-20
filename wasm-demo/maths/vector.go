@@ -1,34 +1,8 @@
-package model
+package maths
 
-import "fmt"
-
-type Matrix [3][3]float64
-
-func NewMatrix() Matrix {
-	return Matrix{}
-}
-
-func (m Matrix) Dot(v Vector) *Vector {
-	out := &Vector{}
-	for i := range v {
-		for j := range m[i] {
-			out[j] += m[i][j] * v[i]
-		}
-	}
-
-	return out
-}
-
-func (m Matrix) Scale(c float64) *Matrix {
-	out := &Matrix{}
-	for i := range m {
-		for j := range m[i] {
-			out[i][j] += m[i][j] * c
-		}
-	}
-
-	return out
-}
+import (
+	"fmt"
+)
 
 type Vector [3]float64
 
