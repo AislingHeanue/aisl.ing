@@ -16,6 +16,7 @@ func main() {
 	c.ResolutionScale = 1
 
 	controller.InitCanvas(&c)
+	controller.StartAnimation(&c)
 	controller.RegisterListeners(&c)
 
 	<-done

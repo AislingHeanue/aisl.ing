@@ -8,18 +8,19 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
 	"github.com/gowebapi/webapi/core/jsconv"
+	"github.com/gowebapi/webapi/dom/domcore"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 
 type CubeCube struct {
-	cubes             [][][]*maths.Cube
+	cubes             maths.RubiksCube
 	shapes            []*maths.Cube
-	totalSide         float64
-	side              float64
-	gap               float64
-	sideWithGap       float64
+	totalSide         float32
+	side              float32
+	gap               float32
+	sideWithGap       float32
 	dimension         int
-	origin            *maths.Vector
+	origin            *maths.Point
 	perspectiveMatrix *maths.Mat4
 	bufferSet         *model.BufferSet
 	bufferStale       bool
@@ -27,29 +28,42 @@ type CubeCube struct {
 
 var _ model.Animator = &CubeCube{}
 
+type CCListener struct {
+	cc *CubeCube
+}
+
+func (l *CCListener) HandleEvent(e *domcore.Event) {
+	if e.JSValue().Get("key").String() == "u" {
+		l.cc.cubes.U(false)
+		l.cc.bufferStale = true
+	}
+}
+
+func (cc *CubeCube) InitListeners(c *model.GameContext) {
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{cc}), nil)
+}
+
 func (cc *CubeCube) Init(c *model.GameContext) {
 	cc.dimension = c.Dimension
 	cc.totalSide = 0.5
 	cc.gap = 0.07
-	cc.side = cc.totalSide / ((1+cc.gap)*float64(c.Dimension) - cc.gap)
+	cc.side = cc.totalSide / ((1+cc.gap)*float32(c.Dimension) - cc.gap)
 	cc.sideWithGap = cc.side + cc.gap*cc.side
-	cc.origin = &maths.Vector{0, 0, 0}
+	cc.origin = &maths.Point{0, 0, 0}
 	cc.shapes = []*maths.Cube{}
 	// fmt.Println("somewhere in init")
 	// fmt.Println("dimension =")
 	// fmt.Println(c.Dimension)
-	cc.cubes = make([][][]*maths.Cube, cc.dimension)
+	cc.cubes = make(maths.RubiksCube)
 	for x := 0; x < cc.dimension; x++ {
-		cc.cubes[x] = make([][]*maths.Cube, cc.dimension)
 		for y := 0; y < cc.dimension; y++ {
-			cc.cubes[x][y] = make([]*maths.Cube, cc.dimension)
 			for z := 0; z < cc.dimension; z++ {
 				cubeOrigin := cc.getCentre(x, y, z)
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
 					// fmt.Println("making a cube")
-					cc.cubes[x][y][z] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
-					cc.shapes = append(cc.shapes, cc.cubes[x][y][z])
+					cc.cubes[maths.Coordinate{x, y, z}.String()] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
+					cc.shapes = append(cc.shapes, cc.cubes[maths.Coordinate{x, y, z}.String()])
 				}
 			}
 		}
@@ -78,7 +92,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 // }
 
 func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
-	sg := maths.GroupBuffersFromCubes(cc.cubes)
+	sg := cc.cubes.GroupBuffers()
 	// fmt.Printlsn(cc.cubes)
 	// everything below this line could easily be a second function
 	vertices := jsconv.Float32ToJs(sg.VerticesArray)
@@ -114,11 +128,11 @@ func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
 
 }
 
-func (cc CubeCube) getCentre(x, y, z int) *maths.Vector {
+func (cc CubeCube) getCentre(x, y, z int) *maths.Point {
 	return cc.origin.
-		Subtract(maths.Vector{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
-		Add(maths.Vector{cc.sideWithGap * float64(x), cc.sideWithGap * float64(y), cc.sideWithGap * float64(z)}).
-		Add(maths.Vector{cc.side / 2, cc.side / 2, cc.side / 2})
+		Subtract(maths.Point{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
+		Add(maths.Point{cc.sideWithGap * float32(x), cc.sideWithGap * float32(y), cc.sideWithGap * float32(z)}).
+		Add(maths.Point{cc.side / 2, cc.side / 2, cc.side / 2})
 }
 
 func (cc *CubeCube) CreateShaders(gl *webgl.RenderingContext, c *model.GameContext) *webgl.Program {
@@ -240,6 +254,7 @@ func (cc *CubeCube) Render(gl *webgl.RenderingContext, program *webgl.Program, c
 	gl.EnableVertexAttribArray(uint(vPosition))
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, cc.bufferSet.Colours)
+	// fmt.Println("a")
 	vColour := gl.GetAttribLocation(program, "aVertexColour")
 	gl.VertexAttribPointer(uint(vColour), 4, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vColour))
@@ -250,6 +265,7 @@ func (cc *CubeCube) Render(gl *webgl.RenderingContext, program *webgl.Program, c
 		Rotate(float32(c.AngleY), maths.Y).
 		Rotate(float32(c.AngleX), maths.X).
 		Rotate(-math.Pi/5, maths.X)
+	// fmt.Println("b")
 	matrixLoc := gl.GetUniformLocation(program, "modelView")
 	gl.UniformMatrix4fv(matrixLoc, false, matrix.ToJS())
 

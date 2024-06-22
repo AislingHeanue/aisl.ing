@@ -4,6 +4,29 @@ import (
 	"image/color"
 )
 
+type Axis int
+
+const (
+	X Axis = iota
+	Y
+	Z
+)
+
+type Cube struct {
+	Side float32
+	// Points           []*Point
+	CentrePoint Point
+	// FinalCentrePoint Point
+	Colours []color.RGBA
+	// These angles are the angular displacement of the cube from its original position
+	// They are performed in the order Y, X
+	// These rotations are applied when DrawCube is used.
+	AngleX float32
+	AngleY float32
+	// FinalAngleX float64
+	// FinalAngleY float64
+}
+
 // creates a new cube at the specified origin in the default rotation.
 // The 'origin' is the cubes lowest x, y and z values.
 /*
@@ -19,8 +42,6 @@ import (
 |   |/                 3   1
 0 - 1                 . 0 .
 */
-type Cube Shape
-
 var (
 	RED    = color.RGBA{255, 0, 0, 255}
 	GREEN  = color.RGBA{0, 255, 0, 255}
@@ -33,29 +54,28 @@ var (
 	DefaultColours = []color.RGBA{WHITE, BLUE, ORANGE, GREEN, RED, YELLOW}
 )
 
-func NewCube(origin Vector, side float64) *Cube {
+func NewCube(origin Point, side float32) *Cube {
 	return NewCubeWithColours(origin, side, []color.RGBA{WHITE, ORANGE, GREEN, RED, BLUE, YELLOW})
 }
 
-func NewCubeWithColours(origin Vector, side float64, colours []color.RGBA) *Cube {
+func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube {
 	var out Cube
-	out.Points = []*Point{
-		{Vector: origin.Add(Vector{-side / 2, -side / 2, -side / 2})}, // GREEN YELLOW RED
-		{Vector: origin.Add(Vector{side / 2, -side / 2, -side / 2})},  // BLUE YELLOW RED
-		{Vector: origin.Add(Vector{side / 2, -side / 2, side / 2})},   // BLUE YELLOW ORANGE
-		{Vector: origin.Add(Vector{-side / 2, -side / 2, side / 2})},  // GREEN YELLOW ORANGE
-		{Vector: origin.Add(Vector{-side / 2, side / 2, -side / 2})},  // GREEN WHITE RED
-		{Vector: origin.Add(Vector{side / 2, side / 2, -side / 2})},   // BLUE WHITE RED
-		{Vector: origin.Add(Vector{side / 2, side / 2, side / 2})},    // BLUE WHITE ORANGE
-		{Vector: origin.Add(Vector{-side / 2, side / 2, side / 2})},   // GREEN WHITE ORANGE
-	}
+	out.Side = side
+	out.CentrePoint = origin
+
+	// out.Points = []*Point{
+	// 	origin.Add(Point{-side / 2, -side / 2, -side / 2}), // GREEN YELLOW RED
+	// 	origin.Add(Point{side / 2, -side / 2, -side / 2}),  // BLUE YELLOW RED
+	// 	origin.Add(Point{side / 2, -side / 2, side / 2}),   // BLUE YELLOW ORANGE
+	// 	origin.Add(Point{-side / 2, -side / 2, side / 2}),  // GREEN YELLOW ORANGE
+	// 	origin.Add(Point{-side / 2, side / 2, -side / 2}),  // GREEN WHITE RED
+	// 	origin.Add(Point{side / 2, side / 2, -side / 2}),   // BLUE WHITE RED
+	// 	origin.Add(Point{side / 2, side / 2, side / 2}),    // BLUE WHITE ORANGE
+	// 	origin.Add(Point{-side / 2, side / 2, side / 2}),   // GREEN WHITE ORANGE
+	// }
 	out.Colours = colours
 
 	return &out
-}
-
-func (c Cube) GetCentre() *Vector {
-	return c.Points[0].Vector.Add(*c.Points[6].Vector).Scale(0.5)
 }
 
 func (c Cube) GetBuffers() DrawShape {
@@ -69,9 +89,23 @@ func (c Cube) GetBuffers() DrawShape {
 		0, 1, 2, 3, // YELLOW
 	}
 
+	points := []*Point{
+		c.CentrePoint.Add(Point{-c.Side / 2, -c.Side / 2, -c.Side / 2}), // GREEN YELLOW RED
+		c.CentrePoint.Add(Point{c.Side / 2, -c.Side / 2, -c.Side / 2}),  // BLUE YELLOW RED
+		c.CentrePoint.Add(Point{c.Side / 2, -c.Side / 2, c.Side / 2}),   // BLUE YELLOW ORANGE
+		c.CentrePoint.Add(Point{-c.Side / 2, -c.Side / 2, c.Side / 2}),  // GREEN YELLOW ORANGE
+		c.CentrePoint.Add(Point{-c.Side / 2, c.Side / 2, -c.Side / 2}),  // GREEN WHITE RED
+		c.CentrePoint.Add(Point{c.Side / 2, c.Side / 2, -c.Side / 2}),   // BLUE WHITE RED
+		c.CentrePoint.Add(Point{c.Side / 2, c.Side / 2, c.Side / 2}),    // BLUE WHITE ORANGE
+		c.CentrePoint.Add(Point{-c.Side / 2, c.Side / 2, c.Side / 2}),   // GREEN WHITE ORANGE
+	}
+	for i, p := range points {
+		points[i] = p.Rotate(c.CentrePoint, c.AngleY, Y)
+	}
+
 	out.VerticesArray = make([]float32, 72)
 	for i, index := range indexOfVerticesArray {
-		pointSlice := c.Points[index].toSlice()
+		pointSlice := points[index].toSlice()
 		out.VerticesArray[3*i] = pointSlice[0]
 		out.VerticesArray[3*i+1] = pointSlice[1]
 		out.VerticesArray[3*i+2] = pointSlice[2]
@@ -110,24 +144,14 @@ func (c Cube) GetBuffers() DrawShape {
 	out.ColourArray = outColours
 	// fmt.Println(out.ColoursArray)
 
+	// fmt.Println(len(c.Points))
+	// fmt.Println(len(out.VerticesArray) / 3)
+	// fmt.Println(len(out.IndicesArray))
+	// fmt.Println(len(out.ColourArray) / 4)
+
 	out.VCount = 24
 	out.ICount = 36
 	out.CCount = 24
 
 	return out
-}
-
-func GroupBuffersFromCubes(c [][][]*Cube) DrawShapeGroup {
-	d := []DrawShape{}
-	for _, c1 := range c {
-		for _, c2 := range c1 {
-			for _, c3 := range c2 {
-				if c3 != nil {
-					d = append(d, c3.GetBuffers())
-				}
-			}
-		}
-	}
-
-	return GroupBuffers(d)
 }

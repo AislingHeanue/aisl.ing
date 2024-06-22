@@ -82,8 +82,8 @@ func handleDimension(c *model.GameContext, value js.Value) {
 	c.Animator.Init(c)
 }
 
-func getRelativeMousePosition(c *model.GameContext, click js.Value) (float64, float64) {
-	relativeX := click.Get("offsetX").Float() / c.Width
-	relativeY := click.Get("offsetY").Float() / c.Height
-	return relativeX, relativeY
+func getRelativeMousePosition(c *model.GameContext, click js.Value) (float32, float32) {
+	relativeX := float32(click.Get("offsetX").Float()) / c.Width
+	relativeY := float32(click.Get("offsetY").Float()) / c.Height
+	return float32(relativeX), float32(relativeY)
 }

@@ -19,6 +19,7 @@ type BufferSet struct {
 
 type Animator interface {
 	Init(*GameContext)
+	InitListeners(*GameContext)
 	// CreateBuffers(*webgl.RenderingContext, *GameContext)
 	CreateShaders(*webgl.RenderingContext, *GameContext) *webgl.Program
 	Render(*webgl.RenderingContext, *webgl.Program, *GameContext)
@@ -28,26 +29,26 @@ type Animator interface {
 }
 
 type GameContext struct {
-	Height float64
-	Width  float64
-	T      float64
+	Height float32
+	Width  float32
+	T      float32
 
 	Animator        Animator
 	CvsElement      *dom.Element
 	Document        *webapi.Document
 	Window          *webapi.Window
-	ResolutionScale float64
+	ResolutionScale float32
 
 	Gl      *webgl.RenderingContext
 	Program *webgl.Program
 
 	Dimension int
 
-	AngleX       float64
-	AngleY       float64
-	AnchorX      float64
-	AnchorY      float64
-	AnchorAngleX float64
-	AnchorAngleY float64
+	AngleX       float32
+	AngleY       float32
+	AnchorX      float32
+	AnchorY      float32
+	AnchorAngleX float32
+	AnchorAngleY float32
 	MouseDown    bool
 }
