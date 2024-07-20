@@ -14,7 +14,6 @@ import (
 
 type CubeCube struct {
 	cubes             maths.RubiksCube
-	shapes            []*maths.Cube
 	totalSide         float32
 	side              float32
 	gap               float32
@@ -24,6 +23,7 @@ type CubeCube struct {
 	perspectiveMatrix *maths.Mat4
 	bufferSet         *model.BufferSet
 	bufferStale       bool
+	sg                maths.DrawShape
 }
 
 var _ model.Animator = &CubeCube{}
@@ -33,8 +33,24 @@ type CCListener struct {
 }
 
 func (l *CCListener) HandleEvent(e *domcore.Event) {
-	if e.JSValue().Get("key").String() == "u" {
+	eventDone := true
+	switch e.JSValue().Get("key").String() {
+	case "u":
 		l.cc.cubes.U(false)
+	case "d":
+		l.cc.cubes.D(false)
+	case "l":
+		l.cc.cubes.L(false)
+	case "r":
+		l.cc.cubes.R(false)
+	case "f":
+		l.cc.cubes.F(false)
+	case "b":
+		l.cc.cubes.B(false)
+	default:
+		eventDone = false
+	}
+	if eventDone {
 		l.cc.bufferStale = true
 	}
 }
@@ -50,11 +66,11 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 	cc.side = cc.totalSide / ((1+cc.gap)*float32(c.Dimension) - cc.gap)
 	cc.sideWithGap = cc.side + cc.gap*cc.side
 	cc.origin = &maths.Point{0, 0, 0}
-	cc.shapes = []*maths.Cube{}
+	// cc.shapes = []*maths.Cube{}
 	// fmt.Println("somewhere in init")
 	// fmt.Println("dimension =")
 	// fmt.Println(c.Dimension)
-	cc.cubes = make(maths.RubiksCube)
+	cc.cubes = maths.NewRubiksCube(c.Dimension)
 	for x := 0; x < cc.dimension; x++ {
 		for y := 0; y < cc.dimension; y++ {
 			for z := 0; z < cc.dimension; z++ {
@@ -62,8 +78,8 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
 					// fmt.Println("making a cube")
-					cc.cubes[maths.Coordinate{x, y, z}.String()] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
-					cc.shapes = append(cc.shapes, cc.cubes[maths.Coordinate{x, y, z}.String()])
+					cc.cubes[x][y][z] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
+					// cc.shapes = append(cc.shapes, cc.cubes[x][y][z])
 				}
 			}
 		}
@@ -82,6 +98,28 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 	// c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(gl, program, c, cc.Render)))
 }
 
+func (cc *CubeCube) createDrawCubes() {
+	// cc.sg = cc.cubes.GroupBuffers()
+
+	newCubes := maths.NewRubiksCube(cc.dimension)
+	for x := range cc.dimension {
+		for y := range cc.dimension {
+			for z := range cc.dimension {
+				_, external := cubeColours(x, y, z, cc.dimension)
+				if external {
+					cubeOrigin := cc.getCentre(x, y, z)
+					newCubes[x][y][z] = maths.NewCube(*cubeOrigin, cc.side)
+					// fmt.Println(x, y, z, cc.cubes[x][y][z])
+					newCubes[x][y][z].Colours = cc.cubes[x][y][z].Colours
+				}
+			}
+		}
+	}
+
+	cc.cubes = newCubes
+	cc.sg = cc.cubes.GroupBuffers()
+}
+
 // func wrapAnimator(gl *webgl.RenderingContext, p *webgl.Program, c *model.GameContext, f model.RenderFunc) func(float64) {
 // 	return func(time float64) {
 // 		c.T = time / 1000 // milliseconds to seconds
@@ -92,22 +130,21 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 // }
 
 func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
-	sg := cc.cubes.GroupBuffers()
 	// fmt.Printlsn(cc.cubes)
 	// everything below this line could easily be a second function
-	vertices := jsconv.Float32ToJs(sg.VerticesArray)
+	vertices := jsconv.Float32ToJs(cc.sg.VerticesArray)
 	vertexBuffer := gl.CreateBuffer()
 	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
 	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
 	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 
-	indices := jsconv.UInt16ToJs(sg.IndicesArray)
+	indices := jsconv.UInt16ToJs(cc.sg.IndicesArray)
 	indexBuffer := gl.CreateBuffer()
 	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, indexBuffer)
 	gl.BufferData2(webgl.ELEMENT_ARRAY_BUFFER, webgl.UnionFromJS(indices), webgl.STATIC_DRAW)
 	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, &webgl.Buffer{})
 
-	colours := jsconv.Float32ToJs(sg.ColourArray)
+	colours := jsconv.Float32ToJs(cc.sg.ColourArray)
 	colorBuffer := gl.CreateBuffer()
 	gl.BindBuffer(webgl.ARRAY_BUFFER, colorBuffer)
 	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(colours), webgl.STATIC_DRAW)
@@ -119,9 +156,9 @@ func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
 		Vertices: vertexBuffer,
 		Indices:  indexBuffer,
 		Colours:  colorBuffer,
-		VCount:   sg.VCount,
-		ICount:   sg.ICount,
-		CCount:   sg.CCount,
+		VCount:   cc.sg.VCount,
+		ICount:   cc.sg.ICount,
+		CCount:   cc.sg.CCount,
 	}
 	// fmt.Println("for real")
 	cc.bufferStale = false
@@ -235,6 +272,7 @@ func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
 
 func (cc *CubeCube) Render(gl *webgl.RenderingContext, program *webgl.Program, c *model.GameContext) {
 	if cc.bufferStale {
+		cc.createDrawCubes()
 		cc.createBuffers(gl)
 	}
 
