@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/animation"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/rubiks"
 )
 
 var done chan struct{}
@@ -11,8 +11,7 @@ var done chan struct{}
 func main() {
 	c := model.GameContext{}
 
-	c.Animator = &animation.CubeCube{}
-	c.Dimension = 3
+	c.Animator = &rubiks.CubeCube{}
 	c.ResolutionScale = 1
 
 	controller.InitCanvas(&c)

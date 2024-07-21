@@ -1,7 +1,9 @@
-package maths
+package rubiks
+
+import "github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 
 type DrawShape struct {
-	Points        []*Point
+	Points        []*maths.Point
 	VerticesArray []float32
 	IndicesArray  []uint16
 	ColourArray   []float32
@@ -42,7 +44,7 @@ func GroupBuffers(s []DrawShape) DrawShape {
 	return out
 }
 
-func (c Cube) GetBuffers() DrawShape {
+func GetBuffers(c maths.Cube) DrawShape {
 	var out DrawShape
 	indexOfVerticesArray := []uint16{
 		4, 5, 6, 7, // WHITE
@@ -53,15 +55,15 @@ func (c Cube) GetBuffers() DrawShape {
 		0, 1, 2, 3, // YELLOW
 	}
 
-	points := []*Point{
-		c.CentrePoint.Add(Point{-c.Side / 2, -c.Side / 2, -c.Side / 2}), // GREEN YELLOW RED
-		c.CentrePoint.Add(Point{c.Side / 2, -c.Side / 2, -c.Side / 2}),  // BLUE YELLOW RED
-		c.CentrePoint.Add(Point{c.Side / 2, -c.Side / 2, c.Side / 2}),   // BLUE YELLOW ORANGE
-		c.CentrePoint.Add(Point{-c.Side / 2, -c.Side / 2, c.Side / 2}),  // GREEN YELLOW ORANGE
-		c.CentrePoint.Add(Point{-c.Side / 2, c.Side / 2, -c.Side / 2}),  // GREEN WHITE RED
-		c.CentrePoint.Add(Point{c.Side / 2, c.Side / 2, -c.Side / 2}),   // BLUE WHITE RED
-		c.CentrePoint.Add(Point{c.Side / 2, c.Side / 2, c.Side / 2}),    // BLUE WHITE ORANGE
-		c.CentrePoint.Add(Point{-c.Side / 2, c.Side / 2, c.Side / 2}),   // GREEN WHITE ORANGE
+	points := []*maths.Point{
+		c.CentrePoint.Add(maths.Point{-c.Side / 2, -c.Side / 2, -c.Side / 2}), // GREEN YELLOW RED
+		c.CentrePoint.Add(maths.Point{c.Side / 2, -c.Side / 2, -c.Side / 2}),  // BLUE YELLOW RED
+		c.CentrePoint.Add(maths.Point{c.Side / 2, -c.Side / 2, c.Side / 2}),   // BLUE YELLOW ORANGE
+		c.CentrePoint.Add(maths.Point{-c.Side / 2, -c.Side / 2, c.Side / 2}),  // GREEN YELLOW ORANGE
+		c.CentrePoint.Add(maths.Point{-c.Side / 2, c.Side / 2, -c.Side / 2}),  // GREEN WHITE RED
+		c.CentrePoint.Add(maths.Point{c.Side / 2, c.Side / 2, -c.Side / 2}),   // BLUE WHITE RED
+		c.CentrePoint.Add(maths.Point{c.Side / 2, c.Side / 2, c.Side / 2}),    // BLUE WHITE ORANGE
+		c.CentrePoint.Add(maths.Point{-c.Side / 2, c.Side / 2, c.Side / 2}),   // GREEN WHITE ORANGE
 	}
 	// for i, p := range points {
 	// 	points[i] = p.Rotate(c.CentrePoint, c.AngleY, Y)
@@ -69,7 +71,7 @@ func (c Cube) GetBuffers() DrawShape {
 
 	out.VerticesArray = make([]float32, 72)
 	for i, index := range indexOfVerticesArray {
-		pointSlice := points[index].toSlice()
+		pointSlice := points[index].ToSlice()
 		out.VerticesArray[3*i] = pointSlice[0]
 		out.VerticesArray[3*i+1] = pointSlice[1]
 		out.VerticesArray[3*i+2] = pointSlice[2]

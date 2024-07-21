@@ -1,9 +1,10 @@
-package animation
+package rubiks
 
 import (
 	"fmt"
 	"image/color"
 	"math"
+	"strings"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
@@ -13,7 +14,7 @@ import (
 )
 
 type CubeCube struct {
-	cubes             maths.RubiksCube
+	cubes             RubiksCube
 	totalSide         float32
 	side              float32
 	gap               float32
@@ -22,41 +23,57 @@ type CubeCube struct {
 	origin            *maths.Point
 	perspectiveMatrix *maths.Mat4
 	bufferSet         *model.BufferSet
-	bufferStale       bool
-	sg                maths.DrawShape
+	sg                DrawShape
 }
 
 var _ model.Animator = &CubeCube{}
 
 type CCListener struct {
-	cc *CubeCube
+	cc CubeController
+	c  *model.GameContext
 }
 
 func (l *CCListener) HandleEvent(e *domcore.Event) {
 	eventDone := true
-	switch e.JSValue().Get("key").String() {
+	// fmt.Println("handlering")
+	// l.c.Window.JSValue().Get("console").Call("log", e.JSValue())
+	shiftPressed := e.JSValue().Get("shiftKey").Bool()
+	// fmt.Print(shiftPressed)
+	switch strings.ToLower(e.JSValue().Get("key").String()) {
 	case "u":
-		l.cc.cubes.U(false)
+		l.cc.U(shiftPressed)
 	case "d":
-		l.cc.cubes.D(false)
+		l.cc.D(shiftPressed)
 	case "l":
-		l.cc.cubes.L(false)
+		l.cc.L(shiftPressed)
 	case "r":
-		l.cc.cubes.R(false)
+		l.cc.R(shiftPressed)
 	case "f":
-		l.cc.cubes.F(false)
+		l.cc.F(shiftPressed)
 	case "b":
-		l.cc.cubes.B(false)
+		l.cc.B(shiftPressed)
+	case "m":
+		l.cc.M(shiftPressed)
+	case "e":
+		l.cc.E(shiftPressed)
+	case "s":
+		l.cc.S(shiftPressed)
+	case "x":
+		l.cc.X(shiftPressed)
+	case "y":
+		l.cc.Y(shiftPressed)
+	case "z":
+		l.cc.Y(shiftPressed)
 	default:
 		eventDone = false
 	}
 	if eventDone {
-		l.cc.bufferStale = true
+		l.cc.RefreshBuffers()
 	}
 }
 
 func (cc *CubeCube) InitListeners(c *model.GameContext) {
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{cc}), nil)
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{&cc.cubes, c}), nil)
 }
 
 func (cc *CubeCube) Init(c *model.GameContext) {
@@ -70,7 +87,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 	// fmt.Println("somewhere in init")
 	// fmt.Println("dimension =")
 	// fmt.Println(c.Dimension)
-	cc.cubes = maths.NewRubiksCube(c.Dimension)
+	cc.cubes = NewRubiksCube(c.Dimension)
 	for x := 0; x < cc.dimension; x++ {
 		for y := 0; y < cc.dimension; y++ {
 			for z := 0; z < cc.dimension; z++ {
@@ -78,7 +95,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
 					// fmt.Println("making a cube")
-					cc.cubes[x][y][z] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
+					cc.cubes.data[x][y][z] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
 					// cc.shapes = append(cc.shapes, cc.cubes[x][y][z])
 				}
 			}
@@ -91,7 +108,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 		6,
 	)
 	// fmt.Println("innit")
-	cc.bufferStale = true
+	cc.cubes.bufferStale = true
 	// gl := c.Gl
 	// program := c.Program
 
@@ -101,16 +118,16 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 func (cc *CubeCube) createDrawCubes() {
 	// cc.sg = cc.cubes.GroupBuffers()
 
-	newCubes := maths.NewRubiksCube(cc.dimension)
+	newCubes := NewRubiksCube(cc.dimension)
 	for x := range cc.dimension {
 		for y := range cc.dimension {
 			for z := range cc.dimension {
 				_, external := cubeColours(x, y, z, cc.dimension)
 				if external {
 					cubeOrigin := cc.getCentre(x, y, z)
-					newCubes[x][y][z] = maths.NewCube(*cubeOrigin, cc.side)
+					newCubes.data[x][y][z] = maths.NewCube(*cubeOrigin, cc.side)
 					// fmt.Println(x, y, z, cc.cubes[x][y][z])
-					newCubes[x][y][z].Colours = cc.cubes[x][y][z].Colours
+					newCubes.data[x][y][z].Colours = cc.cubes.data[x][y][z].Colours
 				}
 			}
 		}
@@ -161,8 +178,7 @@ func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
 		CCount:   cc.sg.CCount,
 	}
 	// fmt.Println("for real")
-	cc.bufferStale = false
-
+	cc.cubes.bufferStale = false
 }
 
 func (cc CubeCube) getCentre(x, y, z int) *maths.Point {
@@ -271,7 +287,7 @@ func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
 // }
 
 func (cc *CubeCube) Render(gl *webgl.RenderingContext, program *webgl.Program, c *model.GameContext) {
-	if cc.bufferStale {
+	if cc.cubes.bufferStale {
 		cc.createDrawCubes()
 		cc.createBuffers(gl)
 	}

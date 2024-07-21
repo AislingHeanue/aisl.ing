@@ -60,21 +60,33 @@ func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube 
 	return &out
 }
 
-func (c *Cube) RotateColoursX(times int) {
+func (c *Cube) RotateColoursX(flip bool) {
+	times := 1
+	if flip {
+		times = 3
+	}
 	for i := 0; i < times; i++ {
 		c.Colours[0], c.Colours[1], c.Colours[5], c.Colours[3] =
 			c.Colours[3], c.Colours[0], c.Colours[1], c.Colours[5]
 	}
 }
 
-func (c *Cube) RotateColoursY(times int) {
+func (c *Cube) RotateColoursY(flip bool) {
+	times := 1
+	if flip {
+		times = 3
+	}
 	for i := 0; i < times; i++ {
 		c.Colours[1], c.Colours[2], c.Colours[3], c.Colours[4] =
 			c.Colours[2], c.Colours[3], c.Colours[4], c.Colours[1]
 	}
 }
 
-func (c *Cube) RotateColoursZ(times int) {
+func (c *Cube) RotateColoursZ(flip bool) {
+	times := 1
+	if flip {
+		times = 3
+	}
 	for i := 0; i < times; i++ {
 		c.Colours[0], c.Colours[4], c.Colours[5], c.Colours[2] =
 			c.Colours[2], c.Colours[0], c.Colours[4], c.Colours[5]

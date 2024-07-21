@@ -82,7 +82,7 @@ func (p Point) GetZOrthogonal(x, y float32) float32 {
 	return -(p[0]*x + p[1]*y) / p[2]
 }
 
-func (p Point) toSlice() []float32 {
+func (p Point) ToSlice() []float32 {
 	return []float32{
 		float32(p[0]),
 		float32(p[1]),
