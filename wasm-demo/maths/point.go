@@ -90,7 +90,7 @@ func (p Point) ToSlice() []float32 {
 	}
 }
 
-func (p Point) Rotate(anchor Point, angle float32, axis Axis) *Point {
+func (p *Point) Rotate(anchor Point, angle float32, axis Axis) *Point {
 	displacement := p.Subtract(anchor)
 	matrix := getRotation3Matrix(angle, axis)
 

@@ -1,6 +1,8 @@
 package rubiks
 
 import (
+	"fmt"
+
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
@@ -9,15 +11,38 @@ type CubeController interface {
 	D(bool)
 	F(bool)
 	B(bool)
-	L(bool)
 	R(bool)
-	X(bool)
-	Y(bool)
-	Z(bool)
+	L(bool)
 	S(bool)
 	E(bool)
 	M(bool)
+	X(bool)
+	Y(bool)
+	Z(bool)
 	RefreshBuffers()
+}
+
+type turnInfo struct {
+	xSelector cubeSelector
+	ySelector cubeSelector
+	zSelector cubeSelector
+	reverse   bool
+	axis      maths.Axis
+}
+
+var turnMap = map[string]turnInfo{
+	"u": {ALL, LAST, ALL, false, maths.Y},
+	"d": {ALL, FIRST, ALL, true, maths.Y},
+	"r": {LAST, ALL, ALL, false, maths.X},
+	"l": {FIRST, ALL, ALL, true, maths.X},
+	"f": {ALL, ALL, FIRST, false, maths.Z},
+	"b": {ALL, ALL, LAST, true, maths.Z},
+	"m": {MIDDLE, ALL, ALL, true, maths.X},
+	"e": {ALL, MIDDLE, ALL, true, maths.Y},
+	"s": {ALL, ALL, MIDDLE, false, maths.Z},
+	"x": {ALL, ALL, ALL, false, maths.X},
+	"y": {ALL, ALL, ALL, false, maths.Y},
+	"z": {ALL, ALL, ALL, false, maths.Z},
 }
 
 var _ CubeController = &RubiksCube{}
@@ -26,7 +51,6 @@ type RubiksCube struct {
 	data        [][][]*maths.Cube
 	dimension   int
 	bufferStale bool
-	// animationHandler animationHandler
 }
 
 func NewRubiksCube(d int) RubiksCube {
@@ -67,6 +91,60 @@ func (r RubiksCube) flatten() []*maths.Cube {
 	return cubes
 }
 
+type cubeSelector int
+
+const (
+	FIRST cubeSelector = iota
+	MIDDLE
+	LAST
+	ALL
+)
+
+func (r RubiksCube) getCubeSubset(xSelector, ySelector, zSelector cubeSelector) [][3]int {
+	xs := r.getRangeFromSelection(xSelector)
+	ys := r.getRangeFromSelection(ySelector)
+	zs := r.getRangeFromSelection(zSelector)
+
+	coords := [][3]int{}
+
+	for _, x := range xs {
+		for _, y := range ys {
+			for _, z := range zs {
+				if r.isExternalCube(x, y, z) {
+					coords = append(coords, [3]int{x, y, z})
+				}
+			}
+		}
+	}
+
+	return coords
+}
+
+func (r RubiksCube) getRangeFromSelection(selector cubeSelector) []int {
+	switch selector {
+	case FIRST:
+		return []int{0}
+	case MIDDLE:
+		out := make([]int, r.dimension-2)
+		for i := range out {
+			out[i] = i + 1
+		}
+
+		return out
+	case LAST:
+		return []int{r.dimension - 1}
+	case ALL:
+		out := make([]int, r.dimension)
+		for i := range out {
+			out[i] = i
+		}
+
+		return out
+	default:
+		return []int{}
+	}
+}
+
 func (r RubiksCube) isExternalCube(x, y, z int) bool {
 	xCond := x == 0 || x == r.dimension-1
 	yCond := y == 0 || y == r.dimension-1
@@ -94,6 +172,7 @@ func (r RubiksCube) GroupBuffers() DrawShape {
 // var _ *CubeController = RubiksCube{}
 
 func (r *RubiksCube) U(reverse bool) {
+	info := turnMap["u"]
 	times := 1
 	if reverse {
 		times = 3
@@ -101,12 +180,12 @@ func (r *RubiksCube) U(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			y := r.dimension - 1
-			for z := range r.dimension {
-				newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
-				newR.data[x][y][z].RotateColoursY(false)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
+			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
 		*r = newR
@@ -114,6 +193,7 @@ func (r *RubiksCube) U(reverse bool) {
 }
 
 func (r *RubiksCube) D(reverse bool) {
+	info := turnMap["d"]
 	times := 1
 	if reverse {
 		times = 3
@@ -121,12 +201,12 @@ func (r *RubiksCube) D(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			y := 0
-			for z := range r.dimension {
-				newR.data[x][y][z] = r.data[z][y][r.dimension-1-x]
-				newR.data[x][y][z].RotateColoursY(true)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[z][y][r.dimension-1-x]
+			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
 		*r = newR
@@ -134,6 +214,7 @@ func (r *RubiksCube) D(reverse bool) {
 }
 
 func (r *RubiksCube) R(reverse bool) {
+	info := turnMap["r"]
 	times := 1
 	if reverse {
 		times = 3
@@ -141,12 +222,13 @@ func (r *RubiksCube) R(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		x := r.dimension - 1
-		for y := range r.dimension {
-			for z := range r.dimension {
-				newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
-				newR.data[x][y][z].RotateColoursX(false)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			fmt.Println(x, y, z)
+			newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
+			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
 		*r = newR
@@ -154,6 +236,7 @@ func (r *RubiksCube) R(reverse bool) {
 }
 
 func (r *RubiksCube) L(reverse bool) {
+	info := turnMap["l"]
 	times := 1
 	if reverse {
 		times = 3
@@ -161,12 +244,12 @@ func (r *RubiksCube) L(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		x := 0
-		for y := range r.dimension {
-			for z := range r.dimension {
-				newR.data[x][y][z] = r.data[x][r.dimension-1-z][y]
-				newR.data[x][y][z].RotateColoursX(true)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[x][r.dimension-1-z][y]
+			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
 		*r = newR
@@ -174,6 +257,7 @@ func (r *RubiksCube) L(reverse bool) {
 }
 
 func (r *RubiksCube) F(reverse bool) {
+	info := turnMap["f"]
 	times := 1
 	if reverse {
 		times = 3
@@ -181,12 +265,12 @@ func (r *RubiksCube) F(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				z := 0
-				newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
-				newR.data[x][y][z].RotateColoursZ(false)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].RotateColoursZ(info.reverse)
 		}
 
 		*r = newR
@@ -194,6 +278,7 @@ func (r *RubiksCube) F(reverse bool) {
 }
 
 func (r *RubiksCube) B(reverse bool) {
+	info := turnMap["b"]
 	times := 1
 	if reverse {
 		times = 3
@@ -201,12 +286,12 @@ func (r *RubiksCube) B(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				z := r.dimension - 1
-				newR.data[x][y][z] = r.data[y][r.dimension-1-x][z]
-				newR.data[x][y][z].RotateColoursZ(true)
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[y][r.dimension-1-x][z]
+			newR.data[x][y][z].RotateColoursZ(info.reverse)
 		}
 
 		*r = newR
@@ -214,6 +299,7 @@ func (r *RubiksCube) B(reverse bool) {
 }
 
 func (r *RubiksCube) M(reverse bool) {
+	info := turnMap["m"]
 	times := 1
 	if reverse {
 		times = 3
@@ -221,15 +307,12 @@ func (r *RubiksCube) M(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension - 2 {
-			for y := range r.dimension {
-				for z := range r.dimension {
-					if r.isExternalCube(x+1, y, z) {
-						newR.data[x+1][y][z] = r.data[x+1][r.dimension-1-z][y]
-						newR.data[x+1][y][z].RotateColoursX(true)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[x][r.dimension-1-z][y]
+			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
 		*r = newR
@@ -237,6 +320,7 @@ func (r *RubiksCube) M(reverse bool) {
 }
 
 func (r *RubiksCube) E(reverse bool) {
+	info := turnMap["e"]
 	times := 1
 	if reverse {
 		times = 3
@@ -244,15 +328,12 @@ func (r *RubiksCube) E(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension - 2 {
-				for z := range r.dimension {
-					if r.isExternalCube(x, y+1, z) {
-						newR.data[x][y+1][z] = r.data[z][y+1][r.dimension-1-x]
-						newR.data[x][y+1][z].RotateColoursY(true)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[z][y][r.dimension-1-x]
+			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
 		*r = newR
@@ -260,6 +341,7 @@ func (r *RubiksCube) E(reverse bool) {
 }
 
 func (r *RubiksCube) S(reverse bool) {
+	info := turnMap["s"]
 	times := 1
 	if reverse {
 		times = 3
@@ -267,15 +349,12 @@ func (r *RubiksCube) S(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				for z := range r.dimension - 2 {
-					if r.isExternalCube(x, y, z+1) {
-						newR.data[x][y][z+1] = r.data[r.dimension-1-y][x][z+1]
-						newR.data[x][y][z+1].RotateColoursZ(false)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].RotateColoursZ(false)
 		}
 
 		*r = newR
@@ -283,6 +362,7 @@ func (r *RubiksCube) S(reverse bool) {
 }
 
 func (r *RubiksCube) X(reverse bool) {
+	info := turnMap["x"]
 	times := 1
 	if reverse {
 		times = 3
@@ -290,15 +370,12 @@ func (r *RubiksCube) X(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				for z := range r.dimension {
-					if r.isExternalCube(x, y, z) {
-						newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
-						newR.data[x][y][z].RotateColoursX(false)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
+			newR.data[x][y][z].RotateColoursX(false)
 		}
 
 		*r = newR
@@ -306,6 +383,7 @@ func (r *RubiksCube) X(reverse bool) {
 }
 
 func (r *RubiksCube) Y(reverse bool) {
+	info := turnMap["y"]
 	times := 1
 	if reverse {
 		times = 3
@@ -313,15 +391,12 @@ func (r *RubiksCube) Y(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				for z := range r.dimension {
-					if r.isExternalCube(x, y, z) {
-						newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
-						newR.data[x][y][z].RotateColoursY(false)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
+			newR.data[x][y][z].RotateColoursY(false)
 		}
 
 		*r = newR
@@ -329,6 +404,7 @@ func (r *RubiksCube) Y(reverse bool) {
 }
 
 func (r *RubiksCube) Z(reverse bool) {
+	info := turnMap["z"]
 	times := 1
 	if reverse {
 		times = 3
@@ -336,41 +412,14 @@ func (r *RubiksCube) Z(reverse bool) {
 	for range times {
 		newR := r.copy()
 
-		for x := range r.dimension {
-			for y := range r.dimension {
-				for z := range r.dimension {
-					if r.isExternalCube(x, y, z) {
-						newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
-						newR.data[x][y][z].RotateColoursZ(false)
-					}
-				}
-			}
+		for _, coord := range r.getCubeSubset(info.xSelector, info.ySelector, info.zSelector) {
+			x := coord[0]
+			y := coord[1]
+			z := coord[2]
+			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].RotateColoursZ(false)
 		}
 
 		*r = newR
 	}
 }
-
-// func (r *RubiksCube) X(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }
-
-// func (r *RubiksCube) Y(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }
-
-// func (r *RubiksCube) Z(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }
-
-// func (r *RubiksCube) S(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }
-
-// func (r *RubiksCube) E(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }
-
-// func (r *RubiksCube) M(reverse bool) {
-// 	panic("not implemented") // TODO: Implement
-// }

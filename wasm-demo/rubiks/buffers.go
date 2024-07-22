@@ -19,12 +19,7 @@ func GroupBuffers(s []DrawShape) DrawShape {
 	out.ColourArray = []float32{}
 	vCountOffset := 0
 	iCountOffset := 0
-	// fmt.Println("sup")
 	for _, shape := range s {
-		// fmt.Println("yup")
-		// out.Shapes = append(out.Shapes, shape)
-		// out.Points = append(out.Points, shape.Points...)
-
 		out.VerticesArray = append(out.VerticesArray, shape.VerticesArray...)
 
 		for _, i := range shape.IndicesArray {
@@ -35,9 +30,6 @@ func GroupBuffers(s []DrawShape) DrawShape {
 		vCountOffset += shape.VCount
 		iCountOffset += shape.ICount
 	}
-	// fmt.Println(len(out.VerticesArray) / 3 / 26)
-	// fmt.Println(len(out.IndicesArray) / 26)
-	// fmt.Println(len(out.ColourArray) / 4 / 26)
 	out.VCount = vCountOffset
 	out.ICount = iCountOffset
 
@@ -46,32 +38,10 @@ func GroupBuffers(s []DrawShape) DrawShape {
 
 func GetBuffers(c maths.Cube) DrawShape {
 	var out DrawShape
-	indexOfVerticesArray := []uint16{
-		4, 5, 6, 7, // WHITE
-		3, 2, 6, 7, // ORANGE
-		0, 3, 7, 4, // GREEN
-		1, 0, 4, 5, // RED
-		1, 2, 6, 5, // BLUE
-		0, 1, 2, 3, // YELLOW
-	}
-
-	points := []*maths.Point{
-		c.CentrePoint.Add(maths.Point{-c.Side / 2, -c.Side / 2, -c.Side / 2}), // GREEN YELLOW RED
-		c.CentrePoint.Add(maths.Point{c.Side / 2, -c.Side / 2, -c.Side / 2}),  // BLUE YELLOW RED
-		c.CentrePoint.Add(maths.Point{c.Side / 2, -c.Side / 2, c.Side / 2}),   // BLUE YELLOW ORANGE
-		c.CentrePoint.Add(maths.Point{-c.Side / 2, -c.Side / 2, c.Side / 2}),  // GREEN YELLOW ORANGE
-		c.CentrePoint.Add(maths.Point{-c.Side / 2, c.Side / 2, -c.Side / 2}),  // GREEN WHITE RED
-		c.CentrePoint.Add(maths.Point{c.Side / 2, c.Side / 2, -c.Side / 2}),   // BLUE WHITE RED
-		c.CentrePoint.Add(maths.Point{c.Side / 2, c.Side / 2, c.Side / 2}),    // BLUE WHITE ORANGE
-		c.CentrePoint.Add(maths.Point{-c.Side / 2, c.Side / 2, c.Side / 2}),   // GREEN WHITE ORANGE
-	}
-	// for i, p := range points {
-	// 	points[i] = p.Rotate(c.CentrePoint, c.AngleY, Y)
-	// }
 
 	out.VerticesArray = make([]float32, 72)
-	for i, index := range indexOfVerticesArray {
-		pointSlice := points[index].ToSlice()
+	for i, index := range c.VertexArrayIndices {
+		pointSlice := c.Points[index].ToSlice()
 		out.VerticesArray[3*i] = pointSlice[0]
 		out.VerticesArray[3*i+1] = pointSlice[1]
 		out.VerticesArray[3*i+2] = pointSlice[2]

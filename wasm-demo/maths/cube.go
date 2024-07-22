@@ -15,8 +15,9 @@ const (
 type Cube struct {
 	Side float32
 	// maybe this field can be moved?
-	CentrePoint Point
-	Colours     []color.RGBA
+	Colours            []color.RGBA
+	VertexArrayIndices []uint16
+	Points             []*Point
 }
 
 // creates a new cube at the specified origin in the default rotation.
@@ -53,9 +54,28 @@ func NewCube(origin Point, side float32) *Cube {
 func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube {
 	var out Cube
 	out.Side = side
-	out.CentrePoint = origin
 
 	out.Colours = colours
+
+	out.VertexArrayIndices = []uint16{
+		4, 5, 6, 7, // WHITE
+		3, 2, 6, 7, // ORANGE
+		0, 3, 7, 4, // GREEN
+		1, 0, 4, 5, // RED
+		1, 2, 6, 5, // BLUE
+		0, 1, 2, 3, // YELLOW
+	}
+
+	out.Points = []*Point{
+		origin.Add(Point{-side / 2, -side / 2, -side / 2}), // GREEN YELLOW RED
+		origin.Add(Point{side / 2, -side / 2, -side / 2}),  // BLUE YELLOW RED
+		origin.Add(Point{side / 2, -side / 2, side / 2}),   // BLUE YELLOW ORANGE
+		origin.Add(Point{-side / 2, -side / 2, side / 2}),  // GREEN YELLOW ORANGE
+		origin.Add(Point{-side / 2, side / 2, -side / 2}),  // GREEN WHITE RED
+		origin.Add(Point{side / 2, side / 2, -side / 2}),   // BLUE WHITE RED
+		origin.Add(Point{side / 2, side / 2, side / 2}),    // BLUE WHITE ORANGE
+		origin.Add(Point{-side / 2, side / 2, side / 2}),   // GREEN WHITE ORANGE
+	}
 
 	return &out
 }
@@ -91,4 +111,13 @@ func (c *Cube) RotateColoursZ(flip bool) {
 		c.Colours[0], c.Colours[4], c.Colours[5], c.Colours[2] =
 			c.Colours[2], c.Colours[0], c.Colours[4], c.Colours[5]
 	}
+}
+
+func (c Cube) Rotate(anchor Point, angle float32, axis Axis) *Cube {
+	cubeCopy := c
+	for i, p := range c.Points {
+		cubeCopy.Points[i] = p.Rotate(anchor, angle, axis)
+	}
+
+	return &cubeCopy
 }

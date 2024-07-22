@@ -24,56 +24,58 @@ type CubeCube struct {
 	perspectiveMatrix *maths.Mat4
 	bufferSet         *model.BufferSet
 	sg                DrawShape
+	// What I want to do with the animation handler
+	// Key press is received, event is sent to animationHandler (which also implements )
+	animationHandler animationHandler
 }
 
 var _ model.Animator = &CubeCube{}
 
 type CCListener struct {
-	cc CubeController
+	cc *CubeCube
 	c  *model.GameContext
 }
 
 func (l *CCListener) HandleEvent(e *domcore.Event) {
-	eventDone := true
+	// eventDone := true
 	// fmt.Println("handlering")
 	// l.c.Window.JSValue().Get("console").Call("log", e.JSValue())
 	shiftPressed := e.JSValue().Get("shiftKey").Bool()
 	// fmt.Print(shiftPressed)
-	switch strings.ToLower(e.JSValue().Get("key").String()) {
-	case "u":
-		l.cc.U(shiftPressed)
-	case "d":
-		l.cc.D(shiftPressed)
-	case "l":
-		l.cc.L(shiftPressed)
-	case "r":
-		l.cc.R(shiftPressed)
-	case "f":
-		l.cc.F(shiftPressed)
-	case "b":
-		l.cc.B(shiftPressed)
-	case "m":
-		l.cc.M(shiftPressed)
-	case "e":
-		l.cc.E(shiftPressed)
-	case "s":
-		l.cc.S(shiftPressed)
-	case "x":
-		l.cc.X(shiftPressed)
-	case "y":
-		l.cc.Y(shiftPressed)
-	case "z":
-		l.cc.Y(shiftPressed)
-	default:
-		eventDone = false
-	}
-	if eventDone {
-		l.cc.RefreshBuffers()
-	}
+	face := strings.ToLower(e.JSValue().Get("key").String())
+	l.cc.animationHandler.AddEvent(face, shiftPressed)
+	// case "d":
+	// 	l.cc.D(shiftPressed)
+	// case "l":
+	// 	l.cc.L(shiftPressed)
+	// case "r":
+	// 	l.cc.R(shiftPressed)
+	// case "f":
+	// 	l.cc.F(shiftPressed)
+	// case "b":
+	// 	l.cc.B(shiftPressed)
+	// case "m":
+	// 	l.cc.M(shiftPressed)
+	// case "e":
+	// 	l.cc.E(shiftPressed)
+	// case "s":
+	// 	l.cc.S(shiftPressed)
+	// case "x":
+	// 	l.cc.X(shiftPressed)
+	// case "y":
+	// 	l.cc.Y(shiftPressed)
+	// case "z":
+	// 	l.cc.Z(shiftPressed)
+	// default:
+	// 	eventDone = false
+	// }
+	// if eventDone {
+	// 	l.cc.RefreshBuffers()
+	// }
 }
 
 func (cc *CubeCube) InitListeners(c *model.GameContext) {
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{&cc.cubes, c}), nil)
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{cc, c}), nil)
 }
 
 func (cc *CubeCube) Init(c *model.GameContext) {
@@ -109,32 +111,15 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 	)
 	// fmt.Println("innit")
 	cc.cubes.bufferStale = true
+
+	cc.animationHandler = &RubiksAnimationHandler{
+		controller: &cc.cubes,
+		rubiksCube: cc.cubes,
+	}
 	// gl := c.Gl
 	// program := c.Program
 
 	// c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(gl, program, c, cc.Render)))
-}
-
-func (cc *CubeCube) createDrawCubes() {
-	// cc.sg = cc.cubes.GroupBuffers()
-
-	newCubes := NewRubiksCube(cc.dimension)
-	for x := range cc.dimension {
-		for y := range cc.dimension {
-			for z := range cc.dimension {
-				_, external := cubeColours(x, y, z, cc.dimension)
-				if external {
-					cubeOrigin := cc.getCentre(x, y, z)
-					newCubes.data[x][y][z] = maths.NewCube(*cubeOrigin, cc.side)
-					// fmt.Println(x, y, z, cc.cubes[x][y][z])
-					newCubes.data[x][y][z].Colours = cc.cubes.data[x][y][z].Colours
-				}
-			}
-		}
-	}
-
-	cc.cubes = newCubes
-	cc.sg = cc.cubes.GroupBuffers()
 }
 
 // func wrapAnimator(gl *webgl.RenderingContext, p *webgl.Program, c *model.GameContext, f model.RenderFunc) func(float64) {
@@ -287,8 +272,9 @@ func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
 // }
 
 func (cc *CubeCube) Render(gl *webgl.RenderingContext, program *webgl.Program, c *model.GameContext) {
-	if cc.cubes.bufferStale {
-		cc.createDrawCubes()
+	animationStale := cc.animationHandler.Tick()
+	if cc.cubes.bufferStale || animationStale {
+		cc.sg = cc.animationHandler.GetBuffers(cc.origin)
 		cc.createBuffers(gl)
 	}
 
