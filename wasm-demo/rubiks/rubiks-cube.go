@@ -1,8 +1,6 @@
 package rubiks
 
 import (
-	"fmt"
-
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
@@ -226,7 +224,7 @@ func (r *RubiksCube) R(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			fmt.Println(x, y, z)
+			// fmt.Println(x, y, z)
 			newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
 			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}

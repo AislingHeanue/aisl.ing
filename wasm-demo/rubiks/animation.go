@@ -67,7 +67,7 @@ func (a *RubiksAnimationHandler) Tick() bool {
 	a.currentEventIndices = []int{}
 	// for every event in order
 	for i, event := range a.events {
-		fmt.Println(event)
+		// fmt.Println(event)
 		// if the event is not finished
 		if event.t < maxTicks {
 			allowedToMove := true
@@ -167,7 +167,7 @@ func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point)
 		x := coord[0]
 		y := coord[1]
 		z := coord[2]
-		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(rotationScale*math.Pi/(2*maxTicks)), info.axis)
+		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(rotationScale*math.Pi/(2*maxTicks-2)), info.axis)
 	}
 
 }
