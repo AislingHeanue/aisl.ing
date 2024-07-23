@@ -88,18 +88,27 @@ func (c *Cube) RotateColoursX(flip bool) {
 	}
 	for i := 0; i < times; i++ {
 		c.Colours[0], c.Colours[1], c.Colours[5], c.Colours[3] =
-			c.Colours[3], c.Colours[0], c.Colours[1], c.Colours[5]
+			c.Colours[1], c.Colours[5], c.Colours[3], c.Colours[0]
 	}
 }
 
-func (c *Cube) RotateColoursY(flip bool) {
+func (c *Cube) RotateColours(flip bool, axis Axis) {
 	times := 1
 	if flip {
 		times = 3
 	}
 	for i := 0; i < times; i++ {
-		c.Colours[1], c.Colours[2], c.Colours[3], c.Colours[4] =
-			c.Colours[2], c.Colours[3], c.Colours[4], c.Colours[1]
+		switch axis {
+		case X:
+			c.Colours[0], c.Colours[1], c.Colours[5], c.Colours[3] =
+				c.Colours[1], c.Colours[5], c.Colours[3], c.Colours[0]
+		case Y:
+			c.Colours[1], c.Colours[2], c.Colours[3], c.Colours[4] =
+				c.Colours[4], c.Colours[1], c.Colours[2], c.Colours[3]
+		case Z:
+			c.Colours[0], c.Colours[4], c.Colours[5], c.Colours[2] =
+				c.Colours[2], c.Colours[0], c.Colours[4], c.Colours[5]
+		}
 	}
 }
 

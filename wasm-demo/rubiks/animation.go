@@ -7,22 +7,7 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
-const maxTicks = 100
-
-var concurrentTurnsAllowed map[string][]string = map[string][]string{
-	"u": {"e", "d"},
-	"e": {"d", "u"},
-	"d": {"u", "e"},
-	"y": {},
-	"r": {"m", "l"},
-	"m": {"l", "r"},
-	"l": {"r", "m"},
-	"x": {},
-	"f": {"s", "b"},
-	"s": {"b", "f"},
-	"b": {"f", "s"},
-	"z": {},
-}
+const maxTicks = 10
 
 type animationHandler interface {
 	AddEvent(face string, reverse bool)
@@ -52,7 +37,7 @@ var _ animationHandler = &RubiksAnimationHandler{}
 func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) {
 	// face not recognised, do nothing
 	fmt.Println("Trying to make an event with the letter " + face)
-	if _, ok := concurrentTurnsAllowed[face]; !ok {
+	if _, ok := turnMap[face]; !ok {
 		return
 	}
 	fmt.Println("event added")
@@ -79,7 +64,7 @@ func (a *RubiksAnimationHandler) Tick() bool {
 					// Each move has a list of moves that can be done in parallel with them
 					// If every move between the very first currently-moving move and this move
 					// match this criteria, then this move can also be ticked.
-					for _, otherAllowedMove := range concurrentTurnsAllowed[a.events[j].face] {
+					for _, otherAllowedMove := range turnMap[a.events[j].face].allowedConcurrent {
 						matchFoundInAllowedList := false
 						if otherAllowedMove == event.face {
 							matchFoundInAllowedList = true
@@ -125,39 +110,14 @@ func (a *RubiksAnimationHandler) Tick() bool {
 }
 
 func (a *RubiksAnimationHandler) doTurn(event RubiksEvent) {
-	switch event.face {
-	case "u":
-		a.controller.U(event.reverse)
-	case "e":
-		a.controller.E(event.reverse)
-	case "d":
-		a.controller.D(event.reverse)
-	case "y":
-		a.controller.Y(event.reverse)
-	case "r":
-		a.controller.R(event.reverse)
-	case "m":
-		a.controller.M(event.reverse)
-	case "l":
-		a.controller.L(event.reverse)
-	case "x":
-		a.controller.X(event.reverse)
-	case "f":
-		a.controller.F(event.reverse)
-	case "s":
-		a.controller.S(event.reverse)
-	case "b":
-		a.controller.B(event.reverse)
-	case "z":
-		a.controller.Z(event.reverse)
-	}
+	a.controller.Turn(event.face, event.reverse)
 }
 
 func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point) {
 	info, ok := turnMap[event.face]
-	rotationScale := -1.
+	rotationScale := 1.
 	if info.reverse {
-		rotationScale *= 1.
+		rotationScale *= -1.
 	}
 	if event.reverse {
 		rotationScale *= -1
