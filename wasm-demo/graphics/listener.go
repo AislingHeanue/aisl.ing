@@ -93,11 +93,13 @@ func touch(c *GameContext, e *domcore.Event) {
 	c.AnchorAngleX = c.AngleX
 	c.AnchorAngleY = c.AngleY
 	c.MouseDown = true
+	e.PreventDefault()
 	// lockScroll(c)
 }
 
 func dragCanvas(c *GameContext, e *domcore.Event) {
 	if c.MouseDown {
+		e.PreventDefault()
 		mouseX, mouseY := getRelativeMousePosition(c, e.JSValue())
 		c.AngleX = (c.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale)
 		c.AngleY = (c.AnchorAngleY + 5*(c.AnchorX-mouseX)/c.ResolutionScale)
