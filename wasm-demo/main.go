@@ -11,7 +11,7 @@ func main() {
 
 	c.Animator = &graphics.CubeRenderer{}
 	c.ResolutionScale = 1
-	c.MaxTicks = 12
+	c.TurnFrames = 12
 
 	graphics.InitCanvas(&c)
 	graphics.StartAnimation(&c)

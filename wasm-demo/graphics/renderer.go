@@ -33,14 +33,14 @@ func (cc *CubeRenderer) InitListeners(c *GameContext) {
 }
 
 func (cc *CubeRenderer) Init(c *GameContext) {
-	cc.dimension = c.Dimension
+	cc.dimension = c.CubeDimension
 	cc.totalSide = 0.5
 	cc.gap = 0.07
-	cc.side = cc.totalSide / ((1+cc.gap)*float32(c.Dimension) - cc.gap)
+	cc.side = cc.totalSide / ((1+cc.gap)*float32(c.CubeDimension) - cc.gap)
 	cc.sideWithGap = cc.side + cc.gap*cc.side
 	cc.origin = &maths.Point{0, 0, 0}
 
-	cc.cubes = maths.NewRubiksCube(c.Dimension)
+	cc.cubes = maths.NewRubiksCube(c.CubeDimension)
 	for x := 0; x < cc.dimension; x++ {
 		for y := 0; y < cc.dimension; y++ {
 			for z := 0; z < cc.dimension; z++ {
@@ -61,7 +61,7 @@ func (cc *CubeRenderer) Init(c *GameContext) {
 
 	cc.animationHandler = &maths.RubiksAnimationHandler{
 		RubiksCube: &cc.cubes,
-		MaxTicks:   c.MaxTicks,
+		MaxTicks:   c.TurnFrames,
 	}
 
 	cc.bufferStale = true

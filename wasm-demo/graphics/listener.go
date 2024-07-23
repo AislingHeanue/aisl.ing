@@ -125,7 +125,7 @@ func touchUp(c *GameContext) {
 
 func handleDimension(c *GameContext, value js.Value) {
 	i, _ := strconv.Atoi(value.Get("value").String())
-	c.Dimension = i
+	c.CubeDimension = i
 	c.Animator.Init(c)
 }
 
@@ -140,21 +140,5 @@ func getRelativeTouchPosition(c *GameContext, touch js.Value) (float32, float32)
 	touchInfo := touch.Get("touches").Get("0") // only care about the first touch point
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
-	return float32(offsetX) / c.Width, float32(offsetY) / c.Height
+	return 1.5 * float32(offsetX) / c.Width, 1.5 * float32(offsetY) / c.Height
 }
-
-// func lockScroll(c *GameContext) {
-// 	c.ScrollPosition = c.Document.ActiveElement().ScrollTop() //c.Window.PageYOffset()
-// 	c.Document.Body().Style().SetProperty("overflow", "none", nil)
-// 	c.Document.Body().Style().SetProperty("position", "fixed", nil)
-// 	c.Document.Body().Style().SetProperty("top", fmt.Sprintf("-%dpx", int(c.ScrollPosition)), nil)
-// 	c.Document.Body().Style().SetProperty("width", "100%", nil)
-// }
-
-// func unlockScroll(c *GameContext) {
-// 	c.Document.Body().Style().SetProperty("overflow", "", nil)
-// 	c.Document.Body().Style().SetProperty("position", "", nil)
-// 	c.Document.Body().Style().SetProperty("top", "", nil)
-// 	c.Document.Body().Style().SetProperty("width", "100%", nil)
-// 	c.Window.ScrollTo(&view.ScrollToOptions{Left: 0, Top: c.ScrollPosition})
-// }

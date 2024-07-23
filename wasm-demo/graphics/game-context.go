@@ -30,23 +30,19 @@ type GameContext struct {
 	T      float32
 
 	Animator        Animator
-	MaxTicks        int
+	TurnFrames      int
 	CvsElement      *dom.Element
 	Document        *webapi.Document
 	Window          *webapi.Window
 	ResolutionScale float32
 
-	Gl      *webgl.RenderingContext
-	Program *webgl.Program
+	CubeDimension int
 
-	Dimension int
-
-	AngleX         float32
-	AngleY         float32
-	AnchorX        float32
-	AnchorY        float32
-	AnchorAngleX   float32
-	AnchorAngleY   float32
-	MouseDown      bool
-	ScrollPosition float64
+	AngleX       float32
+	AngleY       float32
+	AnchorX      float32
+	AnchorY      float32
+	AnchorAngleX float32
+	AnchorAngleY float32
+	MouseDown    bool
 }
