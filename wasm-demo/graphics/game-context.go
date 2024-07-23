@@ -41,11 +41,12 @@ type GameContext struct {
 
 	Dimension int
 
-	AngleX       float32
-	AngleY       float32
-	AnchorX      float32
-	AnchorY      float32
-	AnchorAngleX float32
-	AnchorAngleY float32
-	MouseDown    bool
+	AngleX         float32
+	AngleY         float32
+	AnchorX        float32
+	AnchorY        float32
+	AnchorAngleX   float32
+	AnchorAngleY   float32
+	MouseDown      bool
+	ScrollPosition float64
 }
