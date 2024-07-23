@@ -1,12 +1,10 @@
 package graphics
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"syscall/js"
 
-	"github.com/gowebapi/webapi/css/cssom/view"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
@@ -95,7 +93,7 @@ func touch(c *GameContext, e *domcore.Event) {
 	c.AnchorAngleX = c.AngleX
 	c.AnchorAngleY = c.AngleY
 	c.MouseDown = true
-	lockScroll(c)
+	// lockScroll(c)
 }
 
 func dragCanvas(c *GameContext, e *domcore.Event) {
@@ -120,7 +118,7 @@ func mouseUp(c *GameContext) {
 
 func touchUp(c *GameContext) {
 	c.MouseDown = false
-	unlockScroll(c)
+	// unlockScroll(c)
 }
 
 func handleDimension(c *GameContext, value js.Value) {
@@ -143,18 +141,18 @@ func getRelativeTouchPosition(c *GameContext, touch js.Value) (float32, float32)
 	return float32(offsetX) / c.Width, float32(offsetY) / c.Height
 }
 
-func lockScroll(c *GameContext) {
-	c.ScrollPosition = c.Document.ActiveElement().ScrollTop() //c.Window.PageYOffset()
-	c.Document.Body().Style().SetProperty("overflow", "none", nil)
-	c.Document.Body().Style().SetProperty("position", "fixed", nil)
-	c.Document.Body().Style().SetProperty("top", fmt.Sprintf("-%dpx", int(c.ScrollPosition)), nil)
-	c.Document.Body().Style().SetProperty("width", "100%", nil)
-}
+// func lockScroll(c *GameContext) {
+// 	c.ScrollPosition = c.Document.ActiveElement().ScrollTop() //c.Window.PageYOffset()
+// 	c.Document.Body().Style().SetProperty("overflow", "none", nil)
+// 	c.Document.Body().Style().SetProperty("position", "fixed", nil)
+// 	c.Document.Body().Style().SetProperty("top", fmt.Sprintf("-%dpx", int(c.ScrollPosition)), nil)
+// 	c.Document.Body().Style().SetProperty("width", "100%", nil)
+// }
 
-func unlockScroll(c *GameContext) {
-	c.Document.Body().Style().SetProperty("overflow", "", nil)
-	c.Document.Body().Style().SetProperty("position", "", nil)
-	c.Document.Body().Style().SetProperty("top", "", nil)
-	c.Document.Body().Style().SetProperty("width", "100%", nil)
-	c.Window.ScrollTo(&view.ScrollToOptions{Left: 0, Top: c.ScrollPosition})
-}
+// func unlockScroll(c *GameContext) {
+// 	c.Document.Body().Style().SetProperty("overflow", "", nil)
+// 	c.Document.Body().Style().SetProperty("position", "", nil)
+// 	c.Document.Body().Style().SetProperty("top", "", nil)
+// 	c.Document.Body().Style().SetProperty("width", "100%", nil)
+// 	c.Window.ScrollTo(&view.ScrollToOptions{Left: 0, Top: c.ScrollPosition})
+// }
