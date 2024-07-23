@@ -13,8 +13,7 @@ const (
 )
 
 type Cube struct {
-	Side float32
-	// maybe this field can be moved?
+	Side               float32
 	Colours            []color.RGBA
 	VertexArrayIndices []uint16
 	Points             []Point

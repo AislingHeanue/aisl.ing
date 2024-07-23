@@ -61,16 +61,6 @@ func GetBuffers(c maths.Cube) DrawShape {
 		out.IndicesArray[6*j+5] = uint16(4*j + 3)
 
 	}
-	// fmt.Println(out.IndicesArray)
-
-	// out.IndicesArray = []uint16{
-	// 	7., 6., 5., 7., 5., 4., // WHITE   +0
-	// 	14, 15, 11, 14, 11, 10, // ORANGE  +8
-	// 	23, 20, 16, 23, 16, 19, // GREEN   +16
-	// 	12, 13, 9., 12, 9., 8., // RED     +8
-	// 	17, 21, 22, 17, 22, 18, // BLUE    +16
-	// 	0., 1., 2., 0., 2., 3., // YELLOW  +0
-	// }
 
 	outColours := []float32{}
 	for _, c := range c.Colours {
@@ -80,12 +70,6 @@ func GetBuffers(c maths.Cube) DrawShape {
 		outColours = append(outColours, float32(c.R)/256, float32(c.G)/256, float32(c.B)/256, float32(c.A)/256)
 	}
 	out.ColourArray = outColours
-	// fmt.Println(out.ColoursArray)
-
-	// fmt.Println(len(c.Points))
-	// fmt.Println(len(out.VerticesArray) / 3)
-	// fmt.Println(len(out.IndicesArray))
-	// fmt.Println(len(out.ColourArray) / 4)
 
 	out.VCount = 24
 	out.ICount = 36

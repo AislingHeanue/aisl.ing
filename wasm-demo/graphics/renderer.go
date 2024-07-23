@@ -47,9 +47,7 @@ func (cc *CubeRenderer) Init(c *GameContext) {
 				cubeOrigin := cc.getCentre(x, y, z)
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
-					// fmt.Println("making a cube")
 					cc.cubes.Data[x][y][z] = maths.NewCubeWithColours(cubeOrigin, cc.side, colours)
-					// cc.shapes = append(cc.shapes, cc.cubes[x][y][z])
 				}
 			}
 		}

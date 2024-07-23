@@ -82,7 +82,6 @@ func dragCanvas(c *GameContext, e *domcore.Event) {
 }
 
 func mouseUp(c *GameContext) {
-	// fmt.Println("up")
 	c.MouseDown = false
 }
 

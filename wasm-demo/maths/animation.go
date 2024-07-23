@@ -21,12 +21,10 @@ type RubiksEvent struct {
 }
 
 func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) {
-	// face not recognised, do nothing
-	// fmt.Println("Trying to make an event with the letter " + face)
 	if _, ok := turnMap[Face(face)]; !ok {
+		// face not recognised, do nothing
 		return
 	}
-	// fmt.Println("event added")
 	a.events = append(a.events, RubiksEvent{
 		face:    Face(face),
 		reverse: reverse,
@@ -38,7 +36,6 @@ func (a *RubiksAnimationHandler) Tick() bool {
 	a.currentEventIndices = []int{}
 	// for every event in order
 	for i, event := range a.events {
-		// fmt.Println(event)
 		// if the event is not finished
 		if event.t < a.MaxTicks {
 			allowedToMove := true
@@ -119,7 +116,6 @@ func (a *RubiksAnimationHandler) DoEvent(event RubiksEvent, origin *Point) {
 		x := coord[0]
 		y := coord[1]
 		z := coord[2]
-		// fmt.Println(event.t)
 		a.CopyRubiksCube.Data[x][y][z] = a.RubiksCube.Data[x][y][z].Rotate(*origin, float32(float64(event.t)*rotationScale*math.Pi/float64(2*a.MaxTicks-2)), info.axis)
 	}
 
