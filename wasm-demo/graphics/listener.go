@@ -144,7 +144,7 @@ func getRelativeTouchPosition(c *GameContext, touch js.Value) (float32, float32)
 }
 
 func lockScroll(c *GameContext) {
-	c.ScrollPosition = c.Window.PageYOffset()
+	c.ScrollPosition = c.Document.ActiveElement().ScrollTop() //c.Window.PageYOffset()
 	c.Document.Body().Style().SetProperty("overflow", "hidden", nil)
 	c.Document.Body().Style().SetProperty("position", "fixed", nil)
 	c.Document.Body().Style().SetProperty("top", fmt.Sprintf("-%dpx", int(c.ScrollPosition)), nil)

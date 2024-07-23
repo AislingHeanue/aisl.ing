@@ -6,7 +6,7 @@ import Collatz from "./pages/collatz.jsx";
 import Wasm from "./pages/wasm.jsx";
 import "./styles/tailwind.css";
 
-console.log("loading 4");
+// console.log("loading 4");
 // flash of unstyled content preventer
 document.documentElement.classList.add("dark");
 ReactDOM.createRoot(document.getElementById("root")).render(
