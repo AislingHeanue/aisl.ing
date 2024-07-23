@@ -152,7 +152,7 @@ func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
 	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(colours), webgl.STATIC_DRAW)
 	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 
-	fmt.Println("made some buffers")
+	// fmt.Println("made some buffers")
 
 	cc.bufferSet = &model.BufferSet{
 		Vertices: vertexBuffer,

@@ -7,7 +7,7 @@ import (
 )
 
 type CubeController interface {
-	Turn(string, bool)
+	Turn(Face, bool)
 	RefreshBuffers()
 }
 
@@ -17,22 +17,39 @@ type turnInfo struct {
 	zSelector         cubeSelector
 	reverse           bool
 	axis              maths.Axis
-	allowedConcurrent []string
+	allowedConcurrent []Face
 }
 
-var turnMap = map[string]turnInfo{
-	"u": {EVERY, FINAL, EVERY, true, maths.Y, []string{"d", "e"}},
-	"d": {EVERY, FIRST, EVERY, false, maths.Y, []string{"d", "u"}},
-	"r": {FINAL, EVERY, EVERY, true, maths.X, []string{"u", "e"}},
-	"l": {FIRST, EVERY, EVERY, false, maths.X, []string{}},
-	"f": {EVERY, EVERY, FIRST, false, maths.Z, []string{"m", "l"}},
-	"b": {EVERY, EVERY, FINAL, true, maths.Z, []string{"l", "r"}},
-	"m": {INNER, EVERY, EVERY, false, maths.X, []string{"r", "m"}},
-	"e": {EVERY, INNER, EVERY, false, maths.Y, []string{}},
-	"s": {EVERY, EVERY, INNER, false, maths.Z, []string{"s", "b"}},
-	"x": {EVERY, EVERY, EVERY, true, maths.X, []string{"b", "f"}},
-	"y": {EVERY, EVERY, EVERY, true, maths.Y, []string{"f", "s"}},
-	"z": {EVERY, EVERY, EVERY, false, maths.Z, []string{}},
+type Face string
+
+const (
+	u Face = "u"
+	d Face = "d"
+	r Face = "r"
+	l Face = "l"
+	f Face = "f"
+	b Face = "b"
+	m Face = "m"
+	e Face = "e"
+	s Face = "s"
+	x Face = "x"
+	y Face = "y"
+	z Face = "z"
+)
+
+var turnMap = map[Face]turnInfo{
+	u: {EVERY, FINAL, EVERY, true, maths.Y, []Face{d, e}},
+	d: {EVERY, FIRST, EVERY, false, maths.Y, []Face{e, u}},
+	r: {FINAL, EVERY, EVERY, true, maths.X, []Face{l, m}},
+	l: {FIRST, EVERY, EVERY, false, maths.X, []Face{m, r}},
+	f: {EVERY, EVERY, FIRST, false, maths.Z, []Face{s, b}},
+	b: {EVERY, EVERY, FINAL, true, maths.Z, []Face{f, s}},
+	m: {INNER, EVERY, EVERY, false, maths.X, []Face{l, r}},
+	e: {EVERY, INNER, EVERY, false, maths.Y, []Face{d, u}},
+	s: {EVERY, EVERY, INNER, false, maths.Z, []Face{b, f}},
+	x: {EVERY, EVERY, EVERY, true, maths.X, []Face{}},
+	y: {EVERY, EVERY, EVERY, true, maths.Y, []Face{}},
+	z: {EVERY, EVERY, EVERY, false, maths.Z, []Face{}},
 }
 
 var _ CubeController = &RubiksCube{}
@@ -185,7 +202,7 @@ func (r RubiksCube) getPermutedCubeColours(x, y, z int, axis maths.Axis, reverse
 
 // var _ *CubeController = RubiksCube{}
 
-func (r *RubiksCube) Turn(face string, reverse bool) {
+func (r *RubiksCube) Turn(face Face, reverse bool) {
 	info, ok := turnMap[face]
 	if !ok {
 		return

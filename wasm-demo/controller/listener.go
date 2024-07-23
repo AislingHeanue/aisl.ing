@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 	"syscall/js"
 
@@ -72,7 +71,7 @@ func dragCanvas(c *model.GameContext, e *domcore.Event) {
 }
 
 func mouseUp(c *model.GameContext) {
-	fmt.Println("up")
+	// fmt.Println("up")
 	c.MouseDown = false
 }
 

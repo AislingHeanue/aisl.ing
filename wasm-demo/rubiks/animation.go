@@ -1,13 +1,12 @@
 package rubiks
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
-const maxTicks = 10
+const maxTicks = 8
 
 type animationHandler interface {
 	AddEvent(face string, reverse bool)
@@ -27,7 +26,7 @@ type RubiksAnimationHandler struct {
 }
 
 type RubiksEvent struct {
-	face    string
+	face    Face
 	reverse bool
 	t       int
 }
@@ -36,13 +35,13 @@ var _ animationHandler = &RubiksAnimationHandler{}
 
 func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) {
 	// face not recognised, do nothing
-	fmt.Println("Trying to make an event with the letter " + face)
-	if _, ok := turnMap[face]; !ok {
+	// fmt.Println("Trying to make an event with the letter " + face)
+	if _, ok := turnMap[Face(face)]; !ok {
 		return
 	}
-	fmt.Println("event added")
+	// fmt.Println("event added")
 	a.events = append(a.events, RubiksEvent{
-		face:    face,
+		face:    Face(face),
 		reverse: reverse,
 		t:       0,
 	})
@@ -60,18 +59,21 @@ func (a *RubiksAnimationHandler) Tick() bool {
 			if len(a.currentEventIndices) != 0 {
 				// check every move between the first currently moving move, and the
 				// current move being looked at.
-				for j := a.currentEventIndices[0]; j <= i; j++ {
+				for j := a.currentEventIndices[0]; j < i; j++ {
+					if a.events[j].t == maxTicks {
+						continue
+					}
 					// Each move has a list of moves that can be done in parallel with them
 					// If every move between the very first currently-moving move and this move
 					// match this criteria, then this move can also be ticked.
+					matchFoundInAllowedList := false
 					for _, otherAllowedMove := range turnMap[a.events[j].face].allowedConcurrent {
-						matchFoundInAllowedList := false
 						if otherAllowedMove == event.face {
 							matchFoundInAllowedList = true
 						}
-						if !matchFoundInAllowedList {
-							allowedToMove = false
-						}
+					}
+					if !matchFoundInAllowedList {
+						allowedToMove = false
 					}
 				}
 			}
@@ -84,7 +86,7 @@ func (a *RubiksAnimationHandler) Tick() bool {
 	if len(a.currentEventIndices) == 0 {
 		a.done = true
 
-		// false: no events occured
+		// false: no events occurred
 		return false
 	}
 	// count the events left in the list after the first currently-moving move. Zero if nothing is moving.
@@ -130,7 +132,7 @@ func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point)
 		x := coord[0]
 		y := coord[1]
 		z := coord[2]
-		fmt.Println(event.t)
+		// fmt.Println(event.t)
 		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(float64(event.t)*rotationScale*math.Pi/(2*maxTicks-2)), info.axis)
 	}
 
