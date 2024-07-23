@@ -1,11 +1,9 @@
-package controller
+package graphics
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
 
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/graphics/webgl"
@@ -13,7 +11,7 @@ import (
 	"github.com/gowebapi/webapi/html/htmlcommon"
 )
 
-func InitCanvas(c *model.GameContext) {
+func InitCanvas(c *GameContext) {
 	c.Window = webapi.GetWindow()
 	c.Document = c.Window.Document()
 	c.CvsElement = c.Document.GetElementById("wasm-canvas")
@@ -34,7 +32,7 @@ func InitCanvas(c *model.GameContext) {
 	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Width))
 }
 
-func StartAnimation(c *model.GameContext) {
+func StartAnimation(c *GameContext) {
 	c.Animator.Init(c)
 	c.Animator.InitListeners(c)
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
@@ -44,7 +42,7 @@ func StartAnimation(c *model.GameContext) {
 	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(gl, program, c, c.Animator.Render)))
 }
 
-func wrapAnimator(gl *webgl.RenderingContext, p *webgl.Program, c *model.GameContext, f model.RenderFunc) func(float64) {
+func wrapAnimator(gl *webgl.RenderingContext, p *webgl.Program, c *GameContext, f RenderFunc) func(float64) {
 	return func(time float64) {
 		c.T = float32(time) / 1000 // milliseconds to seconds
 		f(gl, p, c)

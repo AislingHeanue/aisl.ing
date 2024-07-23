@@ -1,8 +1,7 @@
-package maths
+package graphics
 
 import (
-	"math"
-
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
@@ -21,7 +20,7 @@ func I4() Mat4 {
 // This just, does not work for me, so I'll use a halfway solution that looks good
 // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#perspective_projection_matrix
 func PerspectiveMatrix(fov float32, ratio float32, nearZ float32, farZ float32) *Mat4 {
-	f := 1 / tan(fov/2)
+	f := 1 / maths.Tan(fov/2)
 	r := 1 / (farZ - nearZ)
 	return &Mat4{
 		{f / ratio, 0, 0, 0},
@@ -42,7 +41,7 @@ func (m Mat4) Scale(c float32) *Mat4 {
 	return &out
 }
 
-func (m Mat4) Rotate(angle float32, axis Axis) *Mat4 {
+func (m Mat4) Rotate(angle float32, axis maths.Axis) *Mat4 {
 	return m.MatrixDot(getRotationMat4(angle, axis))
 }
 
@@ -70,38 +69,26 @@ func (m Mat4) ToJS() *webgl.Union {
 	return webgl.UnionFromJS(jsconv.Float32ToJs(flatMatrix))
 }
 
-func cos(angle float32) float32 {
-	return float32(math.Cos(float64(angle)))
-}
-
-func sin(angle float32) float32 {
-	return float32(math.Sin(float64(angle)))
-}
-
-func tan(angle float32) float32 {
-	return float32(math.Tan(float64(angle)))
-}
-
-func getRotationMat4(angle float32, axis Axis) Mat4 {
+func getRotationMat4(angle float32, axis maths.Axis) Mat4 {
 	switch axis {
-	case X:
+	case maths.X:
 		return Mat4{
 			{1, 0, 0, 0},
-			{0, cos(angle), sin(angle), 0},
-			{0, -sin(angle), cos(angle), 0},
+			{0, maths.Cos(angle), maths.Sin(angle), 0},
+			{0, -maths.Sin(angle), maths.Cos(angle), 0},
 			{0, 0, 0, 1},
 		}
-	case Y:
+	case maths.Y:
 		return Mat4{
-			{cos(angle), 0, -sin(angle), 0},
+			{maths.Cos(angle), 0, -maths.Sin(angle), 0},
 			{0, 1, 0, 0},
-			{sin(angle), 0, cos(angle), 0},
+			{maths.Sin(angle), 0, maths.Cos(angle), 0},
 			{0, 0, 0, 1},
 		}
-	case Z:
+	case maths.Z:
 		return Mat4{
-			{cos(angle), sin(angle), 0, 0},
-			{-sin(angle), cos(angle), 0, 0},
+			{maths.Cos(angle), maths.Sin(angle), 0, 0},
+			{-maths.Sin(angle), maths.Cos(angle), 0, 0},
 			{0, 0, 1, 0},
 			{0, 0, 0, 1},
 		}

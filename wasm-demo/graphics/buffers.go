@@ -1,4 +1,4 @@
-package rubiks
+package graphics
 
 import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
@@ -92,4 +92,21 @@ func GetBuffers(c maths.Cube) DrawShape {
 	out.CCount = 24
 
 	return out
+}
+
+func GetBuffersForRubiksAnimator(a *maths.RubiksAnimationHandler, origin *maths.Point) DrawShape {
+	a.CopyRubiksCube = a.RubiksCube.Copy()
+	for _, event := range a.EventsWhichNeedToBeRotated {
+		a.DoEvent(event, origin)
+	}
+	return GroupBuffersForRubiksCube(a.CopyRubiksCube)
+}
+
+func GroupBuffersForRubiksCube(r maths.RubiksCube) DrawShape {
+	d := []DrawShape{}
+	for _, v := range r.Flatten() {
+		d = append(d, GetBuffers(v))
+	}
+
+	return GroupBuffers(d)
 }

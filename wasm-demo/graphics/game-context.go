@@ -1,4 +1,4 @@
-package model
+package graphics
 
 import (
 	"github.com/gowebapi/webapi"
@@ -20,12 +20,8 @@ type BufferSet struct {
 type Animator interface {
 	Init(*GameContext)
 	InitListeners(*GameContext)
-	// CreateBuffers(*webgl.RenderingContext, *GameContext)
 	CreateShaders(*webgl.RenderingContext, *GameContext) *webgl.Program
 	Render(*webgl.RenderingContext, *webgl.Program, *GameContext)
-	// RefreshCoords(*GameContext)
-	// IsActive() bool
-	// IsRedrawRequired() bool
 }
 
 type GameContext struct {
@@ -34,6 +30,7 @@ type GameContext struct {
 	T      float32
 
 	Animator        Animator
+	MaxTicks        int
 	CvsElement      *dom.Element
 	Document        *webapi.Document
 	Window          *webapi.Window

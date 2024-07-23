@@ -1,18 +1,29 @@
-package controller
+package graphics
 
 import (
 	"strconv"
+	"strings"
 	"syscall/js"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
+
+type CCListener struct {
+	cc *CubeRenderer
+	c  *GameContext
+}
+
+func (l *CCListener) HandleEvent(e *domcore.Event) {
+	shiftPressed := e.JSValue().Get("shiftKey").Bool()
+	face := strings.ToLower(e.JSValue().Get("key").String())
+	l.cc.animationHandler.AddEvent(face, shiftPressed)
+}
 
 func Log(v js.Value) {
 	js.Global().Get("console").Call("log", v)
 }
 
-func RegisterListeners(c *model.GameContext) {
+func RegisterListeners(c *GameContext) {
 	c.Window.AddEventListener("resize", domcore.NewEventListener(&Listener{c, RESIZE}), nil)
 
 	res := c.Document.GetElementById("dimension")
@@ -36,7 +47,7 @@ const (
 )
 
 type Listener struct {
-	c    *model.GameContext
+	c    *GameContext
 	kind ListenerKind
 }
 
@@ -55,14 +66,14 @@ func (l *Listener) HandleEvent(e *domcore.Event) {
 	}
 }
 
-func click(c *model.GameContext, e *domcore.Event) {
+func click(c *GameContext, e *domcore.Event) {
 	c.AnchorX, c.AnchorY = getRelativeMousePosition(c, e.Value_JS)
 	c.AnchorAngleX = c.AngleX
 	c.AnchorAngleY = c.AngleY
 	c.MouseDown = true
 }
 
-func dragCanvas(c *model.GameContext, e *domcore.Event) {
+func dragCanvas(c *GameContext, e *domcore.Event) {
 	if c.MouseDown {
 		mouseX, mouseY := getRelativeMousePosition(c, e.JSValue())
 		c.AngleX = (c.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale)
@@ -70,18 +81,18 @@ func dragCanvas(c *model.GameContext, e *domcore.Event) {
 	}
 }
 
-func mouseUp(c *model.GameContext) {
+func mouseUp(c *GameContext) {
 	// fmt.Println("up")
 	c.MouseDown = false
 }
 
-func handleDimension(c *model.GameContext, value js.Value) {
+func handleDimension(c *GameContext, value js.Value) {
 	i, _ := strconv.Atoi(value.Get("value").String())
 	c.Dimension = i
 	c.Animator.Init(c)
 }
 
-func getRelativeMousePosition(c *model.GameContext, click js.Value) (float32, float32) {
+func getRelativeMousePosition(c *GameContext, click js.Value) (float32, float32) {
 	relativeX := float32(click.Get("offsetX").Float()) / c.Width
 	relativeY := float32(click.Get("offsetY").Float()) / c.Height
 	return float32(relativeX), float32(relativeY)

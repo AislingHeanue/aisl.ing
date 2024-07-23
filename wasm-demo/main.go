@@ -1,22 +1,21 @@
 package main
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/model"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/rubiks"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/graphics"
 )
 
 var done chan struct{}
 
 func main() {
-	c := model.GameContext{}
+	c := graphics.GameContext{}
 
-	c.Animator = &rubiks.CubeCube{}
+	c.Animator = &graphics.CubeRenderer{}
 	c.ResolutionScale = 1
+	c.MaxTicks = 12
 
-	controller.InitCanvas(&c)
-	controller.StartAnimation(&c)
-	controller.RegisterListeners(&c)
+	graphics.InitCanvas(&c)
+	graphics.StartAnimation(&c)
+	graphics.RegisterListeners(&c)
 
 	<-done
 

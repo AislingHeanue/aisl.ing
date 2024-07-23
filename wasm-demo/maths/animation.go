@@ -1,28 +1,17 @@
-package rubiks
+package maths
 
 import (
 	"math"
-
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
-const maxTicks = 8
-
-type animationHandler interface {
-	AddEvent(face string, reverse bool)
-	GetBuffers(origin *maths.Point) DrawShape
-	FlushAll()
-	Tick() bool
-}
-
 type RubiksAnimationHandler struct {
-	controller                 CubeController
-	rubiksCube                 *RubiksCube
-	copyRubiksCube             RubiksCube
+	RubiksCube                 *RubiksCube
+	CopyRubiksCube             RubiksCube
 	currentEventIndices        []int
-	eventsWhichNeedToBeRotated []RubiksEvent
+	EventsWhichNeedToBeRotated []RubiksEvent
 	events                     []RubiksEvent
 	done                       bool
+	MaxTicks                   int
 }
 
 type RubiksEvent struct {
@@ -30,8 +19,6 @@ type RubiksEvent struct {
 	reverse bool
 	t       int
 }
-
-var _ animationHandler = &RubiksAnimationHandler{}
 
 func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) {
 	// face not recognised, do nothing
@@ -53,14 +40,14 @@ func (a *RubiksAnimationHandler) Tick() bool {
 	for i, event := range a.events {
 		// fmt.Println(event)
 		// if the event is not finished
-		if event.t < maxTicks {
+		if event.t < a.MaxTicks {
 			allowedToMove := true
 			// if there are other moves currently moving first, check that this can also be done
 			if len(a.currentEventIndices) != 0 {
 				// check every move between the first currently moving move, and the
 				// current move being looked at.
 				for j := a.currentEventIndices[0]; j < i; j++ {
-					if a.events[j].t == maxTicks {
+					if a.events[j].t == a.MaxTicks {
 						continue
 					}
 					// Each move has a list of moves that can be done in parallel with them
@@ -91,14 +78,14 @@ func (a *RubiksAnimationHandler) Tick() bool {
 	}
 	// count the events left in the list after the first currently-moving move. Zero if nothing is moving.
 	eventsRemaining := len(a.events) - a.currentEventIndices[0]
-	a.eventsWhichNeedToBeRotated = []RubiksEvent{}
+	a.EventsWhichNeedToBeRotated = []RubiksEvent{}
 	for _, j := range a.currentEventIndices {
-		if a.events[j].t == maxTicks {
+		if a.events[j].t == a.MaxTicks {
 			a.doTurn(a.events[j])
 			// for each instance of doTurn run, the number of unfinished events decreases by one
 			eventsRemaining--
 		} else {
-			a.eventsWhichNeedToBeRotated = append(a.eventsWhichNeedToBeRotated, a.events[j])
+			a.EventsWhichNeedToBeRotated = append(a.EventsWhichNeedToBeRotated, a.events[j])
 		}
 	}
 
@@ -112,10 +99,10 @@ func (a *RubiksAnimationHandler) Tick() bool {
 }
 
 func (a *RubiksAnimationHandler) doTurn(event RubiksEvent) {
-	a.controller.Turn(event.face, event.reverse)
+	a.RubiksCube.Turn(event.face, event.reverse)
 }
 
-func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point) {
+func (a *RubiksAnimationHandler) DoEvent(event RubiksEvent, origin *Point) {
 	info, ok := turnMap[event.face]
 	rotationScale := 1.
 	if info.reverse {
@@ -127,13 +114,13 @@ func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point)
 	if !ok {
 		return // face not recognised, do nothing
 	}
-	coords := a.rubiksCube.getCubeSubset(info.xSelector, info.ySelector, info.zSelector)
+	coords := a.RubiksCube.getCubeSubset(info.xSelector, info.ySelector, info.zSelector)
 	for _, coord := range coords {
 		x := coord[0]
 		y := coord[1]
 		z := coord[2]
 		// fmt.Println(event.t)
-		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(float64(event.t)*rotationScale*math.Pi/(2*maxTicks-2)), info.axis)
+		a.CopyRubiksCube.Data[x][y][z] = a.RubiksCube.Data[x][y][z].Rotate(*origin, float32(float64(event.t)*rotationScale*math.Pi/float64(2*a.MaxTicks-2)), info.axis)
 	}
 
 }
@@ -142,12 +129,4 @@ func (a *RubiksAnimationHandler) FlushAll() {
 	for !a.done {
 		a.Tick()
 	}
-}
-
-func (a *RubiksAnimationHandler) GetBuffers(origin *maths.Point) DrawShape {
-	a.copyRubiksCube = a.rubiksCube.copy()
-	for _, event := range a.eventsWhichNeedToBeRotated {
-		a.doEvent(event, origin)
-	}
-	return a.copyRubiksCube.GroupBuffers()
 }

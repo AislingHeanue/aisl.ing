@@ -2,6 +2,7 @@ package maths
 
 import (
 	"fmt"
+	"math"
 )
 
 type Point [3]float32
@@ -108,24 +109,36 @@ func (p Point) MatrixDot(m [3][3]float32) Point {
 	return out
 }
 
+func Cos(angle float32) float32 {
+	return float32(math.Cos(float64(angle)))
+}
+
+func Sin(angle float32) float32 {
+	return float32(math.Sin(float64(angle)))
+}
+
+func Tan(angle float32) float32 {
+	return float32(math.Tan(float64(angle)))
+}
+
 func getRotation3Matrix(angle float32, axis Axis) [3][3]float32 {
 	switch axis {
 	case X:
 		return [3][3]float32{
 			{1, 0, 0},
-			{0, cos(angle), sin(angle)},
-			{0, -sin(angle), cos(angle)},
+			{0, Cos(angle), Sin(angle)},
+			{0, -Sin(angle), Cos(angle)},
 		}
 	case Y:
 		return [3][3]float32{
-			{cos(angle), 0, -sin(angle)},
+			{Cos(angle), 0, -Sin(angle)},
 			{0, 1, 0},
-			{sin(angle), 0, cos(angle)},
+			{Sin(angle), 0, Cos(angle)},
 		}
 	case Z:
 		return [3][3]float32{
-			{cos(angle), sin(angle), 0},
-			{-sin(angle), cos(angle), 0},
+			{Cos(angle), Sin(angle), 0},
+			{-Sin(angle), Cos(angle), 0},
 			{0, 0, 1},
 		}
 	default:
