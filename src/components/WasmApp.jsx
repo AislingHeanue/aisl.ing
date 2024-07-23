@@ -33,6 +33,7 @@ const WasmApp = () => {
 
   return (
     <>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <div className="h-full w-full lg:flex justify-center">
         <div className="grid lg:grid-cols-3 md:grid-cols-1 w-full h-fit lg:w-11/12 lg:pl-[11rem] md:w-5/6 mx-auto gap-4 ">
           <div className="col-span-1">

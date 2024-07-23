@@ -26,5 +26,3 @@ dist-ssr
 # compiled wasm
 *.wasm
 
-# for test vercel deploys
-.vercel
