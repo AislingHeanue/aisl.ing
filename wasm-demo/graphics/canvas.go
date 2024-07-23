@@ -16,6 +16,9 @@ func InitCanvas(c *GameContext) {
 	c.Document = c.Window.Document()
 	c.CvsElement = c.Document.GetElementById("wasm-canvas")
 	style := c.Window.GetComputedStyle(c.CvsElement, nil)
+
+	pixelRatio := c.Window.DevicePixelRatio()
+	fmt.Printf("device pixel ratio is %v\n", pixelRatio)
 	// c.CvsElement = cvsElement.Value_JS
 
 	widthWithBorder, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("width"), "px"), 32)
@@ -25,8 +28,8 @@ func InitCanvas(c *GameContext) {
 	borderLeft, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-left-width"), "px"), 32)
 	borderRight, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-right-width"), "px"), 32)
 
-	c.Height = float32(heightWithBorder-borderUp-borderDown) / c.ResolutionScale
-	c.Width = float32(widthWithBorder-borderLeft-borderRight) / c.ResolutionScale
+	c.Height = float32(heightWithBorder-borderUp-borderDown) * float32(pixelRatio) / c.ResolutionScale
+	c.Width = float32(widthWithBorder-borderLeft-borderRight) * float32(pixelRatio) / c.ResolutionScale
 
 	c.CvsElement.SetAttribute("height", fmt.Sprint(c.Height))
 	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Width))
