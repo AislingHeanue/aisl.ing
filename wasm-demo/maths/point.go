@@ -24,8 +24,8 @@ func (v1 Point) Dot(v2 Point) float32 {
 	return total
 }
 
-func (v1 Point) Add(v2 Point) *Point {
-	v3 := &Point{}
+func (v1 Point) Add(v2 Point) Point {
+	v3 := Point{}
 	for i := range v1 {
 		v3[i] = v1[i] + v2[i]
 	}
@@ -42,12 +42,12 @@ func (v1 Point) Reverse() *Point {
 	return v2
 }
 
-func (v1 Point) Subtract(v2 Point) *Point {
+func (v1 Point) Subtract(v2 Point) Point {
 	return v1.Add(*v2.Reverse())
 }
 
-func (p Point) Scale(c float32) *Point {
-	return &Point{
+func (p Point) Scale(c float32) Point {
+	return Point{
 		c * p[0],
 		c * p[1],
 		c * p[2],
@@ -90,14 +90,14 @@ func (p Point) ToSlice() []float32 {
 	}
 }
 
-func (p *Point) Rotate(anchor Point, angle float32, axis Axis) *Point {
+func (p *Point) Rotate(anchor Point, angle float32, axis Axis) Point {
 	displacement := p.Subtract(anchor)
 	matrix := getRotation3Matrix(angle, axis)
 
 	return displacement.MatrixDot(matrix).Add(anchor)
 }
 
-func (p Point) MatrixDot(m [3][3]float32) *Point {
+func (p Point) MatrixDot(m [3][3]float32) Point {
 	out := Point{}
 	for k := range []int{0, 1, 2} {
 		for i := range []int{0, 1, 2} {
@@ -105,7 +105,7 @@ func (p Point) MatrixDot(m [3][3]float32) *Point {
 		}
 	}
 
-	return &out
+	return out
 }
 
 func getRotation3Matrix(angle float32, axis Axis) [3][3]float32 {

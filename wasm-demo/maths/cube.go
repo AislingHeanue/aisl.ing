@@ -17,7 +17,7 @@ type Cube struct {
 	// maybe this field can be moved?
 	Colours            []color.RGBA
 	VertexArrayIndices []uint16
-	Points             []*Point
+	Points             []Point
 }
 
 // creates a new cube at the specified origin in the default rotation.
@@ -47,15 +47,16 @@ var (
 	DefaultColours = []color.RGBA{WHITE, BLUE, ORANGE, GREEN, RED, YELLOW}
 )
 
-func NewCube(origin Point, side float32) *Cube {
+func NewCube(origin Point, side float32) Cube {
 	return NewCubeWithColours(origin, side, DefaultColours)
 }
 
-func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube {
+func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) Cube {
 	var out Cube
 	out.Side = side
 
-	out.Colours = colours
+	out.Colours = make([]color.RGBA, len(colours))
+	copy(out.Colours, colours)
 
 	out.VertexArrayIndices = []uint16{
 		4, 5, 6, 7, // WHITE
@@ -66,7 +67,7 @@ func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube 
 		0, 1, 2, 3, // YELLOW
 	}
 
-	out.Points = []*Point{
+	out.Points = []Point{
 		origin.Add(Point{-side / 2, -side / 2, -side / 2}), // GREEN YELLOW RED
 		origin.Add(Point{side / 2, -side / 2, -side / 2}),  // BLUE YELLOW RED
 		origin.Add(Point{side / 2, -side / 2, side / 2}),   // BLUE YELLOW ORANGE
@@ -77,7 +78,7 @@ func NewCubeWithColours(origin Point, side float32, colours []color.RGBA) *Cube 
 		origin.Add(Point{-side / 2, side / 2, side / 2}),   // GREEN WHITE ORANGE
 	}
 
-	return &out
+	return out
 }
 
 func (c *Cube) RotateColoursX(flip bool) {
@@ -113,11 +114,28 @@ func (c *Cube) RotateColoursZ(flip bool) {
 	}
 }
 
-func (c Cube) Rotate(anchor Point, angle float32, axis Axis) *Cube {
-	cubeCopy := c
+func (c Cube) Rotate(anchor Point, angle float32, axis Axis) Cube {
+	cubeCopy := c.Copy()
 	for i, p := range c.Points {
 		cubeCopy.Points[i] = p.Rotate(anchor, angle, axis)
 	}
 
-	return &cubeCopy
+	return cubeCopy
+}
+
+func (c Cube) Copy() Cube {
+	side := c.Side
+	vertexIndices := c.VertexArrayIndices
+	colours := make([]color.RGBA, len(c.Colours))
+	points := make([]Point, len(c.Points))
+
+	copy(colours, c.Colours)
+	copy(points, c.Points)
+
+	return Cube{
+		Side:               side,
+		VertexArrayIndices: vertexIndices,
+		Colours:            colours,
+		Points:             points,
+	}
 }

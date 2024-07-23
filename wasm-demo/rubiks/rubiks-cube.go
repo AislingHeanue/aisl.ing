@@ -46,17 +46,17 @@ var turnMap = map[string]turnInfo{
 var _ CubeController = &RubiksCube{}
 
 type RubiksCube struct {
-	data        [][][]*maths.Cube
+	data        [][][]maths.Cube
 	dimension   int
 	bufferStale bool
 }
 
 func NewRubiksCube(d int) RubiksCube {
-	r := make([][][]*maths.Cube, d)
+	r := make([][][]maths.Cube, d)
 	for i := range r {
-		r[i] = make([][]*maths.Cube, d)
+		r[i] = make([][]maths.Cube, d)
 		for j := range r[i] {
-			r[i][j] = make([]*maths.Cube, d)
+			r[i][j] = make([]maths.Cube, d)
 		}
 	}
 
@@ -76,12 +76,14 @@ func (r RubiksCube) copy() RubiksCube {
 	return newR
 }
 
-func (r RubiksCube) flatten() []*maths.Cube {
-	cubes := []*maths.Cube{}
+func (r RubiksCube) flatten() []maths.Cube {
+	cubes := []maths.Cube{}
 	for x := range r.dimension {
 		for y := range r.dimension {
 			for z := range r.dimension {
-				cubes = append(cubes, r.data[x][y][z])
+				if r.isExternalCube(x, y, z) {
+					cubes = append(cubes, r.data[x][y][z])
+				}
 			}
 		}
 	}
@@ -158,10 +160,7 @@ func (r *RubiksCube) RefreshBuffers() {
 func (r RubiksCube) GroupBuffers() DrawShape {
 	d := []DrawShape{}
 	for _, v := range r.flatten() {
-		if v != nil {
-			d = append(d, GetBuffers(*v))
-		}
-
+		d = append(d, GetBuffers(v))
 	}
 
 	return GroupBuffers(d)
@@ -182,7 +181,7 @@ func (r *RubiksCube) U(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
+			newR.data[x][y][z].Colours = r.data[r.dimension-1-z][y][x].Colours
 			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
@@ -203,7 +202,7 @@ func (r *RubiksCube) D(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[z][y][r.dimension-1-x]
+			newR.data[x][y][z].Colours = r.data[z][y][r.dimension-1-x].Colours
 			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
@@ -225,7 +224,7 @@ func (r *RubiksCube) R(reverse bool) {
 			y := coord[1]
 			z := coord[2]
 			// fmt.Println(x, y, z)
-			newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
+			newR.data[x][y][z].Colours = r.data[x][z][r.dimension-1-y].Colours
 			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
@@ -246,7 +245,7 @@ func (r *RubiksCube) L(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[x][r.dimension-1-z][y]
+			newR.data[x][y][z].Colours = r.data[x][r.dimension-1-z][y].Colours
 			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
@@ -267,7 +266,7 @@ func (r *RubiksCube) F(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].Colours = r.data[r.dimension-1-y][x][z].Colours
 			newR.data[x][y][z].RotateColoursZ(info.reverse)
 		}
 
@@ -288,7 +287,7 @@ func (r *RubiksCube) B(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[y][r.dimension-1-x][z]
+			newR.data[x][y][z].Colours = r.data[y][r.dimension-1-x][z].Colours
 			newR.data[x][y][z].RotateColoursZ(info.reverse)
 		}
 
@@ -309,7 +308,7 @@ func (r *RubiksCube) M(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[x][r.dimension-1-z][y]
+			newR.data[x][y][z].Colours = r.data[x][r.dimension-1-z][y].Colours
 			newR.data[x][y][z].RotateColoursX(info.reverse)
 		}
 
@@ -330,7 +329,7 @@ func (r *RubiksCube) E(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[z][y][r.dimension-1-x]
+			newR.data[x][y][z].Colours = r.data[z][y][r.dimension-1-x].Colours
 			newR.data[x][y][z].RotateColoursY(info.reverse)
 		}
 
@@ -351,7 +350,7 @@ func (r *RubiksCube) S(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].Colours = r.data[r.dimension-1-y][x][z].Colours
 			newR.data[x][y][z].RotateColoursZ(false)
 		}
 
@@ -372,7 +371,7 @@ func (r *RubiksCube) X(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[x][z][r.dimension-1-y]
+			newR.data[x][y][z].Colours = r.data[x][z][r.dimension-1-y].Colours
 			newR.data[x][y][z].RotateColoursX(false)
 		}
 
@@ -393,7 +392,7 @@ func (r *RubiksCube) Y(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[r.dimension-1-z][y][x]
+			newR.data[x][y][z].Colours = r.data[r.dimension-1-z][y][x].Colours
 			newR.data[x][y][z].RotateColoursY(false)
 		}
 
@@ -414,7 +413,7 @@ func (r *RubiksCube) Z(reverse bool) {
 			x := coord[0]
 			y := coord[1]
 			z := coord[2]
-			newR.data[x][y][z] = r.data[r.dimension-1-y][x][z]
+			newR.data[x][y][z].Colours = r.data[r.dimension-1-y][x][z].Colours
 			newR.data[x][y][z].RotateColoursZ(false)
 		}
 

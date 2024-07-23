@@ -1,6 +1,8 @@
 package rubiks
 
-import "github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
+import (
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
+)
 
 type DrawShape struct {
 	Points        []*maths.Point

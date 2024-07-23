@@ -7,7 +7,7 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 )
 
-const maxTicks = 30
+const maxTicks = 100
 
 var concurrentTurnsAllowed map[string][]string = map[string][]string{
 	"u": {"e", "d"},
@@ -33,7 +33,7 @@ type animationHandler interface {
 
 type RubiksAnimationHandler struct {
 	controller                 CubeController
-	rubiksCube                 RubiksCube
+	rubiksCube                 *RubiksCube
 	copyRubiksCube             RubiksCube
 	currentEventIndices        []int
 	eventsWhichNeedToBeRotated []RubiksEvent
@@ -155,9 +155,12 @@ func (a *RubiksAnimationHandler) doTurn(event RubiksEvent) {
 
 func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point) {
 	info, ok := turnMap[event.face]
-	rotationScale := 1.
+	rotationScale := -1.
 	if info.reverse {
-		rotationScale = -1.
+		rotationScale *= 1.
+	}
+	if event.reverse {
+		rotationScale *= -1
 	}
 	if !ok {
 		return // face not recognised, do nothing
@@ -168,10 +171,7 @@ func (a *RubiksAnimationHandler) doEvent(event RubiksEvent, origin *maths.Point)
 		y := coord[1]
 		z := coord[2]
 		fmt.Println(event.t)
-		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(rotationScale*math.Pi/(2*maxTicks-2)), info.axis)
-		if event.t == 29 {
-			a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(-rotationScale*math.Pi/2), info.axis)
-		}
+		a.copyRubiksCube.data[x][y][z] = a.rubiksCube.data[x][y][z].Rotate(*origin, float32(float64(event.t)*rotationScale*math.Pi/(2*maxTicks-2)), info.axis)
 	}
 
 }

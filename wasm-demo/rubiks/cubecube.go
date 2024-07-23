@@ -97,7 +97,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
 					// fmt.Println("making a cube")
-					cc.cubes.data[x][y][z] = maths.NewCubeWithColours(*cubeOrigin, cc.side, colours)
+					cc.cubes.data[x][y][z] = maths.NewCubeWithColours(cubeOrigin, cc.side, colours)
 					// cc.shapes = append(cc.shapes, cc.cubes[x][y][z])
 				}
 			}
@@ -114,7 +114,7 @@ func (cc *CubeCube) Init(c *model.GameContext) {
 
 	cc.animationHandler = &RubiksAnimationHandler{
 		controller: &cc.cubes,
-		rubiksCube: cc.cubes,
+		rubiksCube: &cc.cubes,
 	}
 	// gl := c.Gl
 	// program := c.Program
@@ -166,7 +166,7 @@ func (cc *CubeCube) createBuffers(gl *webgl.RenderingContext) {
 	cc.cubes.bufferStale = false
 }
 
-func (cc CubeCube) getCentre(x, y, z int) *maths.Point {
+func (cc CubeCube) getCentre(x, y, z int) maths.Point {
 	return cc.origin.
 		Subtract(maths.Point{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
 		Add(maths.Point{cc.sideWithGap * float32(x), cc.sideWithGap * float32(y), cc.sideWithGap * float32(z)}).
