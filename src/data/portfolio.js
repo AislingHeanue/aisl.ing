@@ -25,15 +25,15 @@ export default [
     {
         title: "Conway's Game of Life",
         imgURL: "assets/Game of Life Screenshot.png",
-        stack: ["Python","Pygame"],
+        stack: ["Go","Ebiten"],
         link: "https://github.com/AislingHeanue/Misc-Projects",
         internal:false
     },
     {
         title: "Advent of Code Solutions",
         imgURL: "assets/AoC Screenshot.png",
-        stack: ["Python"],
-        link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/2022/Advent%20of%20Code%202022.ipynb",
+        stack: ["Go","Python"],
+        link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/",
         internal:false
     }
 ]
