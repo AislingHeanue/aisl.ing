@@ -9,12 +9,15 @@ function Intro() {
       <p className="text-base md:text-xl mb-3 font-medium">
         Software Developer
       </p>
-      <p className="text-sm max-w-3xl mb-6 font-bold">
-        Having completed my master's in Computer Science at University College
-        Dublin, I am now working as a cloud engineer for HP Enterprise. I have
-        strong Python, Java and NodeJS programming skills, as well as experience
-        with Go, MATLAB and Bash scripting. I am always looking for more
-        opportunities to learn more and try new coding challenges.
+      <p className="max-w-3xl mb-6">
+        Currently working working as a Cloud Engineer for HP Enterprise. I have
+        strong Golang and Python programming skills, as well as experience with
+        Bash, Java and Javascript. I am always looking for more opportunities to
+        learn more and try new coding challenges.
+      </p>
+      <p>
+        These are some of my projects. The first two of these are demos which
+        can be run in the browser.
       </p>
     </div>
   );

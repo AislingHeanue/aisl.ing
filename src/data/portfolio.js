@@ -9,11 +9,11 @@ export default [
         internal:true
     },
     {
-        title: "Rubik's Cube Simulator",
-        imgURL: "assets/Rubiks Cube Screenshot.png",
-        stack: ["Java","JavaFX"],
-        link: "https://github.com/AislingHeanue/Misc-Projects",
-        internal:false
+        title: "Rubik's Cube Demo",
+        imgURL: "assets/Go Rubik's Cube.png",
+        stack: ["Go","Wasm","WebGL"],
+        link: "/wasm/",
+        internal:true
     },
     {
         title: "Quantum Computing Circuits",

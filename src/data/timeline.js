@@ -6,7 +6,8 @@ export default [
         location: "Hewlett Packard Enterprise",
         duration: "",
         GPA: "",
-        details: "I am currently working with Go to add functionality to Greenlake Private Cloud with HPE. Working for a larger company \
+        details: "Creating cloud native applications which form part of HPE GreenLake Private Cloud. I am primarily using Go, and our \
+                have also gained a lot of experience working with Kubernetes, Docker and Terraform. Working for a larger company \
                 has been very exciting because I get to contribute to a product which is being used by many customers around the globe."
     },
 

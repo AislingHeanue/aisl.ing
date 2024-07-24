@@ -12,35 +12,42 @@ const WasmApp = () => {
   addEventListener("keydown", (e) => e.key == "Shift" && setShiftHeld(true));
   addEventListener("keyup", (e) => e.key == "Shift" && setShiftHeld(false));
 
-  useEffect(() => {
-    const loadWasm = async () => {
-      // Load wasm_exec.js dynamically
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "../../wasm_exec.js";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.body.appendChild(script);
-      });
+  let wasmLoaded = false;
 
-      const go = new Go();
-      const response = await fetch("/demo.wasm");
-      console.log(response);
-      const buffer = await response.arrayBuffer();
-      const { instance } = await WebAssembly.instantiate(
-        buffer,
-        go.importObject
-      );
-      go.run(instance);
-    };
-    loadWasm();
+  useEffect(() => {
+    if (!wasmLoaded) {
+      wasmLoaded = true;
+      const loadWasm = async () => {
+        // Load wasm_exec.js dynamically
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "../../wasm_exec.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+
+        const go = new Go();
+        const response = await fetch("/demo.wasm");
+        console.log(response);
+        const buffer = await response.arrayBuffer();
+        const { instance } = await WebAssembly.instantiate(
+          buffer,
+          go.importObject
+        );
+        go.run(instance);
+      };
+      loadWasm();
+    }
   }, []);
 
   return (
     <>
       <div className="h-full w-full lg:flex justify-center">
         <div className="grid lg:grid-cols-3 md:grid-cols-1 w-full h-fit lg:w-11/12 lg:pl-[11rem] md:w-5/6 mx-auto gap-4 ">
-          <div className="col-span-1">
+          <div className="col-span-1 lg:max-h-0">
+            {" "}
+            {/* Prevents a really dumb overscroll issue that I do not understand */}
             <Title>Rubik's Cube</Title>
             <button
               type="button"
@@ -49,30 +56,32 @@ const WasmApp = () => {
               <a href="/">Back to homepage</a>
             </button>
             <p className="mb-4">
-              A Rubik's Cube which I made in WebAssembly to learn how to render
-              3D objects with WebGL. I tried to make it very spam-proof, and to
-              do this I made it so animations are queued up and executed
-              asynchronously with each other, in such a way that they run in
-              parallel where possible, and sequentially when they would
-              conflict. Drag on the canvas to rotate the cube, and use the
-              buttons or keyboard keys to make a move. Hold Shift to make
-              anti-clockwise moves.
+              A Rubik's Cube which I made in WebAssembly so I could learn how to
+              render 3D objects with WebGL. To prevent glitchy animations from
+              pressing the buttons way too fast, I made it so animations are
+              queued up and executed asynchronously, in such a way that they run
+              in parallel where possible, and sequentially when they would
+              conflict with each other.
             </p>
-
-            <div className="grid grid-cols-6 w-full h-full mx-auto gap-1">
+            <p>
+              Drag on the canvas to rotate the cube, and use the buttons or
+              keyboard keys to make a move. Hold Shift to make anti-clockwise
+              moves.
+            </p>
+            <div className="grid grid-cols-5 w-5/6 h-full mx-auto gap-1">
               <div className="col-span-1">
                 <div className="aspect-square">
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="u" className="w-full h-full hover:bg-stone-400">
                       U{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="d" className="w-full h-full hover:bg-stone-400">
                       D{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="e" className="w-full h-full hover:bg-stone-400">
                       E{shiftHeld ? "'" : ""}
                     </button>
@@ -81,17 +90,17 @@ const WasmApp = () => {
               </div>
               <div className="col-span-1">
                 <div className="aspect-square">
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="r" className="w-full h-full hover:bg-stone-400">
                       R{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="l" className="w-full h-full hover:bg-stone-400">
                       L{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="m" className="w-full h-full hover:bg-stone-400">
                       M{shiftHeld ? "'" : ""}
                     </button>
@@ -100,17 +109,17 @@ const WasmApp = () => {
               </div>
               <div className="col-span-1">
                 <div className="aspect-square">
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="f" className="w-full h-full hover:bg-stone-400">
                       F{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="b" className="w-full h-full hover:bg-stone-400">
                       B{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="s" className="w-full h-full hover:bg-stone-400">
                       S{shiftHeld ? "'" : ""}
                     </button>
@@ -119,17 +128,17 @@ const WasmApp = () => {
               </div>
               <div className="col-span-1">
                 <div className="aspect-square">
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="x" className="w-full h-full hover:bg-stone-400">
                       x{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="y" className="w-full h-full hover:bg-stone-400">
                       y{shiftHeld ? "'" : ""}
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="z" className="w-full h-full hover:bg-stone-400">
                       z{shiftHeld ? "'" : ""}
                     </button>
@@ -138,7 +147,7 @@ const WasmApp = () => {
               </div>
               <div className="col-span-1">
                 <div className="aspect-square">
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button
                       id="shuffle"
                       className="w-full h-full hover:bg-stone-400"
@@ -146,7 +155,7 @@ const WasmApp = () => {
                       Shuffle
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button
                       id="reset"
                       className="w-full h-full hover:bg-stone-400"
@@ -154,7 +163,7 @@ const WasmApp = () => {
                       Reset
                     </button>
                   </div>
-                  <div className="w-full h-2/3 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
+                  <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button
                       id="reset-camera"
                       className="w-full h-full hover:bg-stone-400"
