@@ -1,4 +1,4 @@
-package graphics
+package controller
 
 import (
 	"fmt"
@@ -37,7 +37,6 @@ func InitCanvas(c *GameContext) {
 
 func StartAnimation(c *GameContext) {
 	c.Animator.Init(c)
-	c.Animator.InitListeners(c)
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
 	glWrapper := cvsHTML.GetContext("webgl", nil)
 	gl := webgl.RenderingContextFromWrapper(glWrapper)

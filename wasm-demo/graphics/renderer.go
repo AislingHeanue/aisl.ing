@@ -5,9 +5,9 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
 	"github.com/gowebapi/webapi/core/jsconv"
-	"github.com/gowebapi/webapi/dom/domcore"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 
@@ -26,13 +26,18 @@ type CubeRenderer struct {
 	animationHandler  *maths.RubiksAnimationHandler
 }
 
-var _ Animator = &CubeRenderer{}
-
-func (cc *CubeRenderer) InitListeners(c *GameContext) {
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{cc, c}), nil)
+type BufferSet struct {
+	Vertices *webgl.Buffer
+	Indices  *webgl.Buffer
+	Colours  *webgl.Buffer
+	VCount   int
+	ICount   int
+	CCount   int
 }
 
-func (cc *CubeRenderer) Init(c *GameContext) {
+var _ controller.Animator = &CubeRenderer{}
+
+func (cc *CubeRenderer) Init(c *controller.GameContext) {
 	cc.dimension = c.CubeDimension
 	cc.totalSide = 0.5
 	cc.gap = 0.07
@@ -67,38 +72,6 @@ func (cc *CubeRenderer) Init(c *GameContext) {
 	cc.bufferStale = true
 }
 
-func (cc *CubeRenderer) createBuffers(gl *webgl.RenderingContext) {
-	vertices := jsconv.Float32ToJs(cc.sg.VerticesArray)
-	vertexBuffer := gl.CreateBuffer()
-	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
-	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
-	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
-
-	indices := jsconv.UInt16ToJs(cc.sg.IndicesArray)
-	indexBuffer := gl.CreateBuffer()
-	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-	gl.BufferData2(webgl.ELEMENT_ARRAY_BUFFER, webgl.UnionFromJS(indices), webgl.STATIC_DRAW)
-	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, &webgl.Buffer{})
-
-	colours := jsconv.Float32ToJs(cc.sg.ColourArray)
-	colorBuffer := gl.CreateBuffer()
-	gl.BindBuffer(webgl.ARRAY_BUFFER, colorBuffer)
-	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(colours), webgl.STATIC_DRAW)
-	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
-
-	// fmt.Println("made some buffers")
-
-	cc.bufferSet = &BufferSet{
-		Vertices: vertexBuffer,
-		Indices:  indexBuffer,
-		Colours:  colorBuffer,
-		VCount:   cc.sg.VCount,
-		ICount:   cc.sg.ICount,
-		CCount:   cc.sg.CCount,
-	}
-	cc.bufferStale = false
-}
-
 func (cc CubeRenderer) getCentre(x, y, z int) maths.Point {
 	return cc.origin.
 		Subtract(maths.Point{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
@@ -106,7 +79,38 @@ func (cc CubeRenderer) getCentre(x, y, z int) maths.Point {
 		Add(maths.Point{cc.side / 2, cc.side / 2, cc.side / 2})
 }
 
-func (cc *CubeRenderer) CreateShaders(gl *webgl.RenderingContext, c *GameContext) *webgl.Program {
+func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
+	colours := []color.RGBA{maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK}
+	external := false
+	if y == dimension-1 {
+		external = true
+		colours[0] = maths.DefaultColours[0]
+	}
+	if z == dimension-1 {
+		external = true
+		colours[1] = maths.DefaultColours[1]
+	}
+	if x == 0 {
+		external = true
+		colours[2] = maths.DefaultColours[2]
+	}
+	if z == 0 {
+		external = true
+		colours[3] = maths.DefaultColours[3]
+	}
+	if x == dimension-1 {
+		external = true
+		colours[4] = maths.DefaultColours[4]
+	}
+	if y == 0 {
+		external = true
+		colours[5] = maths.DefaultColours[5]
+	}
+
+	return colours, external
+}
+
+func (cc *CubeRenderer) CreateShaders(gl *webgl.RenderingContext, c *controller.GameContext) *webgl.Program {
 	vsSource := `
 	attribute vec3 aVertexPosition;
 	attribute vec4 aVertexColour;
@@ -155,38 +159,7 @@ func (cc *CubeRenderer) CreateShaders(gl *webgl.RenderingContext, c *GameContext
 	return program
 }
 
-func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
-	colours := []color.RGBA{maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK}
-	external := false
-	if y == dimension-1 {
-		external = true
-		colours[0] = maths.DefaultColours[0]
-	}
-	if z == dimension-1 {
-		external = true
-		colours[1] = maths.DefaultColours[1]
-	}
-	if x == 0 {
-		external = true
-		colours[2] = maths.DefaultColours[2]
-	}
-	if z == 0 {
-		external = true
-		colours[3] = maths.DefaultColours[3]
-	}
-	if x == dimension-1 {
-		external = true
-		colours[4] = maths.DefaultColours[4]
-	}
-	if y == 0 {
-		external = true
-		colours[5] = maths.DefaultColours[5]
-	}
-
-	return colours, external
-}
-
-func (cc *CubeRenderer) Render(gl *webgl.RenderingContext, program *webgl.Program, c *GameContext) {
+func (cc *CubeRenderer) Render(gl *webgl.RenderingContext, program *webgl.Program, c *controller.GameContext) {
 	animationStale := cc.animationHandler.Tick()
 	if cc.bufferStale || animationStale {
 		cc.sg = GetBuffersForRubiksAnimator(cc.animationHandler, cc.origin)
@@ -227,4 +200,40 @@ func (cc *CubeRenderer) Render(gl *webgl.RenderingContext, program *webgl.Progra
 	gl.Viewport(0, 0, int(c.Width), int(c.Height))
 
 	gl.DrawElements(webgl.TRIANGLES, cc.bufferSet.ICount, webgl.UNSIGNED_SHORT, 0)
+}
+
+func (cc *CubeRenderer) createBuffers(gl *webgl.RenderingContext) {
+	vertices := jsconv.Float32ToJs(cc.sg.VerticesArray)
+	vertexBuffer := gl.CreateBuffer()
+	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
+	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
+	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
+
+	indices := jsconv.UInt16ToJs(cc.sg.IndicesArray)
+	indexBuffer := gl.CreateBuffer()
+	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+	gl.BufferData2(webgl.ELEMENT_ARRAY_BUFFER, webgl.UnionFromJS(indices), webgl.STATIC_DRAW)
+	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, &webgl.Buffer{})
+
+	colours := jsconv.Float32ToJs(cc.sg.ColourArray)
+	colorBuffer := gl.CreateBuffer()
+	gl.BindBuffer(webgl.ARRAY_BUFFER, colorBuffer)
+	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(colours), webgl.STATIC_DRAW)
+	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
+
+	// fmt.Println("made some buffers")
+
+	cc.bufferSet = &BufferSet{
+		Vertices: vertexBuffer,
+		Indices:  indexBuffer,
+		Colours:  colorBuffer,
+		VCount:   cc.sg.VCount,
+		ICount:   cc.sg.ICount,
+		CCount:   cc.sg.CCount,
+	}
+	cc.bufferStale = false
+}
+
+func (cc *CubeRenderer) QueueEvent(face string, reverse bool) {
+	cc.animationHandler.AddEvent(face, reverse)
 }

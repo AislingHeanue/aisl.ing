@@ -1,6 +1,8 @@
-package graphics
+package controller
 
 import (
+	"syscall/js"
+
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/dom"
 	"github.com/gowebapi/webapi/graphics/webgl"
@@ -8,20 +10,11 @@ import (
 
 type RenderFunc func(*webgl.RenderingContext, *webgl.Program, *GameContext)
 
-type BufferSet struct {
-	Vertices *webgl.Buffer
-	Indices  *webgl.Buffer
-	Colours  *webgl.Buffer
-	VCount   int
-	ICount   int
-	CCount   int
-}
-
 type Animator interface {
 	Init(*GameContext)
-	InitListeners(*GameContext)
 	CreateShaders(*webgl.RenderingContext, *GameContext) *webgl.Program
 	Render(*webgl.RenderingContext, *webgl.Program, *GameContext)
+	QueueEvent(string, bool)
 }
 
 type GameContext struct {
@@ -45,4 +38,8 @@ type GameContext struct {
 	AnchorAngleX float32
 	AnchorAngleY float32
 	MouseDown    bool
+}
+
+func Log(v js.Value) {
+	js.Global().Get("console").Call("log", v)
 }

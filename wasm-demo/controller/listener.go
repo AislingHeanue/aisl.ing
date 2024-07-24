@@ -1,4 +1,4 @@
-package graphics
+package controller
 
 import (
 	"strconv"
@@ -8,38 +8,24 @@ import (
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
-type CCListener struct {
-	cc *CubeRenderer
-	c  *GameContext
-}
-
-func (l *CCListener) HandleEvent(e *domcore.Event) {
-	shiftPressed := e.JSValue().Get("shiftKey").Bool()
-	face := strings.ToLower(e.JSValue().Get("key").String())
-	l.cc.animationHandler.AddEvent(face, shiftPressed)
-}
-
-func Log(v js.Value) {
-	js.Global().Get("console").Call("log", v)
-}
-
 func RegisterListeners(c *GameContext) {
-	c.Window.AddEventListener("resize", domcore.NewEventListener(&Listener{c, RESIZE}), nil)
+	c.Window.AddEventListener("resize", domcore.NewEventListener(&CanvasListener{c, RESIZE}), nil)
 
 	res := c.Document.GetElementById("dimension")
 	handleDimension(c, res.JSValue())
-	res.AddEventListener("input", domcore.NewEventListener(&Listener{c, DIMENSION_CHANGED}), nil)
+	res.AddEventListener("input", domcore.NewEventListener(&CanvasListener{c, DIMENSION_CHANGED}), nil)
 
-	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&Listener{c, CLICK}), nil)
-	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&Listener{c, MOUSE_MOVE}), nil)
-	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&Listener{c, MOUSE_UP}), nil)
-	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&Listener{c, MOUSE_UP}), nil)
+	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&CanvasListener{c, CLICK}), nil)
+	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&CanvasListener{c, MOUSE_MOVE}), nil)
+	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&CanvasListener{c, MOUSE_UP}), nil)
+	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&CanvasListener{c, MOUSE_UP}), nil)
 
-	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&Listener{c, TOUCH}), nil)
-	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&Listener{c, TOUCH_MOVE}), nil)
-	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&Listener{c, TOUCH_UP}), nil)
-	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&Listener{c, TOUCH_UP}), nil)
+	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&CanvasListener{c, TOUCH}), nil)
+	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&CanvasListener{c, TOUCH_MOVE}), nil)
+	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&CanvasListener{c, TOUCH_UP}), nil)
+	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&CanvasListener{c, TOUCH_UP}), nil)
 
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{Animator: c.Animator}), nil)
 }
 
 type ListenerKind int
@@ -55,12 +41,12 @@ const (
 	TOUCH_UP
 )
 
-type Listener struct {
+type CanvasListener struct {
 	c    *GameContext
 	kind ListenerKind
 }
 
-func (l *Listener) HandleEvent(e *domcore.Event) {
+func (l *CanvasListener) HandleEvent(e *domcore.Event) {
 	switch l.kind {
 	case CLICK:
 		click(l.c, e)
@@ -141,4 +127,14 @@ func getRelativeTouchPosition(c *GameContext, touch js.Value) (float32, float32)
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
 	return 1.5 * float32(offsetX) / c.Width, 1.5 * float32(offsetY) / c.Height
+}
+
+type CCListener struct {
+	Animator
+}
+
+func (l *CCListener) HandleEvent(e *domcore.Event) {
+	shiftPressed := e.JSValue().Get("shiftKey").Bool()
+	face := strings.ToLower(e.JSValue().Get("key").String())
+	l.QueueEvent(face, shiftPressed)
 }
