@@ -20,16 +20,18 @@ type RubiksEvent struct {
 	t       int
 }
 
-func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) {
+func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) bool {
 	if _, ok := turnMap[Face(face)]; !ok {
 		// face not recognised, do nothing
-		return
+		return false
 	}
 	a.events = append(a.events, RubiksEvent{
 		face:    Face(face),
 		reverse: reverse,
 		t:       0,
 	})
+
+	return true
 }
 
 func (a *RubiksAnimationHandler) Tick() bool {

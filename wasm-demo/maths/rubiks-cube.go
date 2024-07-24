@@ -195,5 +195,4 @@ func (r *RubiksCube) Turn(face Face, reverse bool) {
 	}
 
 	*r = newR
-
 }

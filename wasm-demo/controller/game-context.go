@@ -14,7 +14,8 @@ type Animator interface {
 	Init(*GameContext)
 	CreateShaders(*webgl.RenderingContext, *GameContext) *webgl.Program
 	Render(*webgl.RenderingContext, *webgl.Program, *GameContext)
-	QueueEvent(string, bool)
+	QueueEvent(string, bool) bool
+	Shuffle()
 }
 
 type GameContext struct {

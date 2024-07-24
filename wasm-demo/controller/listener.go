@@ -2,7 +2,6 @@ package controller
 
 import (
 	"strconv"
-	"strings"
 	"syscall/js"
 
 	"github.com/gowebapi/webapi/dom/domcore"
@@ -11,9 +10,11 @@ import (
 func RegisterListeners(c *GameContext) {
 	c.Window.AddEventListener("resize", domcore.NewEventListener(&CanvasListener{c, RESIZE}), nil)
 
-	res := c.Document.GetElementById("dimension")
-	handleDimension(c, res.JSValue())
-	res.AddEventListener("input", domcore.NewEventListener(&CanvasListener{c, DIMENSION_CHANGED}), nil)
+	c.CubeDimension = 3
+	c.Animator.Init(c)
+	// res := c.Document.GetElementById("dimension")
+	// handleDimension(c, res.JSValue())
+	// res.AddEventListener("input", domcore.NewEventListener(&CanvasListener{c, DIMENSION_CHANGED}), nil)
 
 	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&CanvasListener{c, CLICK}), nil)
 	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&CanvasListener{c, MOUSE_MOVE}), nil)
@@ -26,6 +27,7 @@ func RegisterListeners(c *GameContext) {
 	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&CanvasListener{c, TOUCH_UP}), nil)
 
 	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{Animator: c.Animator}), nil)
+	registerButtons(c)
 }
 
 type ListenerKind int
@@ -127,14 +129,4 @@ func getRelativeTouchPosition(c *GameContext, touch js.Value) (float32, float32)
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
 	return 1.5 * float32(offsetX) / c.Width, 1.5 * float32(offsetY) / c.Height
-}
-
-type CCListener struct {
-	Animator
-}
-
-func (l *CCListener) HandleEvent(e *domcore.Event) {
-	shiftPressed := e.JSValue().Get("shiftKey").Bool()
-	face := strings.ToLower(e.JSValue().Get("key").String())
-	l.QueueEvent(face, shiftPressed)
 }
