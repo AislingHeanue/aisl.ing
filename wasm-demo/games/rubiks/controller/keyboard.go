@@ -3,15 +3,18 @@ package controller
 import (
 	"strings"
 
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
 type CCListener struct {
-	Animator
+	ccc *model.CubeCubeContext
 }
 
 func (l *CCListener) HandleEvent(e *domcore.Event) {
+	controller := CubeController{l.ccc}
+
 	shiftPressed := e.JSValue().Get("shiftKey").Bool()
 	face := strings.ToLower(e.JSValue().Get("key").String())
-	l.QueueEvent(face, shiftPressed)
+	controller.QueueEvent(face, shiftPressed)
 }

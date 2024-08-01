@@ -1,30 +1,31 @@
-package graphics
+package view
 
 import (
 	"fmt"
 	"image/color"
 	"math"
-	"math/rand"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
+	cubeController "github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/controller"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 
 type CubeRenderer struct {
-	cubes             maths.RubiksCube
+	cubes             model.RubiksCube
 	totalSide         float32
 	side              float32
 	gap               float32
 	sideWithGap       float32
 	dimension         int
-	origin            *maths.Point
-	perspectiveMatrix *Mat4
+	origin            *model.Point
+	perspectiveMatrix *model.Mat4
 	bufferSet         *BufferSet
 	sg                DrawShape
 	bufferStale       bool
-	animationHandler  *maths.RubiksAnimationHandler
+	// animationHandler  *model.RubiksAnimationHandler
+	*model.CubeCubeContext
 }
 
 type BufferSet struct {
@@ -39,79 +40,87 @@ type BufferSet struct {
 var _ controller.Animator = &CubeRenderer{}
 
 func (cc *CubeRenderer) Init(c *controller.GameContext) {
-	cc.dimension = c.CubeDimension
+	cc.dimension = cc.CubeDimension
 	cc.totalSide = 0.5
 	cc.gap = 0.07
-	cc.side = cc.totalSide / ((1+cc.gap)*float32(c.CubeDimension) - cc.gap)
+	cc.side = cc.totalSide / ((1+cc.gap)*float32(cc.CubeDimension) - cc.gap)
 	cc.sideWithGap = cc.side + cc.gap*cc.side
-	cc.origin = &maths.Point{0, 0, 0}
+	cc.origin = &model.Point{0, 0, 0}
 
-	cc.cubes = maths.NewRubiksCube(c.CubeDimension)
+	cc.cubes = model.NewRubiksCube(cc.CubeDimension)
 	for x := 0; x < cc.dimension; x++ {
 		for y := 0; y < cc.dimension; y++ {
 			for z := 0; z < cc.dimension; z++ {
 				cubeOrigin := cc.getCentre(x, y, z)
 				colours, external := cubeColours(x, y, z, cc.dimension)
 				if external {
-					cc.cubes.Data[x][y][z] = maths.NewCubeWithColours(cubeOrigin, cc.side, colours)
+					cc.cubes.Data[x][y][z] = model.NewCubeWithColours(cubeOrigin, cc.side, colours)
 				}
 			}
 		}
 	}
-	cc.perspectiveMatrix = PerspectiveMatrix(
+	cc.perspectiveMatrix = model.PerspectiveMatrix(
 		math.Pi/3,
 		float32(c.Width/c.Height),
 		-2,
 		6,
 	)
 
-	cc.animationHandler = &maths.RubiksAnimationHandler{
+	cc.AnimationHandler = &model.RubiksAnimationHandler{
 		RubiksCube: &cc.cubes,
-		MaxTicks:   c.TurnFrames,
+		MaxTicks:   cc.TurnFrames,
 	}
 
 	cc.bufferStale = true
+
+	cc.createShaders(c)
 }
 
-func (cc CubeRenderer) getCentre(x, y, z int) maths.Point {
+func (cc CubeRenderer) InitListeners(c *controller.GameContext) {
+	cubeController.InitListeners(c, cc.CubeCubeContext)
+}
+
+func (cc CubeRenderer) getCentre(x, y, z int) model.Point {
 	return cc.origin.
-		Subtract(maths.Point{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
-		Add(maths.Point{cc.sideWithGap * float32(x), cc.sideWithGap * float32(y), cc.sideWithGap * float32(z)}).
-		Add(maths.Point{cc.side / 2, cc.side / 2, cc.side / 2})
+		Subtract(model.Point{cc.totalSide / 2, cc.totalSide / 2, cc.totalSide / 2}).
+		Add(model.Point{cc.sideWithGap * float32(x), cc.sideWithGap * float32(y), cc.sideWithGap * float32(z)}).
+		Add(model.Point{cc.side / 2, cc.side / 2, cc.side / 2})
 }
 
 func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
-	colours := []color.RGBA{maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK, maths.BLACK}
+	colours := []color.RGBA{model.BLACK, model.BLACK, model.BLACK, model.BLACK, model.BLACK, model.BLACK}
 	external := false
 	if y == dimension-1 {
 		external = true
-		colours[0] = maths.DefaultColours[0]
+		colours[0] = model.DefaultColours[0]
 	}
 	if z == dimension-1 {
 		external = true
-		colours[1] = maths.DefaultColours[1]
+		colours[1] = model.DefaultColours[1]
 	}
 	if x == 0 {
 		external = true
-		colours[2] = maths.DefaultColours[2]
+		colours[2] = model.DefaultColours[2]
 	}
 	if z == 0 {
 		external = true
-		colours[3] = maths.DefaultColours[3]
+		colours[3] = model.DefaultColours[3]
 	}
 	if x == dimension-1 {
 		external = true
-		colours[4] = maths.DefaultColours[4]
+		colours[4] = model.DefaultColours[4]
 	}
 	if y == 0 {
 		external = true
-		colours[5] = maths.DefaultColours[5]
+		colours[5] = model.DefaultColours[5]
 	}
 
 	return colours, external
 }
 
-func (cc *CubeRenderer) CreateShaders(gl *webgl.RenderingContext, c *controller.GameContext) *webgl.Program {
+func (cc *CubeRenderer) createShaders(c *controller.GameContext) {
+	gl := c.GL
+
 	vsSource := `
 	attribute vec3 aVertexPosition;
 	attribute vec4 aVertexColour;
@@ -157,13 +166,15 @@ func (cc *CubeRenderer) CreateShaders(gl *webgl.RenderingContext, c *controller.
 	fmt.Println("made some shaders")
 	gl.UseProgram(program)
 
-	return program
+	c.Program = program
 }
 
-func (cc *CubeRenderer) Render(gl *webgl.RenderingContext, program *webgl.Program, c *controller.GameContext) {
-	animationStale := cc.animationHandler.Tick()
+func (cc *CubeRenderer) Render(c *controller.GameContext) {
+	gl := c.GL
+	program := c.Program
+	animationStale := cc.AnimationHandler.Tick()
 	if cc.bufferStale || animationStale {
-		cc.sg = GetBuffersForRubiksAnimator(cc.animationHandler, cc.origin)
+		cc.sg = GetBuffersForRubiksAnimator(cc.AnimationHandler, cc.origin)
 		cc.createBuffers(gl)
 	}
 
@@ -185,11 +196,11 @@ func (cc *CubeRenderer) Render(gl *webgl.RenderingContext, program *webgl.Progra
 	gl.VertexAttribPointer(uint(vColour), 4, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vColour))
 
-	matrix := I4().
-		Rotate(math.Pi/4, maths.Y).
-		Rotate(float32(c.AngleY), maths.Y).
-		Rotate(float32(c.AngleX), maths.X).
-		Rotate(-math.Pi/5, maths.X)
+	matrix := model.I4().
+		Rotate(math.Pi/4, model.Y).
+		Rotate(float32(cc.AngleY), model.Y).
+		Rotate(float32(cc.AngleX), model.X).
+		Rotate(-math.Pi/5, model.X)
 	matrixLoc := gl.GetUniformLocation(program, "modelView")
 	gl.UniformMatrix4fv(matrixLoc, false, matrix.ToJS())
 
@@ -233,33 +244,4 @@ func (cc *CubeRenderer) createBuffers(gl *webgl.RenderingContext) {
 		CCount:   cc.sg.CCount,
 	}
 	cc.bufferStale = false
-}
-
-func (cc *CubeRenderer) QueueEvent(face string, reverse bool) bool {
-	return cc.animationHandler.AddEvent(face, reverse)
-}
-
-func (cc *CubeRenderer) Shuffle() {
-	fmt.Println("shuffling!")
-	previousFace := ""
-	face := ""
-	faces := []string{"u", "d", "b", "f", "l", "r"}
-	turnDirections := []string{"clockwise", "anticlockwise", "double"}
-	for range 20 {
-		for face == previousFace {
-			face = faces[rand.Intn(len(faces))]
-		}
-		previousFace = face
-		direction := turnDirections[rand.Intn(len(turnDirections))]
-		switch direction {
-		case "clockwise":
-			cc.QueueEvent(face, false)
-		case "anticlockwise":
-			cc.QueueEvent(face, true)
-		case "double":
-			cc.QueueEvent(face, false)
-			cc.QueueEvent(face, false)
-		}
-	}
-
 }

@@ -1,11 +1,9 @@
-package graphics
+package view
 
-import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/maths"
-)
+import "github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 
 type DrawShape struct {
-	Points        []*maths.Point
+	Points        []*model.Point
 	VerticesArray []float32
 	IndicesArray  []uint16
 	ColourArray   []float32
@@ -38,7 +36,7 @@ func GroupBuffers(s []DrawShape) DrawShape {
 	return out
 }
 
-func GetBuffers(c maths.Cube) DrawShape {
+func GetBuffers(c model.Cube) DrawShape {
 	var out DrawShape
 
 	out.VerticesArray = make([]float32, 72)
@@ -78,7 +76,7 @@ func GetBuffers(c maths.Cube) DrawShape {
 	return out
 }
 
-func GetBuffersForRubiksAnimator(a *maths.RubiksAnimationHandler, origin *maths.Point) DrawShape {
+func GetBuffersForRubiksAnimator(a *model.RubiksAnimationHandler, origin *model.Point) DrawShape {
 	a.CopyRubiksCube = a.RubiksCube.Copy()
 	for _, event := range a.EventsWhichNeedToBeRotated {
 		a.DoEvent(event, origin)
@@ -86,7 +84,7 @@ func GetBuffersForRubiksAnimator(a *maths.RubiksAnimationHandler, origin *maths.
 	return GroupBuffersForRubiksCube(a.CopyRubiksCube)
 }
 
-func GroupBuffersForRubiksCube(r maths.RubiksCube) DrawShape {
+func GroupBuffersForRubiksCube(r model.RubiksCube) DrawShape {
 	d := []DrawShape{}
 	for _, v := range r.Flatten() {
 		d = append(d, GetBuffers(v))

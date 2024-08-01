@@ -33,22 +33,21 @@ func InitCanvas(c *GameContext) {
 
 	c.CvsElement.SetAttribute("height", fmt.Sprint(c.Height))
 	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Width))
-}
 
-func StartAnimation(c *GameContext) {
-	c.Animator.Init(c)
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
 	glWrapper := cvsHTML.GetContext("webgl", nil)
-	gl := webgl.RenderingContextFromWrapper(glWrapper)
-	program := c.Animator.CreateShaders(gl, c)
-	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(gl, program, c, c.Animator.Render)))
+	c.GL = webgl.RenderingContextFromWrapper(glWrapper)
+
+	c.Animator.Init(c)
+
+	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(c)))
 }
 
-func wrapAnimator(gl *webgl.RenderingContext, p *webgl.Program, c *GameContext, f RenderFunc) func(float64) {
+func wrapAnimator(c *GameContext) func(float64) {
 	return func(time float64) {
 		c.T = float32(time) / 1000 // milliseconds to seconds
-		f(gl, p, c)
-		c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(gl, p, c, c.Animator.Render)))
+		c.Animator.Render(c)
+		c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(c)))
 	}
 
 }
