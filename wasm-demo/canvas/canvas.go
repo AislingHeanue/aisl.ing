@@ -5,15 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	"github.com/gowebapi/webapi/html/canvas"
 )
 
 func InitCanvas(c *GameContext) {
-	c.Window = webapi.GetWindow()
-	c.Document = c.Window.Document()
-	c.CvsElement = c.Document.GetElementById("wasm-canvas")
 	style := c.Window.GetComputedStyle(c.CvsElement, nil)
 
 	pixelRatio := c.Window.DevicePixelRatio()

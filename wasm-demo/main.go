@@ -3,19 +3,25 @@ package main
 import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
+	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/html/htmlcommon"
 )
 
 var done chan struct{}
 
 func main() {
-	c := canvas.GameContext{}
-
-	c.Animator = rubiks.New(rubiks.CubeCubeOptions{
-		TurnFrames: 12,
-		Dimension:  3,
-	})
-	c.ResolutionScale = 1
+	c := canvas.GameContext{
+		Window:          webapi.GetWindow(),
+		Document:        webapi.GetWindow().Document(),
+		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+		ResolutionScale: 1,
+		Animator: rubiks.New(
+			rubiks.CubeCubeOptions{
+				TurnFrames: 12,
+				Dimension:  3,
+			},
+		),
+	}
 
 	canvas.InitCanvas(&c)
 	c.Animator.Init(&c)
