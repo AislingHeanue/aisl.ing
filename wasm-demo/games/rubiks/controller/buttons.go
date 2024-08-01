@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
@@ -12,7 +12,7 @@ var buttonIDs = []string{
 	"e", "m", "s", "z", "reset-camera",
 }
 
-func registerButtons(c *controller.GameContext, ccc *model.CubeCubeContext) {
+func registerButtons(c *canvas.GameContext, ccc *model.CubeCubeContext) {
 	for _, id := range buttonIDs {
 		c.Document.GetElementById(id).AddEventListener("click", domcore.NewEventListener(&ButtonListener{id, c, ccc}), nil)
 	}
@@ -20,7 +20,7 @@ func registerButtons(c *controller.GameContext, ccc *model.CubeCubeContext) {
 
 type ButtonListener struct {
 	id  string
-	c   *controller.GameContext
+	c   *canvas.GameContext
 	ccc *model.CubeCubeContext
 }
 

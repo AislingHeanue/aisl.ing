@@ -1,4 +1,4 @@
-package controller
+package canvas
 
 import (
 	"github.com/gowebapi/webapi/dom/domcore"
@@ -6,8 +6,6 @@ import (
 
 func RegisterListeners(c *GameContext) {
 	c.Window.AddEventListener("resize", domcore.NewEventListener(&CanvasListener{c, RESIZE}), nil)
-	// c.Animator.Init(c)
-	c.Animator.InitListeners(c)
 }
 
 type ListenerKind int

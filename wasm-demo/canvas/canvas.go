@@ -1,4 +1,4 @@
-package controller
+package canvas
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	"github.com/gowebapi/webapi/html/canvas"
-	"github.com/gowebapi/webapi/html/htmlcommon"
 )
 
 func InitCanvas(c *GameContext) {
@@ -37,17 +36,4 @@ func InitCanvas(c *GameContext) {
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
 	glWrapper := cvsHTML.GetContext("webgl", nil)
 	c.GL = webgl.RenderingContextFromWrapper(glWrapper)
-
-	c.Animator.Init(c)
-
-	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(c)))
-}
-
-func wrapAnimator(c *GameContext) func(float64) {
-	return func(time float64) {
-		c.T = float32(time) / 1000 // milliseconds to seconds
-		c.Animator.Render(c)
-		c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(c)))
-	}
-
 }

@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/controller"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	cubeController "github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/controller"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/core/jsconv"
@@ -38,9 +38,9 @@ type BufferSet struct {
 	CCount   int
 }
 
-var _ controller.Animator = &CubeRenderer{}
+var _ canvas.Animator = &CubeRenderer{}
 
-func (cc *CubeRenderer) Init(c *controller.GameContext) {
+func (cc *CubeRenderer) Init(c *canvas.GameContext) {
 	cc.dimension = cc.CubeDimension
 	cc.totalSide = 0.5
 	cc.gap = 0.07
@@ -74,10 +74,12 @@ func (cc *CubeRenderer) Init(c *controller.GameContext) {
 
 	cc.bufferStale = true
 
-	cc.createShaders(c)
+	if cc.program == nil {
+		cc.createShaders(c)
+	}
 }
 
-func (cc CubeRenderer) InitListeners(c *controller.GameContext) {
+func (cc CubeRenderer) InitListeners(c *canvas.GameContext) {
 	cubeController.InitListeners(c, cc.CubeCubeContext)
 }
 
@@ -119,7 +121,7 @@ func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
 	return colours, external
 }
 
-func (cc *CubeRenderer) createShaders(c *controller.GameContext) {
+func (cc *CubeRenderer) createShaders(c *canvas.GameContext) {
 	gl := c.GL
 
 	vsSource := `
@@ -170,7 +172,7 @@ func (cc *CubeRenderer) createShaders(c *controller.GameContext) {
 	cc.program = program
 }
 
-func (cc *CubeRenderer) Render(c *controller.GameContext) {
+func (cc *CubeRenderer) Render(c *canvas.GameContext) {
 	gl := c.GL
 	program := cc.program
 	animationStale := cc.AnimationHandler.Tick()

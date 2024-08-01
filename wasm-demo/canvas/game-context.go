@@ -1,4 +1,4 @@
-package controller
+package canvas
 
 import (
 	"syscall/js"
