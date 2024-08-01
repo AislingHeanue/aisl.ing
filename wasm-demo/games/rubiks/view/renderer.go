@@ -24,6 +24,7 @@ type CubeRenderer struct {
 	bufferSet         *BufferSet
 	sg                DrawShape
 	bufferStale       bool
+	program           *webgl.Program
 	// animationHandler  *model.RubiksAnimationHandler
 	*model.CubeCubeContext
 }
@@ -166,12 +167,12 @@ func (cc *CubeRenderer) createShaders(c *controller.GameContext) {
 	fmt.Println("made some shaders")
 	gl.UseProgram(program)
 
-	c.Program = program
+	cc.program = program
 }
 
 func (cc *CubeRenderer) Render(c *controller.GameContext) {
 	gl := c.GL
-	program := c.Program
+	program := cc.program
 	animationStale := cc.AnimationHandler.Tick()
 	if cc.bufferStale || animationStale {
 		cc.sg = GetBuffersForRubiksAnimator(cc.AnimationHandler, cc.origin)

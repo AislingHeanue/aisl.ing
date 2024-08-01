@@ -26,7 +26,6 @@ type GameContext struct {
 	Width           float32
 	T               float32
 	GL              *webgl.RenderingContext
-	Program         *webgl.Program
 }
 
 func Log(v js.Value) {
