@@ -24,6 +24,7 @@ type GameContext struct {
 	ResolutionScale float32
 	Height          float32
 	Width           float32
+	FixedSize       bool
 	T               float32
 	GL              *webgl.RenderingContext
 }

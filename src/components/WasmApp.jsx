@@ -238,7 +238,7 @@ const WasmApp = () => {
             <div className="flex flex-col max-h-full aspect-square lg:pt-[5rem] lg:pr-[11rem] lg:pb-[6rem]">
               <canvas
                 id="wasm-canvas"
-                className="w-100 flex-grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600"
+                className="w-100 flex-grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600 rendering-pixelated"
               />
             </div>
           </div>

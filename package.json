@@ -24,6 +24,7 @@
     "nodemon": "^3.1.4",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
+    "tailwindcss-image-rendering": "^1.0.2",
     "vite": "^5.2.12"
   }
 }

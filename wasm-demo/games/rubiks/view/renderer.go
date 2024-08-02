@@ -212,8 +212,6 @@ func (cc *CubeRenderer) Render(c *canvas.GameContext) {
 
 	gl.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, cc.bufferSet.Indices)
 
-	gl.Viewport(0, 0, int(c.Width), int(c.Height))
-
 	gl.DrawElements(webgl.TRIANGLES, cc.bufferSet.ICount, webgl.UNSIGNED_SHORT, 0)
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/html/htmlcommon"
@@ -10,7 +11,7 @@ import (
 var done chan struct{}
 
 func main() {
-	c := canvas.GameContext{
+	c1 := canvas.GameContext{
 		Window:          webapi.GetWindow(),
 		Document:        webapi.GetWindow().Document(),
 		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
@@ -21,7 +22,26 @@ func main() {
 				Dimension:  3,
 			},
 		),
+		// Animator:  &life.LifeGame{},
+		// Height:    10,
+		// Width:     10,
+		// FixedSize: true,
 	}
+
+	c2 := canvas.GameContext{
+		Window:          webapi.GetWindow(),
+		Document:        webapi.GetWindow().Document(),
+		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+		ResolutionScale: 1,
+		Animator:        &life.LifeGame{},
+		Height:          10,
+		Width:           10,
+		FixedSize:       true,
+	}
+
+	c := c1
+	_ = c1
+	_ = c2
 
 	canvas.InitCanvas(&c)
 	c.Animator.Init(&c)
