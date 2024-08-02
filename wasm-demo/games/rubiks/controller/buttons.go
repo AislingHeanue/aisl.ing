@@ -10,6 +10,7 @@ var buttonIDs = []string{
 	"u", "r", "f", "x", "shuffle",
 	"d", "l", "b", "y", "reset",
 	"e", "m", "s", "z", "reset-camera",
+	"kilt", "superflip", "cubecube", "checkerboard", "snake",
 }
 
 func registerButtons(c *canvas.GameContext, ccc *model.CubeCubeContext) {
@@ -36,8 +37,27 @@ func (l *ButtonListener) HandleEvent(e *domcore.Event) {
 	case "reset-camera":
 		l.ccc.AngleX = 0
 		l.ccc.AngleY = 0
+	case "kilt":
+		control := CubeController{l.ccc}
+		control.QueueEvent("u'", "r2", "l2", "f2", "b2", "u'", "r", "l", "f", "b'", "u", "f2", "d2", "r2", "l2", "f2", "u2", "f2", "u'", "f2")
+	case "superflip":
+		control := CubeController{l.ccc}
+		control.QueueEvent("u", "r2", "f", "b", "r", "b2", "r", "u2", "l", "b2", "r", "u'", "d'", "r2", "f", "r'", "l", "b2", "u2", "f2")
+	case "cubecube":
+		control := CubeController{l.ccc}
+		control.QueueEvent("u'", "l'", "u'", "f'", "r2", "b'", "r", "f", "u", "b2", "u", "b'", "l", "u'", "f", "u", "r", "f'")
+	case "checkerboard":
+		control := CubeController{l.ccc}
+		control.QueueEvent("m2", "e2", "s2")
+	case "snake":
+		control := CubeController{l.ccc}
+		control.QueueEvent("l", "u", "b'", "u'", "r", "l'", "b", "r'", "f", "b'", "d", "r", "d'", "f'")
 	default:
 		control := CubeController{l.ccc}
-		control.QueueEvent(face, shiftPressed)
+		prime := ""
+		if shiftPressed {
+			prime = "'"
+		}
+		control.QueueEvent(Turn(face + prime))
 	}
 }

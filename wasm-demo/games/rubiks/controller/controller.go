@@ -11,8 +11,22 @@ type CubeController struct {
 	ccc *model.CubeCubeContext
 }
 
-func (cc *CubeController) QueueEvent(face string, reverse bool) bool {
-	return cc.ccc.AnimationHandler.AddEvent(face, reverse)
+type Turn string
+
+func (cc *CubeController) QueueEvent(turns ...Turn) {
+	for _, t := range turns {
+		if len(t) == 2 {
+			switch string(t[1]) {
+			case "'":
+				cc.ccc.AnimationHandler.AddEvent(string(t[0]), true)
+			case "2":
+				cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
+				cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
+			}
+		} else if len(t) == 1 {
+			cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
+		}
+	}
 }
 
 func (cc *CubeController) Shuffle() {
@@ -29,12 +43,12 @@ func (cc *CubeController) Shuffle() {
 		direction := turnDirections[rand.Intn(len(turnDirections))]
 		switch direction {
 		case "clockwise":
-			cc.QueueEvent(face, false)
+			cc.QueueEvent(Turn(face))
 		case "anticlockwise":
-			cc.QueueEvent(face, true)
+			cc.QueueEvent(Turn(face + "'"))
 		case "double":
-			cc.QueueEvent(face, false)
-			cc.QueueEvent(face, false)
+			cc.QueueEvent(Turn(face))
+			cc.QueueEvent(Turn(face))
 		}
 	}
 

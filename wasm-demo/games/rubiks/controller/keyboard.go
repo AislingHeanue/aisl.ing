@@ -15,6 +15,10 @@ func (l *CCListener) HandleEvent(e *domcore.Event) {
 	controller := CubeController{l.ccc}
 
 	shiftPressed := e.JSValue().Get("shiftKey").Bool()
+	prime := ""
+	if shiftPressed {
+		prime = "'"
+	}
 	face := strings.ToLower(e.JSValue().Get("key").String())
-	controller.QueueEvent(face, shiftPressed)
+	controller.QueueEvent(Turn(face + prime))
 }

@@ -66,7 +66,8 @@ const WasmApp = () => {
             <p>
               Drag on the canvas to rotate the cube, and use the buttons or
               keyboard keys to make a move. Hold Shift to make anti-clockwise
-              moves.
+              moves. The bottom row of buttons preforms some algorithms which
+              look best when the cube is in a solved position.
             </p>
             <div className="grid grid-cols-5 w-5/6 h-full mx-auto gap-1">
               <div className="col-span-1">
@@ -84,6 +85,14 @@ const WasmApp = () => {
                   <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="e" className="w-full h-full hover:bg-stone-400">
                       E{shiftHeld ? "'" : ""}
+                    </button>
+                  </div>
+                  <div className="w-full h-3/4 mr-1 mb-1 mt-5 bg-stone-300 dark:bg-stone-500">
+                    <button
+                      id="kilt"
+                      className="w-full h-full hover:bg-stone-400"
+                    >
+                      Kilt
                     </button>
                   </div>
                 </div>
@@ -105,6 +114,14 @@ const WasmApp = () => {
                       M{shiftHeld ? "'" : ""}
                     </button>
                   </div>
+                  <div className="w-full h-3/4 mr-1 mb-1 mt-5 bg-stone-300 dark:bg-stone-500">
+                    <button
+                      id="superflip"
+                      className="w-full h-full hover:bg-stone-400"
+                    >
+                      Superflip
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="col-span-1">
@@ -124,6 +141,14 @@ const WasmApp = () => {
                       S{shiftHeld ? "'" : ""}
                     </button>
                   </div>
+                  <div className="w-full h-3/4 mr-1 mb-1 mt-5 bg-stone-300 dark:bg-stone-500">
+                    <button
+                      id="cubecube"
+                      className="w-full h-full hover:bg-stone-400"
+                    >
+                      Cube in a Cube
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="col-span-1">
@@ -141,6 +166,14 @@ const WasmApp = () => {
                   <div className="w-full h-3/4 mr-1 mb-1 bg-stone-300 dark:bg-stone-500">
                     <button id="z" className="w-full h-full hover:bg-stone-400">
                       z{shiftHeld ? "'" : ""}
+                    </button>
+                  </div>
+                  <div className="w-full h-3/4 mr-1 mb-1 mt-5 bg-stone-300 dark:bg-stone-500">
+                    <button
+                      id="checkerboard"
+                      className="w-full h-full hover:bg-stone-400"
+                    >
+                      Checker Board
                     </button>
                   </div>
                 </div>
@@ -169,6 +202,14 @@ const WasmApp = () => {
                       className="w-full h-full hover:bg-stone-400"
                     >
                       Reset Camera
+                    </button>
+                  </div>
+                  <div className="w-full h-3/4 mr-1 mb-1 mt-5 bg-stone-300 dark:bg-stone-500">
+                    <button
+                      id="snake"
+                      className="w-full h-full hover:bg-stone-400"
+                    >
+                      Snake
                     </button>
                   </div>
                 </div>
