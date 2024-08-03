@@ -119,7 +119,7 @@ const WasmApp = () => {
                       id="superflip"
                       className="w-full h-full hover:bg-stone-400"
                     >
-                      Superflip
+                      Super Flip
                     </button>
                   </div>
                 </div>
