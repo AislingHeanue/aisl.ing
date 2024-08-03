@@ -22,10 +22,6 @@ func main() {
 				Dimension:  3,
 			},
 		),
-		// Animator:  &life.LifeGame{},
-		// Height:    10,
-		// Width:     10,
-		// FixedSize: true,
 	}
 
 	c2 := canvas.GameContext{
@@ -34,8 +30,8 @@ func main() {
 		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 		ResolutionScale: 1,
 		Animator:        &life.LifeGame{},
-		Height:          10,
-		Width:           10,
+		Height:          200,
+		Width:           200,
 		FixedSize:       true,
 	}
 
