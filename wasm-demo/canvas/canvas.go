@@ -30,7 +30,7 @@ func InitCanvas(c *GameContext) {
 	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Width))
 
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
-	glWrapper := cvsHTML.GetContext("webgl", map[string]any{"alpha": false})
+	glWrapper := cvsHTML.GetContext("webgl", map[string]any{"alpha": true})
 	c.GL = webgl.RenderingContextFromWrapper(glWrapper)
 
 	c.GL.Viewport(0, 0, int(c.Width), int(c.Height))

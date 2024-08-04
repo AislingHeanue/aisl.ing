@@ -93,84 +93,6 @@ func (lg *LifeGame) createShaders(c *canvas.GameContext) {
 	lg.bufferIndex = 0
 }
 
-func (lg *LifeGame) Render(c *canvas.GameContext) {
-	gl := c.GL
-	program := lg.program
-	if lg.bufferStale {
-		lg.createBuffers(c)
-	}
-	lg.t++
-	if math.Mod(float64(lg.t), 1) != 0 {
-		return
-	}
-	// fmt.Println("render")
-	// gl.ActiveTexture(webgl.TEXTURE0)
-	gl.ClearColor(0.0, 0.0, 1.0, 1.0)
-	gl.ActiveTexture(webgl.TEXTURE0)
-
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
-	vPosition := gl.GetAttribLocation(program, "a_position")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(vPosition))
-
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
-	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(tPosition))
-
-	gl.UseProgram(lg.program)
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.frameBuffer)
-
-	decayLoc := gl.GetUniformLocation(lg.program, "u_decay")
-	gl.Uniform1f(decayLoc, 0.1)
-
-	initialDecayLoc := gl.GetUniformLocation(lg.program, "u_initial_decay")
-	gl.Uniform1f(initialDecayLoc, 0.3)
-
-	deadColourLoc := gl.GetUniformLocation(lg.program, "u_new_dead_colour")
-	gl.Uniform3f(deadColourLoc, 0, 1, 0)
-
-	gl.BindTexture(webgl.TEXTURE_2D, lg.textureNotInUse)
-	samplerLocation := gl.GetUniformLocation(lg.program, "u_sampler")
-	gl.Uniform1i(samplerLocation, 0)
-
-	sizeLoc := gl.GetUniformLocation(lg.program, "u_size")
-	gl.Uniform2f(sizeLoc, c.Width, c.Height)
-
-	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
-
-	// THE BLITTING STUFF
-	//
-	gl.UseProgram(lg.displayProgram)
-	program = lg.displayProgram
-
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
-	tPosition = gl.GetAttribLocation(program, "a_tex_coord")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(tPosition))
-
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
-	vPosition = gl.GetAttribLocation(program, "a_position")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(vPosition))
-	gl.BindTexture(webgl.TEXTURE_2D, lg.texture)
-
-	samplerLocation = gl.GetUniformLocation(program, "u_sampler")
-	gl.Uniform1i(samplerLocation, 0)
-
-	gl.Viewport(0, 0, int(c.Width), int(c.Height))
-	gl.Clear(webgl.COLOR_BUFFER_BIT)
-	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
-
-	lg.frameBuffer, lg.frameBufferNotInUse = lg.frameBufferNotInUse, lg.frameBuffer
-	lg.texture, lg.textureNotInUse = lg.textureNotInUse, lg.texture
-}
-
 func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	gl := c.GL
 	vertexArray := []float32{
@@ -239,7 +161,127 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	lg.bufferStale = false
 }
 
+func (lg *LifeGame) Render(c *canvas.GameContext) {
+	gl := c.GL
+	program := lg.program
+	if lg.bufferStale {
+		lg.createBuffers(c)
+	}
+	lg.t++
+	if math.Mod(float64(lg.t), 1) != 0 {
+		return
+	}
+
+	if math.Mod(float64(lg.t), 60) == 30 {
+		pixels := lg.getPixelsFromTexture(c)
+		// pixels[0] = 255
+		// pixels[1] = 255
+		// pixels[2] = 255
+		// pixels[3] = 255
+		lg.setPixelsInTexture(c, pixels)
+	}
+
+	gl.ClearColor(0.0, 0.0, 1.0, 1.0)
+	// gl.ActiveTexture(webgl.TEXTURE0)
+
+	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
+	vPosition := gl.GetAttribLocation(program, "a_position")
+	// point the program to the vertex buffer object we've bound
+	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
+	gl.EnableVertexAttribArray(uint(vPosition))
+
+	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
+	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
+	// point the program to the vertex buffer object we've bound
+	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
+	gl.EnableVertexAttribArray(uint(tPosition))
+
+	gl.UseProgram(lg.program)
+	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.frameBuffer)
+
+	decayLoc := gl.GetUniformLocation(lg.program, "u_decay")
+	gl.Uniform1f(decayLoc, 0.1)
+
+	initialDecayLoc := gl.GetUniformLocation(lg.program, "u_initial_decay")
+	gl.Uniform1f(initialDecayLoc, 0.3)
+
+	deadColourLoc := gl.GetUniformLocation(lg.program, "u_new_dead_colour")
+	gl.Uniform3f(deadColourLoc, 0, 1, 0)
+
+	gl.BindTexture(webgl.TEXTURE_2D, lg.textureNotInUse)
+	samplerLocation := gl.GetUniformLocation(lg.program, "u_sampler")
+	gl.Uniform1i(samplerLocation, 0)
+
+	sizeLoc := gl.GetUniformLocation(lg.program, "u_size")
+	gl.Uniform2f(sizeLoc, c.Width, c.Height)
+
+	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
+	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+
+	// THE BLITTING STUFF
+	//
+	gl.UseProgram(lg.displayProgram)
+	program = lg.displayProgram
+
+	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
+	tPosition = gl.GetAttribLocation(program, "a_tex_coord")
+	// point the program to the vertex buffer object we've bound
+	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
+	gl.EnableVertexAttribArray(uint(tPosition))
+
+	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
+	vPosition = gl.GetAttribLocation(program, "a_position")
+	// point the program to the vertex buffer object we've bound
+	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
+	gl.EnableVertexAttribArray(uint(vPosition))
+
+	gl.BindTexture(webgl.TEXTURE_2D, lg.texture)
+	samplerLocation = gl.GetUniformLocation(program, "u_sampler")
+	gl.Uniform1i(samplerLocation, 0)
+
+	gl.Viewport(0, 0, int(c.Width), int(c.Height))
+	gl.Clear(webgl.COLOR_BUFFER_BIT)
+	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
+
+	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+	lg.frameBuffer, lg.frameBufferNotInUse = lg.frameBufferNotInUse, lg.frameBuffer
+	lg.texture, lg.textureNotInUse = lg.textureNotInUse, lg.texture
+}
+
+func (lg *LifeGame) getPixelsFromTexture(c *canvas.GameContext) []uint8 {
+	gl := c.GL
+	gl.BindTexture(webgl.TEXTURE_2D, lg.texture)
+	union := webgl.Union{
+		Value: jsconv.UInt8ToJs(make([]uint8, int(c.Height*c.Width*4))),
+	}
+	gl.ReadPixels(0, 0, int(c.Width), int(c.Height), webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	// fmt.Println(union.Value.Type().String())
+	if lg.t < 60 {
+		canvas.Log(union.Value)
+	}
+	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+
+	return jsconv.JsToUInt8(union.Value)
+}
+
+func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in []uint8) {
+	gl := c.GL
+	gl.BindTexture(webgl.TEXTURE_2D, lg.textureNotInUse)
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), int(c.Width), int(c.Height), 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(in)))
+	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+}
+
 func setupPixelArray(width int, height int) []uint8 {
+	if width == 5 && height == 5 {
+		return []uint8{
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		}
+	}
+
 	on := []uint8{255, 255, 255, 255}
 	off := []uint8{0, 0, 0, 0}
 	out := make([]uint8, 4*height*width)

@@ -30,8 +30,8 @@ func main() {
 		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 		ResolutionScale: 1,
 		Animator:        &life.LifeGame{},
-		Height:          200,
-		Width:           200,
+		Height:          5,
+		Width:           5,
 		FixedSize:       true,
 	}
 
