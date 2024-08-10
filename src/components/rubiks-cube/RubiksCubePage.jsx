@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import ThemeSwitcher from "../components/ThemeSwitcher";
-import WasmApp from "../components/WasmApp";
-import Footer from "../components/Footer";
+import ThemeSwitcher from "../common/ThemeSwitcher";
+import RubiksCube from "./RubiksCube";
 
-const Wasm = () => {
+const RubiksCubePage = () => {
   const [theme, setTheme] = useState("dark");
   useEffect(() => {
     if (theme === "dark") {
@@ -18,10 +17,10 @@ const Wasm = () => {
       <div className="bg-white dark:bg-stone-900 dark:text-stone-300 text-stone-900 min-h-screen font-inter lg:justify-center lg:flex">
         <script src="../public/wasm_exec.js"></script>
         <ThemeSwitcher theme={theme} setTheme={setTheme} />
-        <WasmApp theme={theme} />
+        <RubiksCube theme={theme} />
       </div>
     </>
   );
 };
 
-export default Wasm;
+export default RubiksCubePage;

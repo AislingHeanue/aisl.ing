@@ -12,7 +12,7 @@ export default [
         title: "Rubik's Cube Demo",
         imgURL: "assets/Go Rubik's Cube.png",
         stack: ["Go","Wasm","WebGL"],
-        link: "/wasm/",
+        link: "/rubiks-cube/",
         internal:true
     },
     {

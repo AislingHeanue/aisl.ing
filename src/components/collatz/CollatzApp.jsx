@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import View from "./View";
-import Title from "./Title";
-import Footer from "./Footer";
+import Title from "../common/Title";
 
 function Collatz({ theme }) {
   const [r, setR] = useState(2.5);

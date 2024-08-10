@@ -1,45 +1,17 @@
 import { useState, useEffect } from "react";
-import Title from "./Title";
-import Footer from "./Footer";
+import Title from "../common/Title";
+import Footer from "../common/Footer";
+import WasmCanvas from "../common/WasmCanvas";
 
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
-const WasmApp = () => {
+const RubiksCube = () => {
   // const [dimension, setDimension] = useState(3);
 
   const [shiftHeld, setShiftHeld] = useState(false);
 
   addEventListener("keydown", (e) => e.key == "Shift" && setShiftHeld(true));
   addEventListener("keyup", (e) => e.key == "Shift" && setShiftHeld(false));
-
-  let wasmLoaded = false;
-
-  useEffect(() => {
-    if (!wasmLoaded) {
-      wasmLoaded = true;
-      const loadWasm = async () => {
-        // Load wasm_exec.js dynamically
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "../../wasm_exec.js";
-          script.onload = resolve;
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
-
-        const go = new Go();
-        const response = await fetch("/demo.wasm");
-        console.log(response);
-        const buffer = await response.arrayBuffer();
-        const { instance } = await WebAssembly.instantiate(
-          buffer,
-          go.importObject
-        );
-        go.run(instance);
-      };
-      loadWasm();
-    }
-  }, []);
 
   return (
     <>
@@ -235,12 +207,7 @@ const WasmApp = () => {
               </div>
             </div> */}
           <div className="lg:col-span-2 lg:max-h-screen">
-            <div className="flex flex-col max-h-full aspect-square lg:pt-[5rem] lg:pr-[11rem] lg:pb-[6rem]">
-              <canvas
-                id="wasm-canvas"
-                className="w-100 flex-grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600 rendering-pixelated"
-              />
-            </div>
+            <WasmCanvas />
           </div>
         </div>
         <div className="lg:absolute lg:bottom-0 ">
@@ -250,4 +217,4 @@ const WasmApp = () => {
     </>
   );
 };
-export default WasmApp;
+export default RubiksCube;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import ThemeSwitcher from "../components/ThemeSwitcher.jsx";
-import CollatzApp from "../components/CollatzApp";
+import ThemeSwitcher from "../common/ThemeSwitcher.jsx";
+import CollatzApp from "./CollatzApp.jsx";
 
-const Collatz = () => {
+const CollatzPage = () => {
   const [theme, setTheme] = useState("dark");
   useEffect(() => {
     if (theme === "dark") {
@@ -23,4 +23,4 @@ const Collatz = () => {
   );
 };
 
-export default Collatz;
+export default CollatzPage;

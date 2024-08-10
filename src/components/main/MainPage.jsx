@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import Intro from "../components/Intro";
-import Timeline from "../components/Timeline";
-import Portfolio from "../components/Portfolio";
-import Footer from "../components/Footer";
-import ThemeSwitcher from "../components/ThemeSwitcher.jsx";
+import Intro from "./Intro.jsx";
+import Timeline from "./Timeline.jsx";
+import Portfolio from "./Portfolio.jsx";
+import Footer from "../common/Footer.jsx";
+import ThemeSwitcher from "../common/ThemeSwitcher.jsx";
 
-const Main = () => {
+const MainPage = () => {
   const [theme, setTheme] = useState("dark");
   useEffect(() => {
     if (theme === "dark") {
@@ -30,4 +30,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default MainPage;
