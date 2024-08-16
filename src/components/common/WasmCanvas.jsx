@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import Title from "../common/Title";
-import Footer from "../common/Footer";
 
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
-const WasmCanvas = () => {
+const WasmCanvas = ({ game }) => {
   // const [dimension, setDimension] = useState(3);
   let wasmLoaded = false;
 
@@ -29,6 +27,7 @@ const WasmCanvas = () => {
           buffer,
           go.importObject
         );
+        go.argv = [game];
         go.run(instance);
       };
       loadWasm();

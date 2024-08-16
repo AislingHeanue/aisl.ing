@@ -10,7 +10,7 @@ import (
 )
 
 func InitCanvas(c *GameContext) {
-	if !c.FixedSize {
+	if c.ResolutionScale != 0 {
 		style := c.Window.GetComputedStyle(c.CvsElement, nil)
 
 		pixelRatio := c.Window.DevicePixelRatio()

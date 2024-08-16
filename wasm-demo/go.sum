@@ -1,2 +1,4 @@
 github.com/gowebapi/webapi v0.0.0-20221221115732-41cedfc27a0b h1:ziwlwRTFt5kSst3238Ndwce+wHZh3BC05nxBThB08XE=
 github.com/gowebapi/webapi v0.0.0-20221221115732-41cedfc27a0b/go.mod h1:idYMKBl+9tqA6sZrzVqN+3XGWANtIRP6CLZsxZOiIFg=
+gonum.org/v1/plot v0.14.0 h1:+LBDVFYwFe4LHhdP8coW6296MBEY4nQ+Y4vuUpJopcE=
+gonum.org/v1/plot v0.14.0/go.mod h1:MLdR9424SJed+5VqC6MsouEpig9pZX2VZ57H9ko2bXU=

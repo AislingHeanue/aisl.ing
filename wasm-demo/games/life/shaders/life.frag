@@ -4,20 +4,34 @@ uniform float u_decay;
 uniform float u_initial_decay;
 uniform vec3 u_new_dead_colour;
 uniform vec2 u_size;
-varying highp vec2 v_tex_coord;
+varying vec2 v_tex_coord;
+uniform bool u_boundary_loop;
+
+
+float get_neighbour(vec2 offset) {
+	vec2 new_coord = v_tex_coord + offset/u_size;
+	return u_boundary_loop ? 
+		(texture2D(u_sampler,mod(new_coord, 1.0)).a == 1.0 ? 1.0 : 0.0) : 
+		(
+			((new_coord.x > 0.0) && (new_coord.y > 0.0) && (new_coord.x <  1.0) && (new_coord.y < 1.0)) ?
+			(texture2D(u_sampler,new_coord).a == 1.0 ? 1.0 : 0.0) : 
+			0.0
+		);
+}
+
 void main() {
 	float neighbours = 0.0;
 	vec4 current_cell = texture2D(u_sampler,v_tex_coord);
 	bool current_alive = (current_cell.a == 1.0);
 
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2(-1.0/u_size.x, -1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2(-1.0/u_size.x,  0.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2(-1.0/u_size.x,  1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2( 0.0/u_size.x, -1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2( 0.0/u_size.x,  1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2( 1.0/u_size.x, -1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2( 1.0/u_size.x,  0.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
-	neighbours += texture2D(u_sampler,v_tex_coord + vec2( 1.0/u_size.x,  1.0/u_size.y)).a == 1.0 ? 1.0 : 0.0;
+	neighbours += get_neighbour(vec2( 1.0,  1.0));
+	neighbours += get_neighbour(vec2( 1.0,  0.0));
+	neighbours += get_neighbour(vec2( 1.0, -1.0));
+	neighbours += get_neighbour(vec2( 0.0,  1.0));
+	neighbours += get_neighbour(vec2( 0.0, -1.0));
+	neighbours += get_neighbour(vec2(-1.0,  1.0));
+	neighbours += get_neighbour(vec2(-1.0,  0.0));
+	neighbours += get_neighbour(vec2(-1.0, -1.0));
 
 	// alpha = 1: alive. 0 < alpha < 1: dead and decaying colour. alpha = 0: dead
 	float new_alpha = (

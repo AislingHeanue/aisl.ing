@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
@@ -11,33 +14,31 @@ import (
 var done chan struct{}
 
 func main() {
-	c1 := canvas.GameContext{
-		Window:          webapi.GetWindow(),
-		Document:        webapi.GetWindow().Document(),
-		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-		ResolutionScale: 1,
-		Animator: rubiks.New(
-			rubiks.CubeCubeOptions{
-				TurnFrames: 12,
-				Dimension:  3,
-			},
-		),
+	contexts := map[string]canvas.GameContext{
+		"rubiks": {
+			Window:          webapi.GetWindow(),
+			Document:        webapi.GetWindow().Document(),
+			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+			ResolutionScale: 1,
+			Animator: rubiks.New(
+				rubiks.CubeCubeOptions{
+					TurnFrames: 12,
+					Dimension:  3,
+				},
+			),
+		},
+		"life": {
+			Window:          webapi.GetWindow(),
+			Document:        webapi.GetWindow().Document(),
+			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+			ResolutionScale: 0, // fixed size, ignore scaling
+			Animator:        life.New(),
+			Height:          500,
+			Width:           500,
+		},
 	}
-
-	c2 := canvas.GameContext{
-		Window:          webapi.GetWindow(),
-		Document:        webapi.GetWindow().Document(),
-		CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-		ResolutionScale: 1,
-		Animator:        &life.LifeGame{},
-		Height:          5,
-		Width:           5,
-		FixedSize:       true,
-	}
-
-	c := c1
-	_ = c1
-	_ = c2
+	fmt.Printf("%#v", os.Args)
+	c := contexts[os.Args[0]]
 
 	canvas.InitCanvas(&c)
 	c.Animator.Init(&c)
@@ -51,7 +52,8 @@ func main() {
 
 func wrapAnimator(c *canvas.GameContext) func(float64) {
 	return func(time float64) {
-		c.T = float32(time) / 1000 // milliseconds to seconds
+		c.IntervalT = (float32(time) / 1000) - c.T // milliseconds to seconds
+		c.T = float32(time) / 1000
 		c.Animator.Render(c)
 		c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(c)))
 	}

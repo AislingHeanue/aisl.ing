@@ -207,7 +207,7 @@ const RubiksCube = () => {
               </div>
             </div> */}
           <div className="lg:col-span-2 lg:max-h-screen">
-            <WasmCanvas />
+            <WasmCanvas game="rubiks" />
           </div>
         </div>
         <div className="lg:absolute lg:bottom-0 ">
