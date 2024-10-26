@@ -8,6 +8,7 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
+	webapicanvas "github.com/gowebapi/webapi/html/canvas"
 )
 
 //go:embed shaders/life.vert
@@ -41,12 +42,13 @@ type LifeGame struct {
 	cumulativeIntervalT float32
 	// colourPalette    []color.Color
 
-	// lastFrameTime time.Time
-	// thisFrameTime time.Time
 	colourPeriodFrames int
 	trailLength        int
 	boundaryLoop       bool
 
+	zoom float32
+	dx   float32 // top-left coords of the top-left grid being displayed. This will usually fall outside the bounds of the grid
+	dy   float32
 	// gamePaused bool
 }
 
@@ -57,15 +59,28 @@ func (lg *LifeGame) Init(c *canvas.GameContext) {
 	lg.createBuffers(c)
 	lg.t = -1
 	lg.colourPeriodFrames = 60
-	lg.trailLength = 15
+	lg.trailLength = 40
 	lg.tps = 5
-	lg.boundaryLoop = false
-	// TODO: store max device fps in the game context
+	lg.boundaryLoop = true
+
+	lg.zoom = 0.4 * c.Height / float32(c.CellHeight)
+	if lg.zoom < 0 {
+		panic("I refuse to create an infinite loop no thank you")
+	}
+	lg.dx = c.Width/2 - lg.zoom*float32(c.CellWidth)/2
+	for lg.dx > 0 {
+		lg.dx -= float32(c.CellWidth) * lg.zoom
+	}
+
+	lg.dy = c.Height/2 - lg.zoom*float32(c.CellHeight)/2
+	for lg.dy > 0 {
+		lg.dy -= float32(c.CellHeight) * lg.zoom
+	}
+
 	// TODO: load patterns
+	// TODO: drawing (most of the work is already there, just need to have a mode select for it)
 	// TODO: add all the sliders and buttons!
-	// TODO: i wonder if i can transition between sizes without losing all information (eg taking a snapshot of the grid)
 	// TODO: pause button
-	// TODO: draw to the canvas while paused
 	// TODO: random button, and infinite growth button, and maybe some other small ones
 	// TODO: scroll screen on drag when unpaused and in looping mode
 	// TODO: split this file up
@@ -172,11 +187,11 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 	lg.textureBuffer = textureBuffer
 
-	pixels := setupPixelArray(int(c.Width), int(c.Height))
+	pixels := setupPixelArray(c.CellWidth, c.CellHeight)
 
 	lg.readTexture = gl.CreateTexture()
 	gl.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), int(c.Width), int(c.Height), 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
@@ -184,7 +199,7 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 
 	lg.writeTexture = gl.CreateTexture()
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), int(c.Width), int(c.Height), 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixels)))
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixels)))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
@@ -221,29 +236,29 @@ func (lg *LifeGame) Render(c *canvas.GameContext) {
 		if math.Mod(float64(lg.t), 60) == 59 {
 			lg.storedPixels = lg.getPixelsFromTexture(c)
 			if math.Mod(float64(lg.t), 60) == 59 {
-				lg.storedPixels[3*4*int(c.Width)+8] = 255
-				lg.storedPixels[3*4*int(c.Width)+9] = 255
-				lg.storedPixels[3*4*int(c.Width)+10] = 255
-				lg.storedPixels[3*4*int(c.Width)+11] = 255
-				lg.storedPixels[3*4*int(c.Width)+12] = 255
-				lg.storedPixels[3*4*int(c.Width)+13] = 255
-				lg.storedPixels[3*4*int(c.Width)+14] = 255
-				lg.storedPixels[3*4*int(c.Width)+15] = 255
-				lg.storedPixels[3*4*int(c.Width)+16] = 255
-				lg.storedPixels[3*4*int(c.Width)+17] = 255
-				lg.storedPixels[3*4*int(c.Width)+18] = 255
-				lg.storedPixels[3*4*int(c.Width)+19] = 255
-				lg.storedPixels[2*4*int(c.Width)+16] = 255
-				lg.storedPixels[2*4*int(c.Width)+17] = 255
-				lg.storedPixels[2*4*int(c.Width)+18] = 255
-				lg.storedPixels[2*4*int(c.Width)+19] = 255
-				lg.storedPixels[4*int(c.Width)+12] = 255
-				lg.storedPixels[4*int(c.Width)+13] = 255
-				lg.storedPixels[4*int(c.Width)+14] = 255
-				lg.storedPixels[4*int(c.Width)+15] = 255
+				lg.storedPixels[3*4*c.CellWidth+8] = 255
+				lg.storedPixels[3*4*c.CellWidth+9] = 255
+				lg.storedPixels[3*4*c.CellWidth+10] = 255
+				lg.storedPixels[3*4*c.CellWidth+11] = 255
+				lg.storedPixels[3*4*c.CellWidth+12] = 255
+				lg.storedPixels[3*4*c.CellWidth+13] = 255
+				lg.storedPixels[3*4*c.CellWidth+14] = 255
+				lg.storedPixels[3*4*c.CellWidth+15] = 255
+				lg.storedPixels[3*4*c.CellWidth+16] = 255
+				lg.storedPixels[3*4*c.CellWidth+17] = 255
+				lg.storedPixels[3*4*c.CellWidth+18] = 255
+				lg.storedPixels[3*4*c.CellWidth+19] = 255
+				lg.storedPixels[2*4*c.CellWidth+16] = 255
+				lg.storedPixels[2*4*c.CellWidth+17] = 255
+				lg.storedPixels[2*4*c.CellWidth+18] = 255
+				lg.storedPixels[2*4*c.CellWidth+19] = 255
+				lg.storedPixels[4*c.CellWidth+12] = 255
+				lg.storedPixels[4*c.CellWidth+13] = 255
+				lg.storedPixels[4*c.CellWidth+14] = 255
+				lg.storedPixels[4*c.CellWidth+15] = 255
 
-				lg.storedPixels[0] = 255
-				lg.storedPixels[3] = 254
+				// lg.storedPixels[0] = 255
+				// lg.storedPixels[3] = 254
 			}
 
 			lg.setPixelsInTexture(c, lg.storedPixels)
@@ -291,7 +306,7 @@ func (lg *LifeGame) deathFrame(c *canvas.GameContext) {
 	gl.Uniform1i(samplerLocation, 0)
 
 	sizeLoc := gl.GetUniformLocation(program, "u_size")
-	gl.Uniform2f(sizeLoc, c.Width, c.Height)
+	gl.Uniform2f(sizeLoc, float32(c.CellWidth), float32(c.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
@@ -345,7 +360,7 @@ func (lg *LifeGame) lifeFrame(c *canvas.GameContext) {
 	gl.Uniform1i(samplerLocation, 0)
 
 	sizeLoc := gl.GetUniformLocation(program, "u_size")
-	gl.Uniform2f(sizeLoc, c.Width, c.Height)
+	gl.Uniform2f(sizeLoc, float32(c.CellWidth), float32(c.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
@@ -360,50 +375,47 @@ func (lg *LifeGame) getDeadColour() (float32, float32, float32) {
 
 func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 	gl := c.GL
+	ctx := c.ZoomCtx
+	showCtx := c.DisplayCtx
 
-	// THE BLITTING STUFF
-	//
-	// lg.swapTextures()
-	gl.UseProgram(lg.displayProgram)
-	program := lg.displayProgram
+	union := webgl.Union{
+		Value: jsconv.UInt8ToJs(make([]uint8, c.CellHeight*c.CellWidth*4)),
+	}
+	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
+	gl.ReadPixels(0, 0, c.CellWidth, c.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
-	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(tPosition))
+	imageData := ctx.CreateImageData(c.CellWidth, c.CellHeight)
+	imageData.Data().JSValue().Call("set", union.JSValue())
+	ctx.PutImageData(imageData, 0, 0)
 
-	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
-	vPosition := gl.GetAttribLocation(program, "a_position")
-	// point the program to the vertex buffer object we've bound
-	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
-	gl.EnableVertexAttribArray(uint(vPosition))
-
-	gl.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
-	samplerLocation := gl.GetUniformLocation(program, "u_sampler")
-	gl.Uniform1i(samplerLocation, 0)
-
-	gl.Viewport(0, 0, int(c.Width), int(c.Height))
-	gl.Clear(webgl.COLOR_BUFFER_BIT)
-	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
-
-	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
-	// lg.swapTextures()
+	showCtx.ClearRect(0, 0, float64(c.Width), float64(c.Height))
+	// tile horizontally if one instance of the grid does not cover the canvas
+	for currentDx := lg.dx; currentDx < c.Width; currentDx += float32(c.CellWidth) * lg.zoom {
+		// and vertically
+		for currentDy := lg.dy; currentDy < c.Height; currentDy += float32(c.CellHeight) * lg.zoom {
+			showCtx.DrawImage3(
+				webapicanvas.UnionFromJS(c.ZoomCanvas.JSValue()),
+				0, 0, // start coords in grid being captured from
+				math.Min(float64((c.Width-currentDx)/lg.zoom), float64(c.Width)), math.Min(float64((c.Height-currentDy)/lg.zoom), float64(c.Height)),
+				float64(currentDx), float64(currentDy), // start coords in grid being displayed to
+				math.Min(float64(c.Width-currentDx), float64(c.Width*lg.zoom)), math.Min(float64(c.Height-currentDy), float64(c.Height*lg.zoom)),
+			)
+		}
+	}
 }
 
 func (lg *LifeGame) getPixelsFromTexture(c *canvas.GameContext) []uint8 {
 	gl := c.GL
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
-	gl.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
 	union := webgl.Union{
-		Value: jsconv.UInt8ToJs(make([]uint8, int(c.Height*c.Width*4))),
+		Value: jsconv.UInt8ToJs(make([]uint8, c.CellHeight*c.CellWidth*4)),
 	}
-	gl.ReadPixels(0, 0, int(c.Width), int(c.Height), webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	gl.ReadPixels(0, 0, c.CellWidth, c.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
 	// fmt.Println(union.Value.Type().String())
 	// if lg.t < 60 {
 	// 	canvas.Log(union.Value)
 	// }
-	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 
 	return jsconv.JsToUInt8(union.Value)
@@ -412,7 +424,7 @@ func (lg *LifeGame) getPixelsFromTexture(c *canvas.GameContext) []uint8 {
 func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in []uint8) {
 	gl := c.GL
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), int(c.Width), int(c.Height), 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(in)))
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(in)))
 	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
 }
 
@@ -434,8 +446,6 @@ func setupPixelArray(width int, height int) []uint8 {
 	for i := range m {
 		m[i] = make([]bool, width)
 	}
-	// matrix is upside down because webgl reasons
-	//
 	// .....
 	// ..*..
 	// ...*.
@@ -455,16 +465,16 @@ func setupPixelArray(width int, height int) []uint8 {
 	// *.*.....
 	midWidth := width/2 - 5
 	midHeight := height/2 - 3
-	m[midHeight][midWidth] = true
-	m[midHeight][midWidth+2] = true
-	m[midHeight+1][midWidth+2] = true
+	m[midHeight][midWidth+6] = true
+	m[midHeight+1][midWidth+4] = true
+	m[midHeight+1][midWidth+6] = true
+	m[midHeight+1][midWidth+7] = true
+	m[midHeight+2][midWidth+6] = true
 	m[midHeight+2][midWidth+4] = true
 	m[midHeight+3][midWidth+4] = true
-	m[midHeight+4][midWidth+4] = true
-	m[midHeight+3][midWidth+6] = true
-	m[midHeight+4][midWidth+6] = true
-	m[midHeight+4][midWidth+7] = true
-	m[midHeight+5][midWidth+6] = true
+	m[midHeight+4][midWidth+2] = true
+	m[midHeight+5][midWidth] = true
+	m[midHeight+5][midWidth+2] = true
 
 	for i := range m {
 		for j := range m[i] {

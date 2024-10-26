@@ -31,10 +31,12 @@ func main() {
 			Window:          webapi.GetWindow(),
 			Document:        webapi.GetWindow().Document(),
 			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-			ResolutionScale: 0, // fixed size, ignore scaling
+			ResolutionScale: 1,
 			Animator:        life.New(),
-			Height:          500,
-			Width:           500,
+			CellHeight:      200,
+			CellWidth:       200,
+			SecondaryCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
 	}
 	fmt.Printf("%#v", os.Args)
