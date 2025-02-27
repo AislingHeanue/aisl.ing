@@ -1,45 +1,41 @@
 export default [
 
     {
-        year: "2023",
+        year: "September 2023-",
         title: "Cloud Engineer",
-        location: "Hewlett Packard Enterprise",
-        duration: "",
+        location: "HP Enterprise",
         GPA: "",
-        details: "Creating cloud native applications which form part of HPE GreenLake Private Cloud. I am primarily using Go, and our \
-                have also gained a lot of experience working with Kubernetes, Docker and Terraform. Working for a larger company \
-                has been very exciting because I get to contribute to a product which is being used by many customers around the globe."
+        details: "Creating cloud native applications which form part of HPE GreenLake Private Cloud. Working for a larger company has \
+                come with many challenges and opportunities to learn better communication skills, and how to deal with a rapidly changing \
+                environment."
     },
 
     {
-        year: "2023",
+        year: "June 2023-August 2023",
         title: "Software Engineering Intern",
         location: "Adaptemy",
-        duration: "3 Months",
         GPA: "",
         details: "Working with Adaptemy gave me my first exposure to working as a software developer. The small team and busy environment meant I was \
                 very quickly able to fully immerse myself in the main product of the company, an online learning platform built in NodeJS. \
-                While it was challenging to work with a language and environment I didn't have much experience with, I enjoyed my time there very much, \
-                and can't think of a better first experience in this area."
+                While it was challenging to work with a new language and environment, I enjoyed my time there very much, \
+                and I can't think of a better first experience in this area."
     },
 
     {
-        year: "2022",
+        year: "2022-2023",
         title: "MSc Computer Science (Negotiated Learning)",
         location: "University College Dublin",
-        duration: "1 Year",
         GPA: "GPA: 3.9/4.2",
         details: "My master's degree has given me a lot of experience with individual and group coding projects.\
-                Some modules I have completed or am currently enrolled in include Distributed Systems, Advanced Data Structures, Numerical Algorithms, \
-                Contemporary Software Development and Performance Engineering."
+                Some of the modules I got the most value from include Distributed Systems, Advanced Data Structures and \
+                Contemporary Software Development."
     },
 
     {
-        year: "2018",
+        year: "2018-2022",
         title: "BSc Applied and Computational Mathematics",
         location: "University College Dublin",
-        duration: "4 Years",
-        GPA: "Degree GPA: 4.06/4.2",
+        GPA: "GPA: 4.06/4.2",
         details: "I learned many useful problem solving and research skills that I still apply regularly from my undergraduate degree. I was \
                 able to use these skills for my final year project on quantum computing algorithms. Some modules that stood out to me are Coding \
                 Theory, Advanced Computational Science and Weather Numerical Modelling."

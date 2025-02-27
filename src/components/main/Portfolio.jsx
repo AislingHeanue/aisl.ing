@@ -8,9 +8,10 @@ function Portfolio() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {portfolio.map((project) => (
           <PortfolioItem
-            imgUrl={project.imgURL}
             key={project.title}
             title={project.title}
+            summary={project.summary}
+            imgUrl={project.imgURL}
             stack={project.stack}
             link={project.link}
             internal={project.internal}

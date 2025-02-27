@@ -12,17 +12,14 @@ function TimelineItem({ year, title, location, duration, GPA, details }) {
           <h3 className="text-lg font-semibold text-stone-900 dark:text-white">
             {title}
           </h3>
-          <p className="my-1 text-md font-normal leading-none text-stone-600 dark:text-stone-400">
+          <p className="my-1 text-md font-normal leading-none text-stone-500 dark:text-stone-400">
             {location}
           </p>
-          <p className="my-1 text-md font-normal leading-none text-stone-600 dark:text-stone-400">
-            {duration}
-          </p>
-          <p className="my-1 text-md font-normal leading-none text-stone-600 dark:text-stone-400">
+          <p className="my-1 text-md font-normal leading-none text-stone-500 dark:text-stone-400">
             {GPA}
           </p>
         </div>
-        <p className="my-2 text-base font-normal text-stone-500 dark:text-stone-300">
+        <p className="my-2 text-base font-normal text-stone-600 dark:text-stone-300">
           {details}
         </p>
       </li>

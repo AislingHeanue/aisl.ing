@@ -6,7 +6,7 @@ import Title from "../common/Title";
 function Timeline() {
   return (
     <div className="flex flex-col md:flex-row justify-center my-20">
-      <div className="w-full md:w-7/12">
+      <div className="w-full lg:w-5/6">
         <Title>Education and Work</Title>
         {timeline.map((item) => (
           <TimelineItem
@@ -14,7 +14,6 @@ function Timeline() {
             year={item.year}
             title={item.title}
             location={item.location}
-            duration={item.duration}
             GPA={item.GPA}
             details={item.details}
           />
