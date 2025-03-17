@@ -31,7 +31,7 @@ func main() {
 			Window:          webapi.GetWindow(),
 			Document:        webapi.GetWindow().Document(),
 			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-			ResolutionScale: 1,
+			ResolutionScale: 0.5,
 			Animator:        life.New(),
 			CellHeight:      200,
 			CellWidth:       200,

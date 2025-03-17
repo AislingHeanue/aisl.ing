@@ -6,6 +6,8 @@ import (
 	"math"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/controller"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/model"
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	webapicanvas "github.com/gowebapi/webapi/html/canvas"
@@ -24,67 +26,58 @@ var fDisplayShaderSource string
 var fDeathShaderSource string
 
 type LifeGame struct {
-	// tickTime     float32 // time in ms before tick can be updated
-	// colourSpeed  float32
-	lifeProgram         *webgl.Program
-	deathProgram        *webgl.Program
-	displayProgram      *webgl.Program
-	vertexBuffer        *webgl.Buffer
-	textureBuffer       *webgl.Buffer
-	vCount              int
-	writeFrameBuffer    *webgl.Framebuffer
-	readFrameBuffer     *webgl.Framebuffer
-	readTexture         *webgl.Texture
-	writeTexture        *webgl.Texture
-	t                   int
-	storedPixels        []uint8
-	tps                 int
-	cumulativeIntervalT float32
-	// colourPalette    []color.Color
+	lifeProgram      *webgl.Program
+	deathProgram     *webgl.Program
+	displayProgram   *webgl.Program
+	vertexBuffer     *webgl.Buffer
+	textureBuffer    *webgl.Buffer
+	vCount           int
+	writeFrameBuffer *webgl.Framebuffer
+	readFrameBuffer  *webgl.Framebuffer
+	readTexture      *webgl.Texture
+	writeTexture     *webgl.Texture
+	t                int
+	storedPixels     []uint8
 
+	// configurable but not exposed to the frontend
 	colourPeriodFrames int
 	trailLength        int
 	boundaryLoop       bool
 
-	zoom float32
-	dx   float32 // top-left coords of the top-left grid being displayed. This will usually fall outside the bounds of the grid
-	dy   float32
-	// gamePaused bool
+	lifeContext *model.LifeContext
 }
 
+// TODO: load patterns + drop-down selection to pick a design from the life wiki (with some curated samples)
+//
+// Listeners and stuff:
+// drawing while paused nah
+// TODO: simulation size slider (with a reasonable default, which changes based on selected wiki design) (causes re-init if used manually)
+// TODO: zoom slider
+// TODO: random button, clear button
+// TODO: speed slider
+
 var _ canvas.Animator = &LifeGame{}
+
+func (lg *LifeGame) zoom(c *canvas.GameContext) float32 {
+	return lg.lifeContext.Zoom * c.Height / float32(c.CellHeight)
+}
 
 func (lg *LifeGame) Init(c *canvas.GameContext) {
 	lg.createShaders(c)
 	lg.createBuffers(c)
+	lg.lifeContext = &model.LifeContext{Zoom: 0.5, Tps: 5}
 	lg.t = -1
 	lg.colourPeriodFrames = 60
 	lg.trailLength = 40
-	lg.tps = 5
 	lg.boundaryLoop = true
 
-	lg.zoom = 0.4 * c.Height / float32(c.CellHeight)
-	if lg.zoom < 0 {
+	if lg.zoom(c) < 0 {
 		panic("I refuse to create an infinite loop no thank you")
 	}
-	lg.dx = c.Width/2 - lg.zoom*float32(c.CellWidth)/2
-	for lg.dx > 0 {
-		lg.dx -= float32(c.CellWidth) * lg.zoom
-	}
-
-	lg.dy = c.Height/2 - lg.zoom*float32(c.CellHeight)/2
-	for lg.dy > 0 {
-		lg.dy -= float32(c.CellHeight) * lg.zoom
-	}
-
-	// TODO: load patterns
-	// TODO: drawing (most of the work is already there, just need to have a mode select for it)
-	// TODO: add all the sliders and buttons!
-	// TODO: pause button
-	// TODO: random button, and infinite growth button, and maybe some other small ones
-	// TODO: scroll screen on drag when unpaused and in looping mode
-	// TODO: split this file up
-	// TODO: make the actual webpage
+	// lg.lifeContext.DX = c.Width/2 - lg.zoom(c)*float32(c.CellWidth)/2
+	lg.lifeContext.DX = c.Width / 2
+	// lg.lifeContext.DY = c.Height/2 - lg.zoom(c)*float32(c.CellHeight)/2
+	lg.lifeContext.DY = c.Height / 2
 }
 
 func New() *LifeGame {
@@ -92,7 +85,7 @@ func New() *LifeGame {
 }
 
 func (lg LifeGame) InitListeners(c *canvas.GameContext) {
-	// cubeController.InitListeners(c, cc.CubeCubeContext)
+	controller.InitListeners(c, lg.lifeContext)
 }
 
 func (lg *LifeGame) createShaders(c *canvas.GameContext) {
@@ -219,7 +212,7 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 }
 
 func (lg *LifeGame) Render(c *canvas.GameContext) {
-	lg.cumulativeIntervalT += c.IntervalT
+	// lg.cumulativeIntervalT += c.IntervalT
 	// ticksToProcess := lg.cumulativeIntervalT * float32(lg.tps)
 	// fmt.Println(int(ticksToProcess))
 	// if ticksToProcess < 1 {
@@ -227,12 +220,11 @@ func (lg *LifeGame) Render(c *canvas.GameContext) {
 	// } else {
 	// lg.cumulativeIntervalT = 0
 	// }
-	for range lg.tps {
-		lg.t++
-		lg.cumulativeIntervalT = 0
-		if math.Mod(float64(lg.t), 1) != 0 {
-			return
-		}
+	for range lg.lifeContext.Tps {
+		// lg.cumulativeIntervalT = 0
+		// if math.Mod(float64(lg.t), 1) != 0 {
+		// 	return
+		// }
 		if math.Mod(float64(lg.t), 60) == 59 {
 			lg.storedPixels = lg.getPixelsFromTexture(c)
 			if math.Mod(float64(lg.t), 60) == 59 {
@@ -261,14 +253,21 @@ func (lg *LifeGame) Render(c *canvas.GameContext) {
 				// lg.storedPixels[3] = 254
 			}
 
+			lg.t++
 			lg.setPixelsInTexture(c, lg.storedPixels)
 			lg.deathFrame(c)
+			lg.swapTextures()
 			lg.drawToCanvas(c)
 
 			return
 		}
 
-		lg.lifeFrame(c)
+		if lg.lifeContext.Paused {
+			lg.deathFrame(c)
+		} else {
+			lg.t++
+			lg.lifeFrame(c)
+		}
 	}
 	lg.drawToCanvas(c)
 	// thisFrameTime := time.Now()
@@ -310,6 +309,7 @@ func (lg *LifeGame) deathFrame(c *canvas.GameContext) {
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+	lg.swapTextures()
 }
 
 func (lg *LifeGame) swapTextures() {
@@ -378,6 +378,16 @@ func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 	ctx := c.ZoomCtx
 	showCtx := c.DisplayCtx
 
+	topLeftDX := lg.lifeContext.DX - lg.zoom(c)*float32(c.CellWidth)/2
+	topLeftDY := lg.lifeContext.DY - lg.zoom(c)*float32(c.CellHeight)/2
+	// bound check DX and DY and make sure they're within a valid range to be able to draw each part of all the visible canvases.
+	for topLeftDX > 0 {
+		topLeftDX -= float32(c.CellWidth) * lg.zoom(c)
+	}
+	for topLeftDY > 0 {
+		topLeftDY -= float32(c.CellHeight) * lg.zoom(c)
+	}
+
 	union := webgl.Union{
 		Value: jsconv.UInt8ToJs(make([]uint8, c.CellHeight*c.CellWidth*4)),
 	}
@@ -391,15 +401,15 @@ func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 
 	showCtx.ClearRect(0, 0, float64(c.Width), float64(c.Height))
 	// tile horizontally if one instance of the grid does not cover the canvas
-	for currentDx := lg.dx; currentDx < c.Width; currentDx += float32(c.CellWidth) * lg.zoom {
+	for currentDx := topLeftDX; currentDx < c.Width; currentDx += float32(c.CellWidth) * lg.zoom(c) {
 		// and vertically
-		for currentDy := lg.dy; currentDy < c.Height; currentDy += float32(c.CellHeight) * lg.zoom {
+		for currentDy := topLeftDY; currentDy < c.Height; currentDy += float32(c.CellHeight) * lg.zoom(c) {
 			showCtx.DrawImage3(
 				webapicanvas.UnionFromJS(c.ZoomCanvas.JSValue()),
 				0, 0, // start coords in grid being captured from
-				math.Min(float64((c.Width-currentDx)/lg.zoom), float64(c.Width)), math.Min(float64((c.Height-currentDy)/lg.zoom), float64(c.Height)),
+				math.Min(float64((c.Width-currentDx)/lg.zoom(c)), float64(c.Width)), math.Min(float64((c.Height-currentDy)/lg.zoom(c)), float64(c.Height)),
 				float64(currentDx), float64(currentDy), // start coords in grid being displayed to
-				math.Min(float64(c.Width-currentDx), float64(c.Width*lg.zoom)), math.Min(float64(c.Height-currentDy), float64(c.Height*lg.zoom)),
+				math.Min(float64(c.Width-currentDx), float64(c.Width*lg.zoom(c))), math.Min(float64(c.Height-currentDy), float64(c.Height*lg.zoom(c))),
 			)
 		}
 	}

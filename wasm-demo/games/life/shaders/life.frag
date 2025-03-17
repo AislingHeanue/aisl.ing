@@ -11,10 +11,10 @@ uniform bool u_boundary_loop;
 float get_neighbour(vec2 offset) {
 	vec2 new_coord = v_tex_coord + offset/u_size;
 	return u_boundary_loop ? 
-		(texture2D(u_sampler,mod(new_coord, 1.0)).a == 1.0 ? 1.0 : 0.0) : 
+		(texture2D(u_sampler,mod(new_coord, 1.0)).a == 1.0 ? 1.0 : 0.0) :
 		(
 			((new_coord.x > 0.0) && (new_coord.y > 0.0) && (new_coord.x <  1.0) && (new_coord.y < 1.0)) ?
-			(texture2D(u_sampler,new_coord).a == 1.0 ? 1.0 : 0.0) : 
+			(texture2D(u_sampler,new_coord).a == 1.0 ? 1.0 : 0.0) :
 			0.0
 		);
 }
