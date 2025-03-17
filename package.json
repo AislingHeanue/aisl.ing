@@ -6,7 +6,7 @@
   "scripts": {
     "prebuild": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm ",
     "start": "nodemon --exec \"npm run prebuild && npm run dev\" --ext go,js,jsx,ts,tsx,frag,vert",
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite build && vite preview"
   },

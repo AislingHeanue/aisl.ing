@@ -2,6 +2,7 @@ package controller
 
 import (
 	"strconv"
+	"strings"
 	"syscall/js"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
@@ -20,30 +21,31 @@ const (
 	TOUCH
 	TOUCH_MOVE
 	TOUCH_UP
+	KEYBOARD
 )
 
 func InitListeners(c *canvas.GameContext, ccc *model.CubeCubeContext) {
-	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&CanvasListener{c, ccc, CLICK}), nil)
-	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&CanvasListener{c, ccc, MOUSE_MOVE}), nil)
-	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&CanvasListener{c, ccc, MOUSE_UP}), nil)
-	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&CanvasListener{c, ccc, MOUSE_UP}), nil)
+	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&CubeListener{c, ccc, CLICK}), nil)
+	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_MOVE}), nil)
+	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_UP}), nil)
+	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_UP}), nil)
 
-	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&CanvasListener{c, ccc, TOUCH}), nil)
-	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&CanvasListener{c, ccc, TOUCH_MOVE}), nil)
-	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&CanvasListener{c, ccc, TOUCH_UP}), nil)
-	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&CanvasListener{c, ccc, TOUCH_UP}), nil)
+	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH}), nil)
+	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_MOVE}), nil)
+	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_UP}), nil)
+	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_UP}), nil)
 
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CCListener{ccc}), nil)
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CubeListener{c, ccc, KEYBOARD}), nil)
 	registerButtons(c, ccc)
 }
 
-type CanvasListener struct {
+type CubeListener struct {
 	c    *canvas.GameContext
 	ccc  *model.CubeCubeContext
 	kind ListenerKind
 }
 
-func (l *CanvasListener) HandleEvent(e *domcore.Event) {
+func (l *CubeListener) HandleEvent(e *domcore.Event) {
 	switch l.kind {
 	case CLICK:
 		click(l.c, l.ccc, e)
@@ -59,6 +61,8 @@ func (l *CanvasListener) HandleEvent(e *domcore.Event) {
 		touchUp(l.ccc)
 	case DIMENSION_CHANGED:
 		handleDimension(l.c, l.ccc, e.SrcElement().JSValue())
+	case KEYBOARD:
+		handleKeyboard(l.ccc, e)
 	}
 }
 
@@ -122,4 +126,16 @@ func getRelativeTouchPosition(c *canvas.GameContext, touch js.Value) (float32, f
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
 	return 1.5 * float32(offsetX) / c.Width, 1.5 * float32(offsetY) / c.Height
+}
+
+func handleKeyboard(ccc *model.CubeCubeContext, e *domcore.Event) {
+	shiftPressed := e.JSValue().Get("shiftKey").Bool()
+	prime := ""
+	if shiftPressed {
+		prime = "'"
+	}
+	face := strings.ToLower(e.JSValue().Get("key").String())
+
+	controller := CubeController{ccc}
+	controller.QueueEvent(Turn(face + prime))
 }
