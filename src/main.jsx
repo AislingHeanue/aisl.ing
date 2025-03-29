@@ -20,5 +20,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/game-of-life" element={<LifePage />} />
       </Routes>
     </Router>
+    <Analytics />
   </React.StrictMode>
 );
