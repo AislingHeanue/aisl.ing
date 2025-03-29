@@ -7,5 +7,7 @@ tar -xzf go.tgz
 export PATH="$PATH:$(pwd)/go/bin"
 rm go.tgz
 
+echo "Running vite prebuild..."
+vite prebuild
 echo "Running vite build..."
 vite build
