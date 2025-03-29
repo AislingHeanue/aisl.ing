@@ -6,6 +6,7 @@ import CollatzPage from "./components/collatz/CollatzPage.jsx";
 import RubiksCubePage from "./components/rubiks-cube/RubiksCubePage.jsx";
 import "./styles/tailwind.css";
 import LifePage from "./components/game-of-life/LifePage.jsx";
+import { Analytics } from "@vercel/analytics/react";
 
 // flash of unstyled content preventer
 document.documentElement.classList.add("dark");

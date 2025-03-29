@@ -7,7 +7,8 @@ tar -xzf go.tgz
 export PATH="$PATH:$(pwd)/go/bin"
 rm go.tgz
 
-echo Running prebuild...
+echo "Running prebuild..."
 npm run prebuild
-echo Running build...
+
+echo "Running build..."
 vite build
