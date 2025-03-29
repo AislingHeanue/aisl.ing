@@ -4,13 +4,16 @@ import (
 	_ "embed"
 	"fmt"
 	"math"
+	"math/rand/v2"
+
+	"github.com/gowebapi/webapi/core/jsconv"
+	"github.com/gowebapi/webapi/graphics/webgl"
+	webapicanvas "github.com/gowebapi/webapi/html/canvas"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/controller"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/model"
-	"github.com/gowebapi/webapi/core/jsconv"
-	"github.com/gowebapi/webapi/graphics/webgl"
-	webapicanvas "github.com/gowebapi/webapi/html/canvas"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/parser"
 )
 
 //go:embed shaders/life.vert
@@ -37,55 +40,64 @@ type LifeGame struct {
 	readTexture      *webgl.Texture
 	writeTexture     *webgl.Texture
 	t                int
-	storedPixels     []uint8
+	// storedPixels     []uint8
 
 	// configurable but not exposed to the frontend
 	colourPeriodFrames int
 	trailLength        int
-	boundaryLoop       bool
 
 	lifeContext *model.LifeContext
 }
 
+// loader stuff
 // TODO: load patterns + drop-down selection to pick a design from the life wiki (with some curated samples)
-//
-// Listeners and stuff:
-// drawing while paused nah
+
+// frontend stuff
 // TODO: simulation size slider (with a reasonable default, which changes based on selected wiki design) (causes re-init if used manually)
 // TODO: zoom slider
 // TODO: random button, clear button
-// TODO: speed slider
+
+// TIME stuff
+// TODO: fps and tps controls toggleable
 
 var _ canvas.Animator = &LifeGame{}
 
+func (lg *LifeGame) zoomY(c *canvas.GameContext) float32 {
+	return lg.lifeContext.Zoom * c.Height / float32(lg.lifeContext.CellHeight)
+}
+
+func (lg *LifeGame) zoomX(c *canvas.GameContext) float32 {
+	return lg.lifeContext.Zoom * c.Width / float32(lg.lifeContext.CellWidth)
+}
+
 func (lg *LifeGame) zoom(c *canvas.GameContext) float32 {
-	return lg.lifeContext.Zoom * c.Height / float32(c.CellHeight)
+	return min(lg.zoomX(c), lg.zoomY(c))
 }
 
 func (lg *LifeGame) Init(c *canvas.GameContext) {
 	lg.createShaders(c)
 	lg.createBuffers(c)
-	lg.lifeContext = &model.LifeContext{Zoom: 0.5, Tps: 5}
 	lg.t = -1
 	lg.colourPeriodFrames = 60
-	lg.trailLength = 40
-	lg.boundaryLoop = true
+	lg.trailLength = 50
 
 	if lg.zoom(c) < 0 {
 		panic("I refuse to create an infinite loop no thank you")
 	}
-	// lg.lifeContext.DX = c.Width/2 - lg.zoom(c)*float32(c.CellWidth)/2
-	lg.lifeContext.DX = c.Width / 2
-	// lg.lifeContext.DY = c.Height/2 - lg.zoom(c)*float32(c.CellHeight)/2
-	lg.lifeContext.DY = c.Height / 2
+	lg.lifeContext.DX = 0 // default offset position of the grid is 0,0
+	lg.lifeContext.DY = 0
 }
 
-func New() *LifeGame {
-	return &LifeGame{}
+func New(lc *model.LifeContext) *LifeGame {
+	return &LifeGame{lifeContext: lc}
 }
 
-func (lg LifeGame) InitListeners(c *canvas.GameContext) {
-	controller.InitListeners(c, lg.lifeContext)
+func (lg LifeGame) Dimensions() (int, int) {
+	return lg.lifeContext.CellWidth, lg.lifeContext.CellHeight
+}
+
+func (lg *LifeGame) InitListeners(c *canvas.GameContext) {
+	controller.InitListeners(c, lg.lifeContext, lg)
 }
 
 func (lg *LifeGame) createShaders(c *canvas.GameContext) {
@@ -180,11 +192,12 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 	lg.textureBuffer = textureBuffer
 
-	pixels := setupPixelArray(c.CellWidth, c.CellHeight)
+	pixels := randomArray(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight)
+	pixelsArray := setupPixelArray(pixels)
 
 	lg.readTexture = gl.CreateTexture()
 	gl.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
@@ -192,7 +205,7 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 
 	lg.writeTexture = gl.CreateTexture()
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixels)))
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixelsArray)))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
 	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
@@ -221,47 +234,6 @@ func (lg *LifeGame) Render(c *canvas.GameContext) {
 	// lg.cumulativeIntervalT = 0
 	// }
 	for range lg.lifeContext.Tps {
-		// lg.cumulativeIntervalT = 0
-		// if math.Mod(float64(lg.t), 1) != 0 {
-		// 	return
-		// }
-		if math.Mod(float64(lg.t), 60) == 59 {
-			lg.storedPixels = lg.getPixelsFromTexture(c)
-			if math.Mod(float64(lg.t), 60) == 59 {
-				lg.storedPixels[3*4*c.CellWidth+8] = 255
-				lg.storedPixels[3*4*c.CellWidth+9] = 255
-				lg.storedPixels[3*4*c.CellWidth+10] = 255
-				lg.storedPixels[3*4*c.CellWidth+11] = 255
-				lg.storedPixels[3*4*c.CellWidth+12] = 255
-				lg.storedPixels[3*4*c.CellWidth+13] = 255
-				lg.storedPixels[3*4*c.CellWidth+14] = 255
-				lg.storedPixels[3*4*c.CellWidth+15] = 255
-				lg.storedPixels[3*4*c.CellWidth+16] = 255
-				lg.storedPixels[3*4*c.CellWidth+17] = 255
-				lg.storedPixels[3*4*c.CellWidth+18] = 255
-				lg.storedPixels[3*4*c.CellWidth+19] = 255
-				lg.storedPixels[2*4*c.CellWidth+16] = 255
-				lg.storedPixels[2*4*c.CellWidth+17] = 255
-				lg.storedPixels[2*4*c.CellWidth+18] = 255
-				lg.storedPixels[2*4*c.CellWidth+19] = 255
-				lg.storedPixels[4*c.CellWidth+12] = 255
-				lg.storedPixels[4*c.CellWidth+13] = 255
-				lg.storedPixels[4*c.CellWidth+14] = 255
-				lg.storedPixels[4*c.CellWidth+15] = 255
-
-				// lg.storedPixels[0] = 255
-				// lg.storedPixels[3] = 254
-			}
-
-			lg.t++
-			lg.setPixelsInTexture(c, lg.storedPixels)
-			lg.deathFrame(c)
-			lg.swapTextures()
-			lg.drawToCanvas(c)
-
-			return
-		}
-
 		if lg.lifeContext.Paused {
 			lg.deathFrame(c)
 		} else {
@@ -305,7 +277,7 @@ func (lg *LifeGame) deathFrame(c *canvas.GameContext) {
 	gl.Uniform1i(samplerLocation, 0)
 
 	sizeLoc := gl.GetUniformLocation(program, "u_size")
-	gl.Uniform2f(sizeLoc, float32(c.CellWidth), float32(c.CellHeight))
+	gl.Uniform2f(sizeLoc, float32(lg.lifeContext.CellWidth), float32(lg.lifeContext.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
@@ -342,7 +314,7 @@ func (lg *LifeGame) lifeFrame(c *canvas.GameContext) {
 
 	boundaryLoc := gl.GetUniformLocation(program, "u_boundary_loop")
 	boundaryLoop := 0.
-	if lg.boundaryLoop {
+	if lg.lifeContext.Loop {
 		boundaryLoop = 1.
 	}
 	gl.Uniform1f(boundaryLoc, float32(boundaryLoop))
@@ -360,7 +332,7 @@ func (lg *LifeGame) lifeFrame(c *canvas.GameContext) {
 	gl.Uniform1i(samplerLocation, 0)
 
 	sizeLoc := gl.GetUniformLocation(program, "u_size")
-	gl.Uniform2f(sizeLoc, float32(c.CellWidth), float32(c.CellHeight))
+	gl.Uniform2f(sizeLoc, float32(lg.lifeContext.CellWidth), float32(lg.lifeContext.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
@@ -378,129 +350,147 @@ func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 	ctx := c.ZoomCtx
 	showCtx := c.DisplayCtx
 
-	topLeftDX := lg.lifeContext.DX - lg.zoom(c)*float32(c.CellWidth)/2
-	topLeftDY := lg.lifeContext.DY - lg.zoom(c)*float32(c.CellHeight)/2
+	// the + c.Width/2 here makes it so that the 'anchor' point for zooming in and out is at the centre of the canvas
+	topLeftDX := lg.lifeContext.DX + c.Width/2 - lg.zoom(c)*float32(lg.lifeContext.CellWidth)/2
+	topLeftDY := lg.lifeContext.DY + c.Height/2 - lg.zoom(c)*float32(lg.lifeContext.CellHeight)/2
 	// bound check DX and DY and make sure they're within a valid range to be able to draw each part of all the visible canvases.
 	for topLeftDX > 0 {
-		topLeftDX -= float32(c.CellWidth) * lg.zoom(c)
+		topLeftDX -= float32(lg.lifeContext.CellWidth) * lg.zoom(c)
 	}
 	for topLeftDY > 0 {
-		topLeftDY -= float32(c.CellHeight) * lg.zoom(c)
+		topLeftDY -= float32(lg.lifeContext.CellHeight) * lg.zoom(c)
 	}
 
 	union := webgl.Union{
-		Value: jsconv.UInt8ToJs(make([]uint8, c.CellHeight*c.CellWidth*4)),
+		Value: jsconv.UInt8ToJs(make([]uint8, lg.lifeContext.CellHeight*lg.lifeContext.CellWidth*4)),
 	}
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
-	gl.ReadPixels(0, 0, c.CellWidth, c.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	gl.ReadPixels(0, 0, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 
-	imageData := ctx.CreateImageData(c.CellWidth, c.CellHeight)
+	imageData := ctx.CreateImageData(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight)
 	imageData.Data().JSValue().Call("set", union.JSValue())
 	ctx.PutImageData(imageData, 0, 0)
+	floatWidth := c.Width   //float32(lg.lifeContext.CellWidth)
+	floatHeight := c.Height //float32(lg.lifeContext.CellWidth)
 
-	showCtx.ClearRect(0, 0, float64(c.Width), float64(c.Height))
+	showCtx.ClearRect(0, 0, float64(floatWidth), float64(floatHeight))
 	// tile horizontally if one instance of the grid does not cover the canvas
-	for currentDx := topLeftDX; currentDx < c.Width; currentDx += float32(c.CellWidth) * lg.zoom(c) {
+	for currentDx := topLeftDX; currentDx < c.Width; currentDx += float32(lg.lifeContext.CellWidth) * lg.zoom(c) {
 		// and vertically
-		for currentDy := topLeftDY; currentDy < c.Height; currentDy += float32(c.CellHeight) * lg.zoom(c) {
+		for currentDy := topLeftDY; currentDy < c.Height; currentDy += float32(lg.lifeContext.CellHeight) * lg.zoom(c) {
 			showCtx.DrawImage3(
 				webapicanvas.UnionFromJS(c.ZoomCanvas.JSValue()),
 				0, 0, // start coords in grid being captured from
-				math.Min(float64((c.Width-currentDx)/lg.zoom(c)), float64(c.Width)), math.Min(float64((c.Height-currentDy)/lg.zoom(c)), float64(c.Height)),
+				float64((c.Width-currentDx)/lg.zoom(c)), float64((c.Height-currentDy)/lg.zoom(c)),
 				float64(currentDx), float64(currentDy), // start coords in grid being displayed to
-				math.Min(float64(c.Width-currentDx), float64(c.Width*lg.zoom(c))), math.Min(float64(c.Height-currentDy), float64(c.Height*lg.zoom(c))),
+				float64(c.Width-currentDx), float64(c.Height-currentDy),
 			)
 		}
 	}
 }
 
-func (lg *LifeGame) getPixelsFromTexture(c *canvas.GameContext) []uint8 {
-	gl := c.GL
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
-	union := webgl.Union{
-		Value: jsconv.UInt8ToJs(make([]uint8, c.CellHeight*c.CellWidth*4)),
-	}
-	gl.ReadPixels(0, 0, c.CellWidth, c.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
-	// fmt.Println(union.Value.Type().String())
-	// if lg.t < 60 {
-	// 	canvas.Log(union.Value)
-	// }
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+// func (lg *LifeGame) getPixelsFromTexture(c *canvas.GameContext) []uint8 {
+// 	gl := c.GL
+// 	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
+// 	union := webgl.Union{
+// 		Value: jsconv.UInt8ToJs(make([]uint8, lg.lifeContext.CellHeight*lg.lifeContext.CellWidth*4)),
+// 	}
+// 	gl.ReadPixels(0, 0, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+// 	// fmt.Println(union.Value.Type().String())
+// 	// if lg.t < 60 {
+// 	// 	canvas.Log(union.Value)
+// 	// }
+// 	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+//
+// 	return jsconv.JsToUInt8(union.Value)
+// }
 
-	return jsconv.JsToUInt8(union.Value)
-}
-
-func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in []uint8) {
+func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in [][]bool) {
 	gl := c.GL
+	inArray := setupPixelArray(in)
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.CellWidth, c.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(in)))
+	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(inArray)))
 	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
 }
 
-func setupPixelArray(width int, height int) []uint8 {
-	if width == 5 && height == 5 {
-		return []uint8{
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		}
-	}
-
-	on := []uint8{255, 255, 255, 255}
-	off := []uint8{0, 0, 0, 0}
-	out := make([]uint8, 4*height*width)
+func emptyArray(width int, height int) [][]bool {
 	m := make([][]bool, height)
 	for i := range m {
 		m[i] = make([]bool, width)
 	}
-	// .....
-	// ..*..
-	// ...*.
-	// .***.
-	// ..... etc.
-	// m[height-1-1][2] = true
-	// m[height-2-1][3] = true
-	// m[height-3-1][1] = true
-	// m[height-3-1][2] = true
-	// m[height-3-1][3] = true
 
-	// ......*.
-	// ....*.**
-	// ....*.*.
-	// ....*...
-	// ..*.....
-	// *.*.....
-	midWidth := width/2 - 5
-	midHeight := height/2 - 3
-	m[midHeight][midWidth+6] = true
-	m[midHeight+1][midWidth+4] = true
-	m[midHeight+1][midWidth+6] = true
-	m[midHeight+1][midWidth+7] = true
-	m[midHeight+2][midWidth+6] = true
-	m[midHeight+2][midWidth+4] = true
-	m[midHeight+3][midWidth+4] = true
-	m[midHeight+4][midWidth+2] = true
-	m[midHeight+5][midWidth] = true
-	m[midHeight+5][midWidth+2] = true
+	return m
+}
 
+func randomArray(width int, height int) [][]bool {
+	m := make([][]bool, height)
+	for i := range m {
+		m[i] = make([]bool, width)
+		for j := range m[i] {
+			if rand.Float32() > 0.8 {
+				m[i][j] = true
+			}
+		}
+	}
+
+	return m
+}
+
+func setupPixelArray(m [][]bool) []uint8 {
+	on := []uint8{255, 255, 255, 255}
+	off := []uint8{0, 0, 0, 0}
+	out := make([]uint8, 4*len(m)*len(m[0]))
+	width := len(m[0])
 	for i := range m {
 		for j := range m[i] {
 			if m[i][j] {
 				out[4*(i*width+j)+0] = on[0]
-				out[4*(i*width+j)+1] = on[0]
-				out[4*(i*width+j)+2] = on[0]
-				out[4*(i*width+j)+3] = on[0]
+				out[4*(i*width+j)+1] = on[1]
+				out[4*(i*width+j)+2] = on[2]
+				out[4*(i*width+j)+3] = on[3]
 			} else {
 				out[4*(i*width+j)+0] = off[0]
-				out[4*(i*width+j)+1] = off[0]
-				out[4*(i*width+j)+2] = off[0]
-				out[4*(i*width+j)+3] = off[0]
+				out[4*(i*width+j)+1] = off[1]
+				out[4*(i*width+j)+2] = off[2]
+				out[4*(i*width+j)+3] = off[3]
 			}
 		}
 	}
 
 	return out
+}
+
+func (lg *LifeGame) Reset(c *canvas.GameContext) {
+	lg.setPixelsInTexture(c, emptyArray(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight))
+	// lg.swapTextures()
+	lg.drawToCanvas(c)
+}
+
+func (lg *LifeGame) Random(c *canvas.GameContext) {
+	lg.setPixelsInTexture(c, randomArray(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight))
+	lg.deathFrame(c)
+	lg.swapTextures()
+	lg.drawToCanvas(c)
+}
+
+func (lg *LifeGame) OpenFile(c *canvas.GameContext, path string) {
+	newArray := parser.ReadRandomFile() // TODO: should return ParsedStuff
+	if newArray == nil {
+		return
+	}
+	lg.lifeContext.CellHeight = len(newArray)
+	lg.lifeContext.CellWidth = len(newArray[0])
+	lg.lifeContext.Zoom = 2
+	lg.lifeContext.DX = 0
+	lg.lifeContext.DY = 0
+	lg.ResizeBuffers(c)
+
+	lg.setPixelsInTexture(c, newArray)
+	fmt.Printf("width: %.2f, height: %.2f, cwidth: %d, cheight: %d, zoom: %.2f\n", c.Width, c.Height, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, lg.lifeContext.Zoom)
+}
+
+func (lg *LifeGame) ResizeBuffers(c *canvas.GameContext) {
+	canvas.InitCanvas(c)
+	lg.createBuffers(c)
 }

@@ -13,9 +13,13 @@ type LifeContext struct {
 	AnchorZoom          float32
 	Zooming             bool
 
+	CellHeight int
+	CellWidth  int
+
 	Zoom           float32
 	Paused         bool
 	SimulationSize int
 	Tps            int
 	NeedsRestart   bool // will probably remove this one
+	Loop           bool
 }

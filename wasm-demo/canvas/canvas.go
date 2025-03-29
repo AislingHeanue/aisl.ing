@@ -31,19 +31,20 @@ func InitCanvas(c *GameContext) {
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
 
 	if c.SecondaryCanvas != nil {
-		c.SecondaryCanvas.SetAttribute("height", fmt.Sprint(c.CellHeight))
-		c.SecondaryCanvas.SetAttribute("width", fmt.Sprint(c.CellWidth))
+		cellWidth, cellHeight := c.Animator.Dimensions()
+		c.SecondaryCanvas.SetAttribute("height", fmt.Sprint(cellHeight))
+		c.SecondaryCanvas.SetAttribute("width", fmt.Sprint(cellWidth))
 		secondaryHTML := canvas.HTMLCanvasElementFromWrapper(c.SecondaryCanvas)
 
-		c.ZoomCanvas.SetAttribute("height", fmt.Sprint(c.Height))
-		c.ZoomCanvas.SetAttribute("width", fmt.Sprint(c.Width))
+		c.ZoomCanvas.SetAttribute("height", fmt.Sprint(cellHeight)) //c.Height)) //cellHeight))
+		c.ZoomCanvas.SetAttribute("width", fmt.Sprint(cellWidth))   //c.Width))   //cellWidth))
 		zoomHTML := canvas.HTMLCanvasElementFromWrapper(c.ZoomCanvas)
 
 		c.GL = webgl.RenderingContextFromWrapper(secondaryHTML.GetContext("webgl", map[string]any{"alpha": false}))
 		c.ZoomCtx = canvas.CanvasRenderingContext2DFromWrapper(zoomHTML.GetContext("2d", map[string]any{"alpha": false}))
 		c.DisplayCtx = canvas.CanvasRenderingContext2DFromWrapper(cvsHTML.GetContext("2d", map[string]any{"alpha": false}))
 		c.DisplayCtx.SetImageSmoothingEnabled(false)
-		c.GL.Viewport(0, 0, int(c.CellWidth), int(c.CellHeight))
+		c.GL.Viewport(0, 0, int(cellWidth), int(cellHeight))
 	} else {
 		c.GL = webgl.RenderingContextFromWrapper(cvsHTML.GetContext("webgl", map[string]any{"alpha": false}))
 		c.GL.Viewport(0, 0, int(c.Width), int(c.Height))

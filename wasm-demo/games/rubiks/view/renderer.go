@@ -79,6 +79,10 @@ func (cc *CubeRenderer) Init(c *canvas.GameContext) {
 	}
 }
 
+func (cc CubeRenderer) Dimensions() (int, int) {
+	return 0, 0
+}
+
 func (cc CubeRenderer) InitListeners(c *canvas.GameContext) {
 	cubeController.InitListeners(c, cc.CubeCubeContext)
 }

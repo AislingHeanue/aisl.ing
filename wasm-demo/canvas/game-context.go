@@ -15,6 +15,8 @@ type Animator interface {
 	Init(*GameContext)
 	InitListeners(*GameContext)
 	Render(*GameContext)
+	// returns CellHeight, CellWidth
+	Dimensions() (int, int)
 }
 
 type GameContext struct {
@@ -25,9 +27,6 @@ type GameContext struct {
 	Document        *webapi.Document
 	Window          *webapi.Window
 	ResolutionScale float32
-
-	CellHeight int
-	CellWidth  int
 
 	Height     float32
 	Width      float32

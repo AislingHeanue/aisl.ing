@@ -5,9 +5,10 @@ import (
 	"math"
 	"syscall/js"
 
+	"github.com/gowebapi/webapi/dom/domcore"
+
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/model"
-	"github.com/gowebapi/webapi/dom/domcore"
 )
 
 type ListenerKind int
@@ -16,7 +17,6 @@ const (
 	CLICK ListenerKind = iota
 	MOUSE_MOVE
 	MOUSE_UP
-	RESIZE
 	DIMENSION_CHANGED
 	TOUCH
 	TOUCH_MOVE
@@ -24,25 +24,33 @@ const (
 	KEYBOARD
 )
 
-func InitListeners(c *canvas.GameContext, lc *model.LifeContext) {
-	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&LifeListener{c, lc, CLICK}), nil)
-	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_MOVE}), nil)
-	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP}), nil)
-	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP}), nil)
+func InitListeners(c *canvas.GameContext, lc *model.LifeContext, controller LifeController) {
+	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&LifeListener{c, lc, CLICK, controller}), nil)
+	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_MOVE, controller}), nil)
+	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}), nil)
+	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}), nil)
 
-	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&LifeListener{c, lc, TOUCH}), nil)
-	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_MOVE}), nil)
-	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP}), nil)
-	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP}), nil)
+	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&LifeListener{c, lc, TOUCH, controller}), nil)
+	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_MOVE, controller}), nil)
+	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}), nil)
+	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}), nil)
 
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&LifeListener{c, lc, KEYBOARD}), nil)
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&LifeListener{c, lc, KEYBOARD, controller}), nil)
 	// registerButtons(c, lc)
 }
 
 type LifeListener struct {
-	c    *canvas.GameContext
-	lc   *model.LifeContext
-	kind ListenerKind
+	c          *canvas.GameContext
+	lc         *model.LifeContext
+	kind       ListenerKind
+	controller LifeController
+}
+
+type LifeController interface {
+	Reset(c *canvas.GameContext)
+	Random(c *canvas.GameContext)
+	ResizeBuffers(c *canvas.GameContext)
+	OpenFile(c *canvas.GameContext, path string)
 }
 
 func (l *LifeListener) HandleEvent(e *domcore.Event) {
@@ -60,7 +68,7 @@ func (l *LifeListener) HandleEvent(e *domcore.Event) {
 	case TOUCH_UP:
 		touchUp(l.lc)
 	case KEYBOARD:
-		handleKeyboard(l.c, l.lc, e)
+		handleKeyboard(l.c, l.lc, l.controller, e)
 	}
 }
 
@@ -109,8 +117,7 @@ func dragCanvasTouch(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Ev
 	}
 	if lc.Zooming {
 		distance := getDistanceBetweenTouches(c, e)
-		lc.Zoom = lc.AnchorZoom * (distance / lc.AnchorPinchDistance) //(lc.AnchorPinchDistance - distance) / distance
-		// zoom stuff
+		setZoom(lc, lc.AnchorZoom*(distance/lc.AnchorPinchDistance))
 	}
 }
 
@@ -144,22 +151,54 @@ func getDistanceBetweenTouches(c *canvas.GameContext, e *domcore.Event) float32 
 	return float32(math.Hypot(float64(x1-x2), float64(y1-y2)))
 }
 
-func handleKeyboard(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
+func handleKeyboard(c *canvas.GameContext, lc *model.LifeContext, controller LifeController, e *domcore.Event) {
 	switch e.JSValue().Get("key").String() {
+	// pause simulation
 	case " ":
-		e.PreventDefault()
 		lc.Paused = !lc.Paused
+		e.PreventDefault()
+	// zoom out
 	case "-":
-		lc.Zoom *= 9. / 10.
-		lc.DX = (lc.DX-c.Width/2)*9./10. + c.Width/2
-		lc.DY = (lc.DY-c.Height/2)*9./10. + c.Height/2
-		fmt.Println(lc.Zoom)
+		setZoom(lc, 9/10.*lc.Zoom)
+	// zoom in (+)
 	case "=":
-		lc.Zoom *= 10. / 9.
-		lc.DX = (lc.DX-c.Width/2)*10./9. + c.Width/2
-		lc.DY = (lc.DY-c.Height/2)*10./9. + c.Height/2
-		fmt.Println(lc.Zoom)
+		setZoom(lc, 10/9.*lc.Zoom)
+	// reset zoom
+	case "0":
+		setZoom(lc, 1)
+	// recentre
+	case "o":
+		lc.DX = 0
+		lc.DY = 0
+	// set simulation size to 210
+	case "b":
+		lc.CellWidth = 500
+		lc.CellHeight = 500
+		controller.ResizeBuffers(c)
+		controller.Reset(c)
+	case "c":
+		controller.Reset(c)
+	case "r":
+		controller.Random(c)
+	case "l":
+		lc.Loop = !lc.Loop
+	case "p":
+		controller.OpenFile(c, "oversized/41dots.lif")
 	}
-	// controller := CubeController{lc}
-	// controller.QueueEvent(Turn(face + prime))
+}
+
+func setZoom(lc *model.LifeContext, zoom float32) {
+	oldZoom := lc.Zoom
+	// cap max zoom in
+	if zoom > oldZoom && zoom > 20 {
+		return
+	}
+	// cap max zoom out
+	if zoom < oldZoom && zoom < 0.2 {
+		return
+	}
+	lc.Zoom = zoom
+	// scale DX and DY so that the 'anchor' of the zoom is always in the centre of the screen.
+	lc.DX *= zoom / oldZoom
+	lc.DY *= zoom / oldZoom
 }
