@@ -15,7 +15,7 @@ import (
 var files embed.FS
 
 var headerLineRe *regexp.Regexp = regexp.MustCompile("x = ([0-9]+), y = ([0-9]+)(?:, rule = (.*))?")
-var dataLineRe *regexp.Regexp = regexp.MustCompile("([0-9]+)?([bo])")
+var dataLineRe *regexp.Regexp = regexp.MustCompile("([0-9]+)?([bo\\$])")
 
 type ParsedStuff struct {
 	x                 int
@@ -39,6 +39,9 @@ func ReadRandomFile() [][]bool {
 		if !subfolderEntry.IsDir() {
 			continue
 		}
+		// if subfolderEntry.Name() != "synthesis" {
+		// 	continue
+		// }
 		subfolder, err := files.ReadDir(filepath.Join("patterns", subfolderEntry.Name()))
 
 		if err != nil {
@@ -52,6 +55,7 @@ func ReadRandomFile() [][]bool {
 		}
 	}
 	choice := rand.Intn(len(fileNames))
+	_ = choice
 
 	return ReadFile(fileNames[choice])
 }
@@ -78,7 +82,7 @@ func ReadFile(path string) [][]bool {
 }
 
 func readLines(lines []string, parsedStuff *ParsedStuff) {
-	dataLines := []string{}
+	dataLine := ""
 	for i, line := range lines {
 		if len(line) == 0 {
 			continue
@@ -108,33 +112,35 @@ func readLines(lines []string, parsedStuff *ParsedStuff) {
 		parsedStuff.paddedX = parsedStuff.x + 2*parsedStuff.calculatedPadding
 		parsedStuff.paddedY = parsedStuff.y + 2*parsedStuff.calculatedPadding
 
-		println(parsedStuff.paddedX)
 		// init the data 2d array
 		parsedStuff.data = make([][]bool, parsedStuff.paddedY)
 		for y := range parsedStuff.paddedY {
 			parsedStuff.data[y] = make([]bool, parsedStuff.paddedX)
 		}
 
-		dataLines = strings.Split(strings.Split(strings.Join(lines[i+1:], ""), "!")[0], "$")
+		dataLine = strings.Split(strings.Join(lines[i+1:], ""), "!")[0]
 		break
 	}
 
-	for j, dataLine := range dataLines {
-		k := 0
-		encodingEntries := dataLineRe.FindAllStringSubmatch(dataLine, -1)
-		for _, entry := range encodingEntries {
-			// println(fmt.Sprintf("%d: %s\n", p, entry[0]))
-			length := 1
-			if entry[1] != "" {
-				length, _ = strconv.Atoi(entry[1])
-			}
+	encodingEntries := dataLineRe.FindAllStringSubmatch(dataLine, -1)
+	xPos := 0
+	yPos := 0
+	for _, entry := range encodingEntries {
+		length := 1
+		if entry[1] != "" {
+			length, _ = strconv.Atoi(entry[1])
+		}
+		switch entry[2] {
+		case "o":
 			for range length {
-				if entry[2] == "o" {
-					parsedStuff.data[j+parsedStuff.calculatedPadding][k+parsedStuff.calculatedPadding] = true
-				}
-				k += 1
+				parsedStuff.data[yPos+parsedStuff.calculatedPadding][xPos+parsedStuff.calculatedPadding] = true
+				xPos += 1
 			}
-
+		case "$":
+			yPos += length
+			xPos = 0
+		case "b":
+			xPos += length
 		}
 	}
 

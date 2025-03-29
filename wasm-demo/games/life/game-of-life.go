@@ -481,7 +481,7 @@ func (lg *LifeGame) OpenFile(c *canvas.GameContext, path string) {
 	}
 	lg.lifeContext.CellHeight = len(newArray)
 	lg.lifeContext.CellWidth = len(newArray[0])
-	lg.lifeContext.Zoom = 2
+	lg.lifeContext.Zoom = 3
 	lg.lifeContext.DX = 0
 	lg.lifeContext.DY = 0
 	lg.ResizeBuffers(c)
