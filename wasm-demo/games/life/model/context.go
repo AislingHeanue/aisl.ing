@@ -22,4 +22,6 @@ type LifeContext struct {
 	Tps            int
 	NeedsRestart   bool // will probably remove this one
 	Loop           bool
+
+	OpenFileName string
 }

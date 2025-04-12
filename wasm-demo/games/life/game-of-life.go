@@ -55,6 +55,7 @@ type LifeGame struct {
 // frontend stuff
 // TODO: simulation size slider (with a reasonable default, which changes based on selected wiki design) (causes re-init if used manually)
 // TODO: zoom slider
+// TODO: step button
 // TODO: random button, clear button
 
 // TIME stuff
@@ -475,10 +476,27 @@ func (lg *LifeGame) Random(c *canvas.GameContext) {
 }
 
 func (lg *LifeGame) OpenFile(c *canvas.GameContext, path string) {
-	newArray := parser.ReadRandomFile() // TODO: should return ParsedStuff
+	newArray := parser.ReadFile(path)
 	if newArray == nil {
 		return
 	}
+	lg.lifeContext.CellHeight = len(newArray)
+	lg.lifeContext.CellWidth = len(newArray[0])
+	lg.lifeContext.Zoom = 3
+	lg.lifeContext.DX = 0
+	lg.lifeContext.DY = 0
+	lg.ResizeBuffers(c)
+
+	lg.setPixelsInTexture(c, newArray)
+	fmt.Printf("width: %.2f, height: %.2f, cwidth: %d, cheight: %d, zoom: %.2f\n", c.Width, c.Height, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, lg.lifeContext.Zoom)
+}
+
+func (lg *LifeGame) OpenRandomFile(c *canvas.GameContext) {
+	newArray, path := parser.ReadRandomFile() // TODO: should return ParsedStuff
+	if newArray == nil {
+		return
+	}
+	lg.lifeContext.OpenFileName = path
 	lg.lifeContext.CellHeight = len(newArray)
 	lg.lifeContext.CellWidth = len(newArray[0])
 	lg.lifeContext.Zoom = 3
@@ -494,3 +512,4 @@ func (lg *LifeGame) ResizeBuffers(c *canvas.GameContext) {
 	canvas.InitCanvas(c)
 	lg.createBuffers(c)
 }
+

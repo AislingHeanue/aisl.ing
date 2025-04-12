@@ -27,11 +27,13 @@ type ParsedStuff struct {
 	calculatedPadding int
 }
 
-func ReadRandomFile() [][]bool {
+func ReadRandomFile() ([][]bool, string) {
+	// FIXME: bring back the oversized folder from the collection, some of them are probably cool.
+	// actually oversized files can be pruned later
 	folder, err := files.ReadDir("patterns")
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, ""
 	}
 
 	fileNames := []string{}
@@ -46,7 +48,7 @@ func ReadRandomFile() [][]bool {
 
 		if err != nil {
 			fmt.Println(err)
-			return nil
+			return nil, ""
 		}
 
 		for _, pattern := range subfolder {
@@ -55,9 +57,9 @@ func ReadRandomFile() [][]bool {
 		}
 	}
 	choice := rand.Intn(len(fileNames))
-	_ = choice
 
-	return ReadFile(fileNames[choice])
+	fmt.Println(fileNames[choice])
+	return ReadFile(fileNames[choice]), fileNames[choice]
 }
 
 func ReadFile(path string) [][]bool {

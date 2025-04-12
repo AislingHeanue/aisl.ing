@@ -51,6 +51,7 @@ type LifeController interface {
 	Random(c *canvas.GameContext)
 	ResizeBuffers(c *canvas.GameContext)
 	OpenFile(c *canvas.GameContext, path string)
+	OpenRandomFile(c *canvas.GameContext)
 }
 
 func (l *LifeListener) HandleEvent(e *domcore.Event) {
@@ -183,7 +184,9 @@ func handleKeyboard(c *canvas.GameContext, lc *model.LifeContext, controller Lif
 	case "l":
 		lc.Loop = !lc.Loop
 	case "p":
-		controller.OpenFile(c, "oversized/41dots.lif")
+		controller.OpenRandomFile(c)
+	case "k":
+		controller.OpenFile(c, lc.OpenFileName)
 	}
 }
 
@@ -202,3 +205,4 @@ func setZoom(lc *model.LifeContext, zoom float32) {
 	lc.DX *= zoom / oldZoom
 	lc.DY *= zoom / oldZoom
 }
+
