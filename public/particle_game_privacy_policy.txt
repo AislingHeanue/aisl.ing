@@ -1,0 +1,31 @@
+Privacy Policy for Particle Game
+This privacy policy explains how I handles information in the Particle Game application ("the App").
+
+1.  No Personal Data Collection
+We are committed to privacy. The App does not collect, use, or share any personal information. This means we do not collect:
+
+- Names
+- Addresses
+- Email addresses
+- Phone numbers
+- Photos
+- Location data
+
+Any other information that could be used to identify an individual.
+
+2.  No Internet Access
+The App does not connect to the internet. Therefore, no data is transmitted to us or any third party.
+
+3.  In-App Purchases/Advertising
+The App does not contain any in-app purchases or advertising.
+
+4.  Third-Party Services
+The App does not use any third-party services that collect personal information.
+
+5.  Changes to This Privacy Policy
+We may update this privacy policy from time to time. Any changes will be posted within the App. We encourage you to review this privacy policy periodically. Your continued use of the App after any changes indicates your acceptance of the new policy. Because we collect no personal information, notification of changes will occur via posting the updated policy within the app itself.
+
+6.  Contact Us
+If you have any questions about this privacy policy, please contact me at:
+Aisling Heanue
+aislingheanue@gmail.com
