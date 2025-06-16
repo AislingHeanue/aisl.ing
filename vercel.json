@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "particles",
+      "destination": "market://details?id=ing.aisl.particle_game",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
