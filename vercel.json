@@ -4,6 +4,18 @@
     {
       "source": "/particles",
       "destination": "market://details?id=ing.aisl.particle_game",
+      "permanent": true,
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": ".*Android.*"
+        }
+      ]
+    },
+    {
+      "source": "/particles",
+      "destination": "https://github.com/AislingHeanue/particle_game",
       "permanent": true
     }
   ],
