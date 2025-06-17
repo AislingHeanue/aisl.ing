@@ -205,4 +205,3 @@ func setZoom(lc *model.LifeContext, zoom float32) {
 	lc.DX *= zoom / oldZoom
 	lc.DY *= zoom / oldZoom
 }
-

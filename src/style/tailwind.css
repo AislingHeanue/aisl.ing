@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+/*
+* my saviour:
+* http://stackoverflow.com/questions/79633687/tailwind-dark-mode-not-working-even-after-configuring-dark-classes-are-always
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@plugin 'tailwind-scrollbar'

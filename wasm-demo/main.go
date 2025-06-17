@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gowebapi/webapi"
@@ -10,7 +9,7 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/model"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/parser"
+
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 )
 
@@ -46,8 +45,8 @@ func main() {
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
 	}
-	parser.ReadFile("oversized/41dots.lif")
-	fmt.Printf("%#v", os.Args)
+	// parser.ReadFile("oversized/41dots.lif")
+	// fmt.Printf("%#v", os.Args)
 	c := contexts[os.Args[0]]
 
 	canvas.InitCanvas(&c)

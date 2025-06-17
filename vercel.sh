@@ -8,7 +8,7 @@ export PATH="$PATH:$(pwd)/go/bin"
 rm go.tgz
 
 echo "Running prebuild..."
-npm run prebuild
+pnpm run prebuild
 
 echo "Running build..."
-vite build
+pnpm run build
