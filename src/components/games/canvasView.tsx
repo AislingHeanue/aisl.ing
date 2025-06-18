@@ -38,8 +38,6 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               </button>
             </div>
             <div className="lg:mb-30 lg:scrollbar lg:scrollbar-thumb-stone-600 lg:scrollbar-track-stone-700 lg:pr-3 lg:overflow-y-auto col-span-3 align-top" >
-              {/* {" "} */}
-              {/* Prevents a really dumb overscroll issue that I do not understand, maybe fixed now */}
               {controller}
             </div>
           </div>
