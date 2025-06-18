@@ -1,8 +1,6 @@
 package canvas
 
 import (
-	"syscall/js"
-
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/dom"
 	"github.com/gowebapi/webapi/graphics/webgl"
@@ -35,8 +33,4 @@ type GameContext struct {
 	GL         *webgl.RenderingContext
 	ZoomCtx    *canvas.CanvasRenderingContext2D
 	DisplayCtx *canvas.CanvasRenderingContext2D
-}
-
-func Log(v js.Value) {
-	js.Global().Get("console").Call("log", v)
 }

@@ -3,6 +3,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
 	// output: 'export', // single-page application
 	distDir: './dist',
+	reactStrictMode: true,
 	async redirects() {
 		return [
 			{

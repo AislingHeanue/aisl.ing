@@ -15,13 +15,16 @@ export default function PortfolioItem({ title, summary, imgUrl, stack, link, int
       href={link}
       target={internal ? "_self" : "_blank"}
       rel={internal ? "" : "noopener"}
-      className="border-2 border-stone-900 dark:border-white rounded-md overflow-hidden"
+      className="border-2 relative border-stone-900 dark:border-white rounded-md overflow-hidden"
     >
-      <Image
-        src={imgUrl}
-        alt="portfolio"
-        className="w-full h-52 object-cover cursor-pointer"
-      />
+      <div className="w-full relative h-52 cursor-pointer">
+        <Image
+          src={imgUrl}
+          fill={true}
+          alt="portfolio"
+          className="object-cover"
+        />
+      </div>
       <div className="w-full p-4">
         <h3 className="text-lg md:text-xl mb-2 md:mb-3 dark:text-white font-semibold">
           {title}

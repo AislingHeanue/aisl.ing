@@ -31,8 +31,8 @@ func PerspectiveMatrix(fov float32, ratio float32, nearZ float32, farZ float32) 
 
 func (m Mat4) Scale(c float32) *Mat4 {
 	out := Mat4{}
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
+	for i := range 4 {
+		for j := range 4 {
 			out[i][j] = c * m[i][j]
 		}
 	}
@@ -95,3 +95,4 @@ func getRotationMat4(angle float32, axis Axis) Mat4 {
 		return Mat4{}
 	}
 }
+

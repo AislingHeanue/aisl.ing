@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"math"
-	"syscall/js"
 
 	"github.com/gowebapi/webapi/dom/domcore"
 
@@ -57,7 +56,7 @@ type LifeController interface {
 func (l *LifeListener) HandleEvent(e *domcore.Event) {
 	switch l.kind {
 	case CLICK:
-		click(l.c, l.lc, e)
+		click(l.lc, e)
 	case MOUSE_MOVE:
 		dragCanvas(l.c, l.lc, e)
 	case MOUSE_UP:
@@ -73,7 +72,7 @@ func (l *LifeListener) HandleEvent(e *domcore.Event) {
 	}
 }
 
-func click(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
+func click(lc *model.LifeContext, e *domcore.Event) {
 	lc.AnchorX, lc.AnchorY = getRelativeMousePosition(e)
 	lc.AnchorDX = lc.DX
 	lc.AnchorDY = lc.DY
@@ -87,11 +86,11 @@ func touch(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
 		lc.Zooming = true
 		// don't drag and zoom at the same time because it's probably complicated
 		lc.MouseDown = false
-		lc.AnchorPinchDistance = getDistanceBetweenTouches(c, e)
+		lc.AnchorPinchDistance = getDistanceBetweenTouches(e)
 		lc.AnchorZoom = lc.Zoom
 		e.PreventDefault()
 	} else {
-		lc.AnchorX, lc.AnchorY = getRelativeTouchPosition(c, e.JSValue().Get("touches").Get("0"))
+		lc.AnchorX, lc.AnchorY = getRelativeTouchPosition(c, e)
 		lc.AnchorDX = lc.DX
 		lc.AnchorDY = lc.DY
 		lc.MouseDown = true
@@ -112,12 +111,12 @@ func dragCanvas(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) 
 
 func dragCanvasTouch(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
 	if lc.MouseDown {
-		mouseX, mouseY := getRelativeTouchPosition(c, e.JSValue().Get("touches").Get("0"))
+		mouseX, mouseY := getRelativeTouchPosition(c, e)
 		lc.DX = (lc.AnchorDX - 3*(lc.AnchorX-mouseX)/c.ResolutionScale)
 		lc.DY = (lc.AnchorDY - 3*(lc.AnchorY-mouseY)/c.ResolutionScale)
 	}
 	if lc.Zooming {
-		distance := getDistanceBetweenTouches(c, e)
+		distance := getDistanceBetweenTouches(e)
 		setZoom(lc, lc.AnchorZoom*(distance/lc.AnchorPinchDistance))
 	}
 }
@@ -138,17 +137,20 @@ func getRelativeMousePosition(e *domcore.Event) (float32, float32) {
 	return float32(relativeX), float32(relativeY)
 }
 
-func getRelativeTouchPosition(c *canvas.GameContext, touch js.Value) (float32, float32) {
+func getRelativeTouchPosition(c *canvas.GameContext, e *domcore.Event) (float32, float32) {
 	rect := c.CvsElement.JSValue().Call("getBoundingClientRect")
+	touch := e.JSValue().Get("touches").Get("0")
 	offsetX := touch.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touch.Get("clientY").Float() - rect.Get("top").Float()
 	return float32(offsetX), float32(offsetY)
 }
 
-func getDistanceBetweenTouches(c *canvas.GameContext, e *domcore.Event) float32 {
+func getDistanceBetweenTouches(e *domcore.Event) float32 {
 	touches := e.JSValue().Get("touches")
-	x1, y1 := getRelativeTouchPosition(c, touches.Get("0"))
-	x2, y2 := getRelativeTouchPosition(c, touches.Get("1"))
+	x1 := touches.Get("0").Get("clientX").Float()
+	y1 := touches.Get("0").Get("clientY").Float()
+	x2 := touches.Get("1").Get("clientX").Float()
+	y2 := touches.Get("1").Get("clientY").Float()
 	return float32(math.Hypot(float64(x1-x2), float64(y1-y2)))
 }
 
@@ -205,3 +207,4 @@ func setZoom(lc *model.LifeContext, zoom float32) {
 	lc.DX *= zoom / oldZoom
 	lc.DY *= zoom / oldZoom
 }
+

@@ -159,7 +159,6 @@ func (lg *LifeGame) createShaders(c *canvas.GameContext) {
 }
 
 func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
-	gl := c.GL
 	vertexArray := []float32{
 		-1.0, -1.0,
 		1.0, -1.0,
@@ -170,10 +169,10 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	}
 
 	vertices := jsconv.Float32ToJs(vertexArray)
-	vertexBuffer := gl.CreateBuffer()
-	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
-	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
-	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
+	vertexBuffer := c.GL.CreateBuffer()
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
+	c.GL.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 	lg.vertexBuffer = vertexBuffer
 	lg.vCount = 6
 
@@ -187,40 +186,40 @@ func (lg *LifeGame) createBuffers(c *canvas.GameContext) {
 	}
 
 	textureCorners := jsconv.Float32ToJs(textureArray)
-	textureBuffer := gl.CreateBuffer()
-	gl.BindBuffer(webgl.ARRAY_BUFFER, textureBuffer)
-	gl.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(textureCorners), webgl.STATIC_DRAW)
-	gl.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
+	textureBuffer := c.GL.CreateBuffer()
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, textureBuffer)
+	c.GL.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(textureCorners), webgl.STATIC_DRAW)
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 	lg.textureBuffer = textureBuffer
 
 	pixels := randomArray(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight)
 	pixelsArray := setupPixelArray(pixels)
 
-	lg.readTexture = gl.CreateTexture()
-	gl.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, int(webgl.NEAREST))
+	lg.readTexture = c.GL.CreateTexture()
+	c.GL.BindTexture(webgl.TEXTURE_2D, lg.readTexture)
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, int(webgl.NEAREST))
 
-	lg.writeTexture = gl.CreateTexture()
-	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixelsArray)))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
-	gl.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, int(webgl.NEAREST))
+	lg.writeTexture = c.GL.CreateTexture()
+	c.GL.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(pixelsArray)))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, int(webgl.NEAREST))
 
-	lg.writeFrameBuffer = gl.CreateFramebuffer()
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.writeFrameBuffer)
-	gl.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, lg.readTexture, 0)
-	lg.readFrameBuffer = gl.CreateFramebuffer()
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
-	gl.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, lg.writeTexture, 0)
+	lg.writeFrameBuffer = c.GL.CreateFramebuffer()
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, lg.writeFrameBuffer)
+	c.GL.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, lg.readTexture, 0)
+	lg.readFrameBuffer = c.GL.CreateFramebuffer()
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
+	c.GL.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, lg.writeTexture, 0)
 
-	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 
 	fmt.Println("made some buffers")
 }
@@ -254,30 +253,29 @@ func (lg *LifeGame) Render(c *canvas.GameContext) {
 
 func (lg *LifeGame) deathFrame(c *canvas.GameContext) {
 	gl := c.GL
-	program := lg.deathProgram
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.writeFrameBuffer)
 
 	gl.ClearColor(0.0, 0.0, 1.0, 1.0)
 	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
-	vPosition := gl.GetAttribLocation(program, "a_position")
+	vPosition := gl.GetAttribLocation(lg.deathProgram, "a_position")
 	// point the program to the vertex buffer object we've bound
 	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vPosition))
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
-	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
+	tPosition := gl.GetAttribLocation(lg.deathProgram, "a_tex_coord")
 	// point the program to the vertex buffer object we've bound
 	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(tPosition))
-	gl.UseProgram(program)
-	decayLoc := gl.GetUniformLocation(program, "u_decay")
+	gl.UseProgram(lg.deathProgram)
+	decayLoc := gl.GetUniformLocation(lg.deathProgram, "u_decay")
 	gl.Uniform1f(decayLoc, 0.66/float32(lg.trailLength))
 
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	samplerLocation := gl.GetUniformLocation(program, "u_sampler")
+	samplerLocation := gl.GetUniformLocation(lg.deathProgram, "u_sampler")
 	gl.Uniform1i(samplerLocation, 0)
 
-	sizeLoc := gl.GetUniformLocation(program, "u_size")
+	sizeLoc := gl.GetUniformLocation(lg.deathProgram, "u_size")
 	gl.Uniform2f(sizeLoc, float32(lg.lifeContext.CellWidth), float32(lg.lifeContext.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
@@ -292,47 +290,46 @@ func (lg *LifeGame) swapTextures() {
 
 func (lg *LifeGame) lifeFrame(c *canvas.GameContext) {
 	gl := c.GL
-	program := lg.lifeProgram
 	// lg.swapTextures()
 	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.writeFrameBuffer)
 
 	gl.ClearColor(0.0, 0.0, 1.0, 1.0)
 	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.vertexBuffer)
-	vPosition := gl.GetAttribLocation(program, "a_position")
+	vPosition := gl.GetAttribLocation(lg.lifeProgram, "a_position")
 	// point the program to the vertex buffer object we've bound
 	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vPosition))
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, lg.textureBuffer)
-	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
+	tPosition := gl.GetAttribLocation(lg.lifeProgram, "a_tex_coord")
 	// point the program to the vertex buffer object we've bound
 	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(tPosition))
-	gl.UseProgram(program)
+	gl.UseProgram(lg.lifeProgram)
 
-	decayLoc := gl.GetUniformLocation(program, "u_decay")
+	decayLoc := gl.GetUniformLocation(lg.lifeProgram, "u_decay")
 	gl.Uniform1f(decayLoc, 0.66/float32(lg.trailLength))
 
-	boundaryLoc := gl.GetUniformLocation(program, "u_boundary_loop")
+	boundaryLoc := gl.GetUniformLocation(lg.lifeProgram, "u_boundary_loop")
 	boundaryLoop := 0.
 	if lg.lifeContext.Loop {
 		boundaryLoop = 1.
 	}
 	gl.Uniform1f(boundaryLoc, float32(boundaryLoop))
 
-	initialDecayLoc := gl.GetUniformLocation(program, "u_initial_decay")
+	initialDecayLoc := gl.GetUniformLocation(lg.lifeProgram, "u_initial_decay")
 	gl.Uniform1f(initialDecayLoc, 0.33)
 
-	deadColourLoc := gl.GetUniformLocation(program, "u_new_dead_colour")
+	deadColourLoc := gl.GetUniformLocation(lg.lifeProgram, "u_new_dead_colour")
 
 	r, g, b := lg.getDeadColour()
 	gl.Uniform3f(deadColourLoc, r, g, b)
 
 	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	samplerLocation := gl.GetUniformLocation(program, "u_sampler")
+	samplerLocation := gl.GetUniformLocation(lg.lifeProgram, "u_sampler")
 	gl.Uniform1i(samplerLocation, 0)
 
-	sizeLoc := gl.GetUniformLocation(program, "u_size")
+	sizeLoc := gl.GetUniformLocation(lg.lifeProgram, "u_size")
 	gl.Uniform2f(sizeLoc, float32(lg.lifeContext.CellWidth), float32(lg.lifeContext.CellHeight))
 
 	gl.DrawArrays(webgl.TRIANGLES, 0, lg.vCount)
@@ -347,10 +344,6 @@ func (lg *LifeGame) getDeadColour() (float32, float32, float32) {
 }
 
 func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
-	gl := c.GL
-	ctx := c.ZoomCtx
-	showCtx := c.DisplayCtx
-
 	// the + c.Width/2 here makes it so that the 'anchor' point for zooming in and out is at the centre of the canvas
 	topLeftDX := lg.lifeContext.DX + c.Width/2 - lg.zoom(c)*float32(lg.lifeContext.CellWidth)/2
 	topLeftDY := lg.lifeContext.DY + c.Height/2 - lg.zoom(c)*float32(lg.lifeContext.CellHeight)/2
@@ -365,22 +358,22 @@ func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 	union := webgl.Union{
 		Value: jsconv.UInt8ToJs(make([]uint8, lg.lifeContext.CellHeight*lg.lifeContext.CellWidth*4)),
 	}
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
-	gl.ReadPixels(0, 0, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
-	gl.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, lg.readFrameBuffer)
+	c.GL.ReadPixels(0, 0, lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 
-	imageData := ctx.CreateImageData(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight)
+	imageData := c.ZoomCtx.CreateImageData(lg.lifeContext.CellWidth, lg.lifeContext.CellHeight)
 	imageData.Data().JSValue().Call("set", union.JSValue())
-	ctx.PutImageData(imageData, 0, 0)
+	c.ZoomCtx.PutImageData(imageData, 0, 0)
 	floatWidth := c.Width   //float32(lg.lifeContext.CellWidth)
 	floatHeight := c.Height //float32(lg.lifeContext.CellWidth)
 
-	showCtx.ClearRect(0, 0, float64(floatWidth), float64(floatHeight))
+	c.DisplayCtx.ClearRect(0, 0, float64(floatWidth), float64(floatHeight))
 	// tile horizontally if one instance of the grid does not cover the canvas
 	for currentDx := topLeftDX; currentDx < c.Width; currentDx += float32(lg.lifeContext.CellWidth) * lg.zoom(c) {
 		// and vertically
 		for currentDy := topLeftDY; currentDy < c.Height; currentDy += float32(lg.lifeContext.CellHeight) * lg.zoom(c) {
-			showCtx.DrawImage3(
+			c.DisplayCtx.DrawImage3(
 				webapicanvas.UnionFromJS(c.ZoomCanvas.JSValue()),
 				0, 0, // start coords in grid being captured from
 				float64((c.Width-currentDx)/lg.zoom(c)), float64((c.Height-currentDy)/lg.zoom(c)),
@@ -408,11 +401,9 @@ func (lg *LifeGame) drawToCanvas(c *canvas.GameContext) {
 // }
 
 func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in [][]bool) {
-	gl := c.GL
-	inArray := setupPixelArray(in)
-	gl.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	gl.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(inArray)))
-	gl.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+	c.GL.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.lifeContext.CellWidth, lg.lifeContext.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(setupPixelArray(in))))
+	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
 }
 
 func emptyArray(width int, height int) [][]bool {
@@ -512,4 +503,3 @@ func (lg *LifeGame) ResizeBuffers(c *canvas.GameContext) {
 	canvas.InitCanvas(c)
 	lg.createBuffers(c)
 }
-

@@ -15,7 +15,7 @@ import (
 var files embed.FS
 
 var headerLineRe *regexp.Regexp = regexp.MustCompile("x = ([0-9]+), y = ([0-9]+)(?:, rule = (.*))?")
-var dataLineRe *regexp.Regexp = regexp.MustCompile("([0-9]+)?([bo\\$])")
+var dataLineRe *regexp.Regexp = regexp.MustCompile(`([0-9]+)?([bo\$])`)
 
 type ParsedStuff struct {
 	x                 int

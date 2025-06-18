@@ -9,8 +9,8 @@ import (
 var buttonIDs = []string{
 	"u", "r", "f", "x", "shuffle",
 	"d", "l", "b", "y", "reset",
-	"e", "m", "s", "z", "reset-camera",
-	"kilt", "superflip", "cubecube", "checkerboard", "snake",
+	"e", "m", "s", "z", "resetcam",
+	"kilt", "s-flip", "cubecube", "checker", "snake",
 }
 
 func registerButtons(c *canvas.GameContext, ccc *model.CubeCubeContext) {

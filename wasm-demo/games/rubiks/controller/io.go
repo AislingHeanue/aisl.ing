@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"strconv"
 	"strings"
-	"syscall/js"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
@@ -17,7 +15,6 @@ const (
 	MOUSE_MOVE
 	MOUSE_UP
 	RESIZE
-	DIMENSION_CHANGED
 	TOUCH
 	TOUCH_MOVE
 	TOUCH_UP
@@ -59,22 +56,20 @@ func (l *CubeListener) HandleEvent(e *domcore.Event) {
 		dragCanvasTouch(l.c, l.ccc, e)
 	case TOUCH_UP:
 		touchUp(l.ccc)
-	case DIMENSION_CHANGED:
-		handleDimension(l.c, l.ccc, e.SrcElement().JSValue())
 	case KEYBOARD:
 		handleKeyboard(l.ccc, e)
 	}
 }
 
 func click(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
-	ccc.AnchorX, ccc.AnchorY = getRelativeMousePosition(c, e.Value_JS)
+	ccc.AnchorX, ccc.AnchorY = getRelativeMousePosition(c, e)
 	ccc.AnchorAngleX = ccc.AngleX
 	ccc.AnchorAngleY = ccc.AngleY
 	ccc.MouseDown = true
 }
 
 func touch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
-	ccc.AnchorX, ccc.AnchorY = getRelativeTouchPosition(c, e.Value_JS)
+	ccc.AnchorX, ccc.AnchorY = getRelativeTouchPosition(c, e)
 	ccc.AnchorAngleX = ccc.AngleX
 	ccc.AnchorAngleY = ccc.AngleY
 	ccc.MouseDown = true
@@ -85,7 +80,7 @@ func touch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) 
 func dragCanvas(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	if ccc.MouseDown {
 		e.PreventDefault()
-		mouseX, mouseY := getRelativeMousePosition(c, e.JSValue())
+		mouseX, mouseY := getRelativeMousePosition(c, e)
 		ccc.AngleX = (ccc.AnchorAngleX + 5*(ccc.AnchorY-mouseY)/c.ResolutionScale)
 		ccc.AngleY = (ccc.AnchorAngleY + 5*(ccc.AnchorX-mouseX)/c.ResolutionScale)
 	}
@@ -93,7 +88,7 @@ func dragCanvas(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Ev
 
 func dragCanvasTouch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	if ccc.MouseDown {
-		mouseX, mouseY := getRelativeTouchPosition(c, e.JSValue())
+		mouseX, mouseY := getRelativeTouchPosition(c, e)
 		ccc.AngleX = (ccc.AnchorAngleX + 5*(ccc.AnchorY-mouseY)/c.ResolutionScale)
 		ccc.AngleY = (ccc.AnchorAngleY + 5*(ccc.AnchorX-mouseX)/c.ResolutionScale)
 	}
@@ -108,21 +103,15 @@ func touchUp(ccc *model.CubeCubeContext) {
 	// unlockScroll(c)
 }
 
-func handleDimension(c *canvas.GameContext, ccc *model.CubeCubeContext, value js.Value) {
-	i, _ := strconv.Atoi(value.Get("value").String())
-	ccc.CubeDimension = i
-	c.Animator.Init(c)
-}
-
-func getRelativeMousePosition(c *canvas.GameContext, click js.Value) (float32, float32) {
-	relativeX := float32(click.Get("offsetX").Float()) / c.Width
-	relativeY := float32(click.Get("offsetY").Float()) / c.Height
+func getRelativeMousePosition(c *canvas.GameContext, click *domcore.Event) (float32, float32) {
+	relativeX := float32(click.JSValue().Get("offsetX").Float()) / c.Width
+	relativeY := float32(click.JSValue().Get("offsetY").Float()) / c.Height
 	return float32(relativeX), float32(relativeY)
 }
 
-func getRelativeTouchPosition(c *canvas.GameContext, touch js.Value) (float32, float32) {
+func getRelativeTouchPosition(c *canvas.GameContext, touch *domcore.Event) (float32, float32) {
 	rect := c.CvsElement.JSValue().Call("getBoundingClientRect")
-	touchInfo := touch.Get("touches").Get("0") // only care about the first touch point
+	touchInfo := touch.JSValue().Get("touches").Get("0") // only care about the first touch point
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
 	return 1.5 * float32(offsetX) / c.Width, 1.5 * float32(offsetY) / c.Height
@@ -139,3 +128,4 @@ func handleKeyboard(ccc *model.CubeCubeContext, e *domcore.Event) {
 	controller := CubeController{ccc}
 	controller.QueueEvent(Turn(face + prime))
 }
+
