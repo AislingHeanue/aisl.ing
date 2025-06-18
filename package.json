@@ -15,6 +15,7 @@
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.10",
+    "@types/golang-wasm-exec": "^1.15.2",
     "@vercel/analytics": "^1.5.0",
     "next": "^15.3.3",
     "react": "^19.1.0",
@@ -23,10 +24,13 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^15.3.3",
     "@types/node": "^20.19.1",
     "@types/react": "19.1.8",
     "eslint": "^9.29.0",
     "eslint-config-next": "15.3.3",
+    "eslint-plugin-next": "^0.0.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "nodemon": "^3.1.4",
     "postcss": "^8.4.38",
     "tailwindcss": "^4.1.10",

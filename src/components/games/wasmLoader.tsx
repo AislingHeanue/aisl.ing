@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 
-export default function WasmCanvas({ game }: { game: ReactNode }) {
+export default function WasmCanvas({ game }: { game: string }) {
   let wasmLoaded = false;
   useEffect(() => {
     if (!wasmLoaded) {
@@ -18,8 +18,7 @@ export default function WasmCanvas({ game }: { game: ReactNode }) {
         const codeBufferPromise = fetch("/demo.wasm").then((response) => response.arrayBuffer());
         const buffer = await Promise.all([wasmPromise, codeBufferPromise]).then((values) => (values[1]))
 
-        // @ts-expect-error since this object is not given a proper typescript type in the wasm_exec.js
-        const go = new global.Go()
+        const go = new Go()
         go.argv = [game];
         const { instance } = await WebAssembly.instantiate(
           buffer,

@@ -8,7 +8,7 @@ export default function Page() {
     <Layout scrollable={false}>
       <CanvasView
         title="Collatz Tree Visualizer"
-        source="https://github.com/AislingHeanue/aisl.ing/tree/master/app/components/collatz"
+        source="https://github.com/AislingHeanue/aisl.ing/tree/master/src/app/components/games/collatz"
         controller={<ControllerClient />}
         game={<GameClient />}
       />
