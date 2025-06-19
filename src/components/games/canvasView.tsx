@@ -38,7 +38,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
                 >Source Code</a>
               </button>
             </div>
-            <div className=" w-full col-span-5 h-full lg:row-span-10 bg-stone-300 dark:bg-stone-600">
+            <div className=" w-full col-span-5 h-full lg:row-span-10 bg-stone-200 dark:bg-stone-800">
               <div className="h-full w-full lg:scrollbar lg:scrollbar-thumb-stone-600 lg:scrollbar-track-stone-700 lg:overflow-auto lg:pr-3 lg:pl-3 lg:overflow-y-auto col-span-3" >
                 {controller}
               </div>

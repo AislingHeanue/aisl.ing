@@ -40,13 +40,13 @@ func (l *ButtonListener) HandleEvent(e *domcore.Event) {
 	case "kilt":
 		control := CubeController{l.ccc}
 		control.QueueEvent("u'", "r2", "l2", "f2", "b2", "u'", "r", "l", "f", "b'", "u", "f2", "d2", "r2", "l2", "f2", "u2", "f2", "u'", "f2")
-	case "superflip":
+	case "s-flip":
 		control := CubeController{l.ccc}
 		control.QueueEvent("u", "r2", "f", "b", "r", "b2", "r", "u2", "l", "b2", "r", "u'", "d'", "r2", "f", "r'", "l", "b2", "u2", "f2")
 	case "cubecube":
 		control := CubeController{l.ccc}
 		control.QueueEvent("u'", "l'", "u'", "f'", "r2", "b'", "r", "f", "u", "b2", "u", "b'", "l", "u'", "f", "u", "r", "f'")
-	case "checkerboard":
+	case "checker":
 		control := CubeController{l.ccc}
 		control.QueueEvent("m2", "e2", "s2")
 	case "snake":
