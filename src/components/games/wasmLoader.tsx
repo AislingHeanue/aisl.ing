@@ -1,3 +1,4 @@
+"use client"
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
 
@@ -35,7 +36,7 @@ export default function WasmCanvas({ game }: { game: string }) {
     <>
       <canvas
         id="wasm-canvas"
-        className="grow border-4 max-h-full max-w-full overflow-auto border-stone-300 dark:border-stone-600 rendering-pixelated"
+        className="border-4 border-stone-300 dark:border-stone-600 rendering-pixelated max-w-full"
       />
     </>
   );

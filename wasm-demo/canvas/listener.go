@@ -22,6 +22,7 @@ type CanvasListener struct {
 func (l *CanvasListener) HandleEvent(e *domcore.Event) {
 	switch l.kind {
 	case RESIZE:
+		println("confused")
 		InitCanvas(l.c)
 	}
 }

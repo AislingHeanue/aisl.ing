@@ -18,6 +18,7 @@ var done chan struct{}
 func main() {
 	contexts := map[string]canvas.GameContext{
 		"rubiks": {
+			Square:          true,
 			Window:          webapi.GetWindow(),
 			Document:        webapi.GetWindow().Document(),
 			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
@@ -30,6 +31,7 @@ func main() {
 			),
 		},
 		"life": {
+			Square:          true,
 			Window:          webapi.GetWindow(),
 			Document:        webapi.GetWindow().Document(),
 			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
@@ -50,6 +52,7 @@ func main() {
 	c := contexts[os.Args[0]]
 
 	canvas.InitCanvas(&c)
+	canvas.RegisterListeners(&c)
 	c.Animator.Init(&c)
 	c.Animator.InitListeners(&c)
 	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(&c)))

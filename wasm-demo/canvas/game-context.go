@@ -26,6 +26,7 @@ type GameContext struct {
 	Window          *webapi.Window
 	ResolutionScale float32
 
+	Square     bool
 	Height     float32
 	Width      float32
 	T          float32

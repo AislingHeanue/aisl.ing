@@ -14,8 +14,6 @@ type CubeController struct {
 type Turn string
 
 func (cc *CubeController) QueueEvent(turns ...Turn) {
-	println([]byte(turns[0]))
-	println([]byte("u"))
 	for _, t := range turns {
 		if len(t) == 2 {
 			switch string(t[1]) {

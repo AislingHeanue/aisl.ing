@@ -26,6 +26,11 @@ func InitCanvas(c *GameContext) {
 		c.Height = float32(heightWithBorder-borderUp-borderDown) * float32(pixelRatio) / c.ResolutionScale
 		c.Width = float32(widthWithBorder-borderLeft-borderRight) * float32(pixelRatio) / c.ResolutionScale
 	}
+	if c.Square {
+		minDimension := min(c.Width, c.Height)
+		c.Height = minDimension
+		c.Width = minDimension
+	}
 	c.CvsElement.SetAttribute("height", fmt.Sprint(c.Width))
 	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Height))
 	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
@@ -50,3 +55,4 @@ func InitCanvas(c *GameContext) {
 		c.GL.Viewport(0, 0, int(c.Width), int(c.Height))
 	}
 }
+

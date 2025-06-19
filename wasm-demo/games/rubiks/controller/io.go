@@ -14,7 +14,6 @@ const (
 	CLICK ListenerKind = iota
 	MOUSE_MOVE
 	MOUSE_UP
-	RESIZE
 	TOUCH
 	TOUCH_MOVE
 	TOUCH_UP
@@ -128,4 +127,3 @@ func handleKeyboard(ccc *model.CubeCubeContext, e *domcore.Event) {
 	controller := CubeController{ccc}
 	controller.QueueEvent(Turn(face + prime))
 }
-

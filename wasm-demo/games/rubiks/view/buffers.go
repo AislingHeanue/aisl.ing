@@ -48,7 +48,7 @@ func GetBuffers(c model.Cube) DrawShape {
 	}
 
 	out.IndicesArray = make([]uint16, 36)
-	for j := 0; j < 6; j++ {
+	for j := range 6 {
 		// assume points are connected as 0->1->2->3
 		// then we need 0,1,2,0,2,3
 		out.IndicesArray[6*j] = uint16(4*j + 0)

@@ -1,5 +1,4 @@
 "use client"
-
 import { ChangeEventHandler } from "react";
 import useCollatzStateStore from "./store";
 
