@@ -24,18 +24,17 @@ const (
 )
 
 func InitListeners(c *canvas.GameContext, lc *model.LifeContext, controller LifeController) {
-	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&LifeListener{c, lc, CLICK, controller}), nil)
-	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_MOVE, controller}), nil)
-	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}), nil)
-	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}), nil)
+	canvas.AddListener(c, "mousedown", domcore.NewEventListener(&LifeListener{c, lc, CLICK, controller}))
+	canvas.AddListener(c, "mousemove", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_MOVE, controller}))
+	canvas.AddListener(c, "mouseup", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}))
+	canvas.AddListener(c, "mouseleave", domcore.NewEventListener(&LifeListener{c, lc, MOUSE_UP, controller}))
 
-	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&LifeListener{c, lc, TOUCH, controller}), nil)
-	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_MOVE, controller}), nil)
-	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}), nil)
-	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}), nil)
+	canvas.AddListener(c, "touchstart", domcore.NewEventListener(&LifeListener{c, lc, TOUCH, controller}))
+	canvas.AddListener(c, "touchmove", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_MOVE, controller}))
+	canvas.AddListener(c, "touchend", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}))
+	canvas.AddListener(c, "touchcancel", domcore.NewEventListener(&LifeListener{c, lc, TOUCH_UP, controller}))
 
 	c.Document.AddEventListener("keydown", domcore.NewEventListener(&LifeListener{c, lc, KEYBOARD, controller}), nil)
-	// registerButtons(c, lc)
 }
 
 type LifeListener struct {
@@ -58,7 +57,7 @@ func (l *LifeListener) HandleEvent(e *domcore.Event) {
 	case CLICK:
 		click(l.lc, e)
 	case MOUSE_MOVE:
-		dragCanvas(l.c, l.lc, e)
+		dragCanvas(l.lc, e)
 	case MOUSE_UP:
 		mouseUp(l.lc)
 	case TOUCH:
@@ -100,20 +99,20 @@ func touch(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
 	// lockScroll(c)
 }
 
-func dragCanvas(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
+func dragCanvas(lc *model.LifeContext, e *domcore.Event) {
 	if lc.MouseDown {
 		e.PreventDefault()
 		mouseX, mouseY := getRelativeMousePosition(e)
-		lc.DX = (lc.AnchorDX - (lc.AnchorX-mouseX)/c.ResolutionScale)
-		lc.DY = (lc.AnchorDY - (lc.AnchorY-mouseY)/c.ResolutionScale)
+		lc.DX = (lc.AnchorDX - (lc.AnchorX - mouseX))
+		lc.DY = (lc.AnchorDY - (lc.AnchorY - mouseY))
 	}
 }
 
 func dragCanvasTouch(c *canvas.GameContext, lc *model.LifeContext, e *domcore.Event) {
 	if lc.MouseDown {
 		mouseX, mouseY := getRelativeTouchPosition(c, e)
-		lc.DX = (lc.AnchorDX - 3*(lc.AnchorX-mouseX)/c.ResolutionScale)
-		lc.DY = (lc.AnchorDY - 3*(lc.AnchorY-mouseY)/c.ResolutionScale)
+		lc.DX = (lc.AnchorDX - float32(c.Window.DevicePixelRatio())*(lc.AnchorX-mouseX))
+		lc.DY = (lc.AnchorDY - float32(c.Window.DevicePixelRatio())*(lc.AnchorY-mouseY))
 	}
 	if lc.Zooming {
 		distance := getDistanceBetweenTouches(e)
@@ -138,7 +137,7 @@ func getRelativeMousePosition(e *domcore.Event) (float32, float32) {
 }
 
 func getRelativeTouchPosition(c *canvas.GameContext, e *domcore.Event) (float32, float32) {
-	rect := c.CvsElement.JSValue().Call("getBoundingClientRect")
+	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
 	touch := e.JSValue().Get("touches").Get("0")
 	offsetX := touch.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touch.Get("clientY").Float() - rect.Get("top").Float()
@@ -207,4 +206,3 @@ func setZoom(lc *model.LifeContext, zoom float32) {
 	lc.DX *= zoom / oldZoom
 	lc.DY *= zoom / oldZoom
 }
-

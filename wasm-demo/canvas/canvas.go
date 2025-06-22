@@ -1,58 +1,30 @@
 package canvas
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
+	"github.com/gowebapi/webapi/dom/domcore"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	"github.com/gowebapi/webapi/html/canvas"
 )
 
 func InitCanvas(c *GameContext) {
-	if c.ResolutionScale != 0 {
-		style := c.Window.GetComputedStyle(c.CvsElement, nil)
+	res := c.Window.JSValue().Call("resizeCanvas", float32(c.ResolutionScale), true)
+	c.Height = float32(res.Get("height").Float())
+	c.Width = float32(res.Get("width").Float())
 
-		pixelRatio := c.Window.DevicePixelRatio()
-		fmt.Printf("device pixel ratio is %v\n", pixelRatio)
+	if c.ZoomCanvas != nil && c.RenderingCanvas != nil {
+		cellHeight, cellWidth := c.Animator.Dimensions()
+		res := c.Window.JSValue().Call("setupMultipleCanvases", c.RenderingCanvas.JSValue(), c.ZoomCanvas.JSValue(), cellHeight, cellWidth)
 
-		widthWithBorder, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("width"), "px"), 32)
-		heightWithBorder, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("height"), "px"), 32)
-		borderUp, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-top-width"), "px"), 32)
-		borderDown, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-bottom-width"), "px"), 32)
-		borderLeft, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-left-width"), "px"), 32)
-		borderRight, _ := strconv.ParseFloat(strings.TrimSuffix(style.GetPropertyValue("border-right-width"), "px"), 32)
-
-		c.Height = float32(heightWithBorder-borderUp-borderDown) * float32(pixelRatio) / c.ResolutionScale
-		c.Width = float32(widthWithBorder-borderLeft-borderRight) * float32(pixelRatio) / c.ResolutionScale
-	}
-	if c.Square {
-		minDimension := min(c.Width, c.Height)
-		c.Height = minDimension
-		c.Width = minDimension
-	}
-	c.CvsElement.SetAttribute("height", fmt.Sprint(c.Width))
-	c.CvsElement.SetAttribute("width", fmt.Sprint(c.Height))
-	cvsHTML := canvas.HTMLCanvasElementFromWrapper(c.CvsElement)
-
-	if c.SecondaryCanvas != nil {
-		cellWidth, cellHeight := c.Animator.Dimensions()
-		c.SecondaryCanvas.SetAttribute("height", fmt.Sprint(cellHeight))
-		c.SecondaryCanvas.SetAttribute("width", fmt.Sprint(cellWidth))
-		secondaryHTML := canvas.HTMLCanvasElementFromWrapper(c.SecondaryCanvas)
-
-		c.ZoomCanvas.SetAttribute("height", fmt.Sprint(cellHeight)) //c.Height)) //cellHeight))
-		c.ZoomCanvas.SetAttribute("width", fmt.Sprint(cellWidth))   //c.Width))   //cellWidth))
-		zoomHTML := canvas.HTMLCanvasElementFromWrapper(c.ZoomCanvas)
-
-		c.GL = webgl.RenderingContextFromWrapper(secondaryHTML.GetContext("webgl", map[string]any{"alpha": false}))
-		c.ZoomCtx = canvas.CanvasRenderingContext2DFromWrapper(zoomHTML.GetContext("2d", map[string]any{"alpha": false}))
-		c.DisplayCtx = canvas.CanvasRenderingContext2DFromWrapper(cvsHTML.GetContext("2d", map[string]any{"alpha": false}))
-		c.DisplayCtx.SetImageSmoothingEnabled(false)
-		c.GL.Viewport(0, 0, int(cellWidth), int(cellHeight))
+		c.GL = webgl.RenderingContextFromJS(res.Get("gl"))
+		c.ZoomCtx = canvas.CanvasRenderingContext2DFromJS(res.Get("zoomContext"))
+		c.DisplayCtx = canvas.CanvasRenderingContext2DFromJS(res.Get("displayContext"))
 	} else {
-		c.GL = webgl.RenderingContextFromWrapper(cvsHTML.GetContext("webgl", map[string]any{"alpha": false}))
-		c.GL.Viewport(0, 0, int(c.Width), int(c.Height))
+		res := c.Window.JSValue().Call("setupCanvas", c.Height, c.Width)
+
+		c.GL = webgl.RenderingContextFromJS(res.Get("gl"))
 	}
 }
 
+func AddListener(c *GameContext, event string, listener domcore.EventListener) {
+	c.Window.JSValue().Call("canvasEventListener", event, domcore.NewEventListener(listener).JSValue())
+}

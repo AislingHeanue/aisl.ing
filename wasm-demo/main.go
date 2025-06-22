@@ -18,10 +18,10 @@ var done chan struct{}
 func main() {
 	contexts := map[string]canvas.GameContext{
 		"rubiks": {
-			Square:          true,
-			Window:          webapi.GetWindow(),
-			Document:        webapi.GetWindow().Document(),
-			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+			Square:   true,
+			Window:   webapi.GetWindow(),
+			Document: webapi.GetWindow().Document(),
+			// RenderingCanvas: webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 			ResolutionScale: 1,
 			Animator: rubiks.New(
 				rubiks.CubeCubeOptions{
@@ -31,10 +31,10 @@ func main() {
 			),
 		},
 		"life": {
-			Square:          true,
-			Window:          webapi.GetWindow(),
-			Document:        webapi.GetWindow().Document(),
-			CvsElement:      webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+			Square:   true,
+			Window:   webapi.GetWindow(),
+			Document: webapi.GetWindow().Document(),
+			// DisplayCanvas:   webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 			ResolutionScale: 0.5,
 			Animator: life.New(&model.LifeContext{
 				CellHeight: 200,
@@ -43,7 +43,7 @@ func main() {
 				Tps:        5,
 				Loop:       true,
 			}),
-			SecondaryCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
 	}

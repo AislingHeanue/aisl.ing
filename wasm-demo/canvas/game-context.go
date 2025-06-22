@@ -18,10 +18,12 @@ type Animator interface {
 }
 
 type GameContext struct {
-	Animator        Animator
-	CvsElement      *dom.Element
-	SecondaryCanvas *dom.Element
-	ZoomCanvas      *dom.Element
+	Animator Animator
+	// the canvas actually being displayed to
+	// optional intermediate canvas to facilitate zooming
+	ZoomCanvas *dom.Element
+	// the canvas with the webgl stuff
+	RenderingCanvas *dom.Element
 	Document        *webapi.Document
 	Window          *webapi.Window
 	ResolutionScale float32

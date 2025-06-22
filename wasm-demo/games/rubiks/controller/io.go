@@ -21,17 +21,17 @@ const (
 )
 
 func InitListeners(c *canvas.GameContext, ccc *model.CubeCubeContext) {
-	c.CvsElement.AddEventListener("mousedown", domcore.NewEventListener(&CubeListener{c, ccc, CLICK}), nil)
-	c.CvsElement.AddEventListener("mousemove", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_MOVE}), nil)
-	c.CvsElement.AddEventListener("mouseup", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_UP}), nil)
-	c.CvsElement.AddEventListener("mouseleave", domcore.NewEventListener(&CubeListener{c, ccc, MOUSE_UP}), nil)
+	canvas.AddListener(c, "mousedown", &CubeListener{c, ccc, CLICK})
+	canvas.AddListener(c, "mousemove", &CubeListener{c, ccc, MOUSE_MOVE})
+	canvas.AddListener(c, "mouseup", &CubeListener{c, ccc, MOUSE_UP})
+	canvas.AddListener(c, "mouseleave", &CubeListener{c, ccc, MOUSE_UP})
 
-	c.CvsElement.AddEventListener("touchstart", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH}), nil)
-	c.CvsElement.AddEventListener("touchmove", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_MOVE}), nil)
-	c.CvsElement.AddEventListener("touchend", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_UP}), nil)
-	c.CvsElement.AddEventListener("touchcancel", domcore.NewEventListener(&CubeListener{c, ccc, TOUCH_UP}), nil)
+	canvas.AddListener(c, "touchstart", &CubeListener{c, ccc, TOUCH})
+	canvas.AddListener(c, "touchmove", &CubeListener{c, ccc, TOUCH_MOVE})
+	canvas.AddListener(c, "touchend", &CubeListener{c, ccc, TOUCH_UP})
+	canvas.AddListener(c, "touchcancel", &CubeListener{c, ccc, TOUCH_UP})
 
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&CubeListener{c, ccc, KEYBOARD}), nil)
+	c.Window.AddEventListener("keydown", domcore.NewEventListener(&CubeListener{c, ccc, KEYBOARD}), nil)
 	registerButtons(c, ccc)
 }
 
@@ -109,7 +109,7 @@ func getRelativeMousePosition(c *canvas.GameContext, click *domcore.Event) (floa
 }
 
 func getRelativeTouchPosition(c *canvas.GameContext, touch *domcore.Event) (float32, float32) {
-	rect := c.CvsElement.JSValue().Call("getBoundingClientRect")
+	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
 	touchInfo := touch.JSValue().Get("touches").Get("0") // only care about the first touch point
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()
 	offsetY := touchInfo.Get("clientY").Float() - rect.Get("top").Float()
