@@ -8,7 +8,7 @@
     "dev": "next",
     "lint": "next lint",
     "prebuild": "cd wasm-demo && GOOS=js GOARCH=wasm go build -o ../public/demo.wasm",
-    "start": "nodemon --exec \"pnpm run prebuild && pnpm run dev\" --watch wasm-demo -e go",
+    "start": "nodemon --exec \"pnpm run prebuild && pnpm run dev\" --watch wasm-demo -e go,frag,vert",
     "preview": "next build && next start",
     "build": "next build"
   },

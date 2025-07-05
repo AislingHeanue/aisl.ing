@@ -89,12 +89,12 @@ export default function WasmCanvas({ game }: { game: string }) {
     zoomCanvas.height = customHeight
     zoomCanvas.width = customWidth
 
-    const gl = webglCanvas.getContext("webgl", { "alpha": false })
+    const gl = webglCanvas.getContext("webgl", { "alpha": false })!
     const zoomCtx = zoomCanvas.getContext("2d", { "alpha": false })
     const displayCtx = mainCanvas.getContext("2d", { "alpha": false })
     displayCtx!.imageSmoothingEnabled = false
 
-    gl?.viewport(0, 0, customWidth, customHeight)
+    gl.viewport(0, 0, customWidth, customHeight)
 
     return { gl: gl!, zoomContext: zoomCtx!, displayContext: displayCtx! }
   }

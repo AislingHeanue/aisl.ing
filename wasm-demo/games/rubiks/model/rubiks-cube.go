@@ -50,38 +50,86 @@ type RubiksCube struct {
 	Dimension int
 }
 
-func NewRubiksCube(d int) RubiksCube {
-	r := make([][][]Cube, d)
-	for i := range r {
-		r[i] = make([][]Cube, d)
-		for j := range r[i] {
-			r[i][j] = make([]Cube, d)
+func NewRubiksCube(d int, origin Point, sideLength float32, totalSideLength float32, sideLengthWithGap float32) RubiksCube {
+	data := make([][][]Cube, d)
+	for i := range data {
+		data[i] = make([][]Cube, d)
+		for j := range data[i] {
+			data[i][j] = make([]Cube, d)
 		}
 	}
+	for x := range d {
+		for y := range d {
+			for z := range d {
+				cubeOrigin := origin.
+					Subtract(Point{totalSideLength / 2, totalSideLength / 2, totalSideLength / 2}).
+					Add(Point{sideLengthWithGap * float32(x), sideLengthWithGap * float32(y), sideLengthWithGap * float32(z)}).
+					Add(Point{sideLength / 2, sideLength / 2, sideLength / 2})
+				colours, external := cubeColours(x, y, z, d)
 
-	return RubiksCube{r, d}
-}
-
-func (r RubiksCube) Copy() RubiksCube {
-	newR := NewRubiksCube(r.Dimension)
-	for x := range r.Dimension {
-		for y := range r.Dimension {
-			for z := range r.Dimension {
-				newR.Data[x][y][z] = r.Data[x][y][z]
+				if external {
+					data[x][y][z] = NewCubeWithColours(cubeOrigin, sideLength, colours)
+				}
 			}
 		}
 	}
 
-	return newR
+	return RubiksCube{Dimension: d, Data: data}
 }
 
-func (r RubiksCube) Flatten() []Cube {
-	cubes := []Cube{}
+func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {
+	colours := []color.RGBA{BLACK, BLACK, BLACK, BLACK, BLACK, BLACK}
+	external := false
+	if y == dimension-1 {
+		external = true
+		colours[0] = DefaultColours[0]
+	}
+	if z == dimension-1 {
+		external = true
+		colours[1] = DefaultColours[1]
+	}
+	if x == 0 {
+		external = true
+		colours[2] = DefaultColours[2]
+	}
+	if z == 0 {
+		external = true
+		colours[3] = DefaultColours[3]
+	}
+	if x == dimension-1 {
+		external = true
+		colours[4] = DefaultColours[4]
+	}
+	if y == 0 {
+		external = true
+		colours[5] = DefaultColours[5]
+	}
+
+	return colours, external
+}
+
+func (r RubiksCube) Copy() RubiksCube {
+	data := make([][][]Cube, r.Dimension)
+	for i := range r.Dimension {
+		data[i] = make([][]Cube, r.Dimension)
+		for j := range r.Dimension {
+			data[i][j] = make([]Cube, r.Dimension)
+			for k := range r.Dimension {
+				data[i][j][k] = r.Data[i][j][k]
+			}
+		}
+	}
+
+	return RubiksCube{Dimension: r.Dimension, Data: data}
+}
+
+func (r RubiksCube) FlattenBuffers() []DrawShape {
+	cubes := []DrawShape{}
 	for x := range r.Dimension {
 		for y := range r.Dimension {
 			for z := range r.Dimension {
 				if r.isExternalCube(x, y, z) {
-					cubes = append(cubes, r.Data[x][y][z])
+					cubes = append(cubes, r.Data[x][y][z].GetBuffers())
 				}
 			}
 		}
@@ -195,4 +243,44 @@ func (r *RubiksCube) Turn(face Face, reverse bool) {
 	}
 
 	*r = newR
+}
+
+func (c Cube) GetBuffers() DrawShape {
+	var out DrawShape
+
+	out.VerticesArray = make([]float32, 72)
+	for i, index := range c.VertexArrayIndices {
+		pointSlice := c.Points[index].ToSlice()
+		out.VerticesArray[3*i] = pointSlice[0]
+		out.VerticesArray[3*i+1] = pointSlice[1]
+		out.VerticesArray[3*i+2] = pointSlice[2]
+	}
+
+	out.IndicesArray = make([]uint16, 36)
+	for j := range 6 {
+		// assume points are connected as 0->1->2->3
+		// then we need 0,1,2,0,2,3
+		out.IndicesArray[6*j] = uint16(4*j + 0)
+		out.IndicesArray[6*j+1] = uint16(4*j + 1)
+		out.IndicesArray[6*j+2] = uint16(4*j + 2)
+		out.IndicesArray[6*j+3] = uint16(4*j + 0)
+		out.IndicesArray[6*j+4] = uint16(4*j + 2)
+		out.IndicesArray[6*j+5] = uint16(4*j + 3)
+
+	}
+
+	outColours := []float32{}
+	for _, c := range c.Colours {
+		outColours = append(outColours, float32(c.R)/256, float32(c.G)/256, float32(c.B)/256, float32(c.A)/256)
+		outColours = append(outColours, float32(c.R)/256, float32(c.G)/256, float32(c.B)/256, float32(c.A)/256)
+		outColours = append(outColours, float32(c.R)/256, float32(c.G)/256, float32(c.B)/256, float32(c.A)/256)
+		outColours = append(outColours, float32(c.R)/256, float32(c.G)/256, float32(c.B)/256, float32(c.A)/256)
+	}
+	out.ColourArray = outColours
+
+	out.VCount = 24
+	out.ICount = 36
+	out.CCount = 24
+
+	return out
 }

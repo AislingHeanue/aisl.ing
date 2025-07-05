@@ -19,7 +19,7 @@ type LifeContext struct {
 	Zoom           float32
 	Paused         bool
 	SimulationSize int
-	Tps            int
+	Tps            float32
 	NeedsRestart   bool // will probably remove this one
 	Loop           bool
 

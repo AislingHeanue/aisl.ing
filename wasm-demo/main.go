@@ -8,7 +8,6 @@ import (
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/model"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 )
@@ -25,8 +24,10 @@ func main() {
 			ResolutionScale: 1,
 			Animator: rubiks.New(
 				rubiks.CubeCubeOptions{
-					TurnFrames: 12,
-					Dimension:  3,
+					TurnSeconds:     0.18,
+					Dimension:       3,
+					TotalSideLength: 0.5,
+					GapProportion:   0.07,
 				},
 			),
 		},
@@ -36,13 +37,16 @@ func main() {
 			Document: webapi.GetWindow().Document(),
 			// DisplayCanvas:   webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 			ResolutionScale: 0.5,
-			Animator: life.New(&model.LifeContext{
-				CellHeight: 200,
-				CellWidth:  200,
-				Zoom:       2,
-				Tps:        5,
-				Loop:       true,
-			}),
+			Animator: life.New(
+				life.LifeOptions{
+					CellHeight:   200,
+					CellWidth:    100,
+					Zoom:         1,
+					Tps:          30,
+					Loop:         true,
+					TrailLength:  25,
+					ColourPeriod: 25,
+				}),
 			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
@@ -58,7 +62,6 @@ func main() {
 	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(&c)))
 
 	<-done
-
 }
 
 func wrapAnimator(c *canvas.GameContext) func(float64) {
@@ -70,3 +73,4 @@ func wrapAnimator(c *canvas.GameContext) func(float64) {
 	}
 
 }
+

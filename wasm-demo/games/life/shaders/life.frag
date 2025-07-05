@@ -56,7 +56,7 @@ void main() {
 
 	gl_FragColor = (
 		new_alive ?
-		vec4(1.0,1.0,1.0,1.0) :
+		vec4(0.9,0.9,0.9,1.0) :
 		vec4(new_colour,new_alpha)
 	);	
 }

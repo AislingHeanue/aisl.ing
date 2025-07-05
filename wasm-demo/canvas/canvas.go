@@ -12,7 +12,7 @@ func InitCanvas(c *GameContext) {
 	c.Width = float32(res.Get("width").Float())
 
 	if c.ZoomCanvas != nil && c.RenderingCanvas != nil {
-		cellHeight, cellWidth := c.Animator.Dimensions()
+		cellWidth, cellHeight := c.Animator.Dimensions()
 		res := c.Window.JSValue().Call("setupMultipleCanvases", c.RenderingCanvas.JSValue(), c.ZoomCanvas.JSValue(), cellHeight, cellWidth)
 
 		c.GL = webgl.RenderingContextFromJS(res.Get("gl"))
