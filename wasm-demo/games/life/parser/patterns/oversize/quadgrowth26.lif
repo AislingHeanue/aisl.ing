@@ -1,0 +1,6 @@
+#C26-cell pattern with a quadratic growth rate.
+#CNick Gotts, 17 Mar '06.
+#CBased on a pattern by Bill Gosper.
+x = 16193, y = 15089, rule = B3/S23
+boo$oo$bo29$16bo$15bobo$15bo$14bo15024$16187bo3bo$16188bobo$16189bobbo
+$16192bo$16192bo21$16159bo$16160bo$16161bo$16160bo$16159bo$16161b3o!

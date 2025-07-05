@@ -1,0 +1,56 @@
+#CThis device eats gliders without affecting gliders on any
+#Cmore distant path. It can potentially emit a signal glider
+#Cwhen it eats a glider.
+#CThe full recovery time for the far edge of the circuit is 2234
+#Cticks, though the robber is ready to steal another glider
+#Cafter 1696 ticks.
+#CDave Greene, 11 January 2007
+x = 272, y = 218, rule = B3/S23
+196boo$196bo5bo$194bobo4bobo$193bobo6bo$189boo3bo$189boo$207boo$182boo
+23boo$183bo31boo$183bobo29bo$184boo27bobo$207boo4boo$207boo$$173boo$
+174bo40boo$174bobo39bo$175boo34boobo$211booboo$193boo$193boo16booboo$
+212bobo$212bobo$71boo140bo$71bo$72bo11bo$71boo9b3o65boo7boo$81bo41bo9b
+o15bobo7boo$41bo39boo10boo28b3o5b3o13b3obobo77bo20bo$40bobo50bo17boo
+13bo3bo15bo5boo48boo6boo17b3o11bo7bobo$40bobo48bobo17bo13boo3boo14boo
+54bobbo4boo16bo14b3o6bo$41bo49boo19bo73boo11booboboo22boo16bo16bo$68b
+oo41boo73boo10bobobo42boo14b3o$68boo128bo3boboo54bo$196b3obbobboo54boo
+$195bo5boo$182boo11boo$182boo$108boo128boo25boo$108boo128boo25bo$263bo
+bo$77boo184boo$78bo$75b3o$75bo174boo$139boo66boo32boo6bobo$98boo19bo6b
+oo11bobo65boo11boo20bo6bo$98bo18b3o6boo13bo78bo20bo6boo$99b3o14bo24boo
+78b3o17boo$101bo14boo105bo$161boo$161bo41boo$162b3o16boo20bo$164bo15bo
+bo21b3o45boo$180bo25bo44bobo$179boo70bo$250boo5$91bo176boo$89b3o152bo
+23bobo$88bo155b3o23bo$88boo157bo22boo$94bo151boo14boo$94b3o165boo$97bo
+$56boo6boo30boo$56bobbo4boo40boo$41boo10booboboo46bo$34boo5boo9bobobo
+47bobo$34boo16bo3boboo38boo4boo$51boobbobboo37bobbo$55boo41boo$36boo
+48boo$36boo48boo$30boo$30boo231boo$263bobo$265bo$265boo3$61boo32boo3b
+oo$61boo11boo20bo3bo$74bo18b3o5b3o$75b3o15bo10bo$77bo23b3o$45booboo50b
+o56boo100boo$44bobobobo6boo41boo55boo5boo87boo4boo$27boo16bobbobo6bo
+32boo36bo35boo87boo$28bo19boboo6b3o30bo36b3o7boo$28bobo16boo3bo7bo30bo
+bo37bo6bo3boo$29boo13bobobbobo40boo4boo30boo4bobo4bo18boo$21bo22boobb
+ooboo44bobbo35boo5bobo16boo90boo$15boo4b3o74boo44boo22boo84boobboo$16b
+o7bo85boo56boo88bobo$16bobo4boo85boo134boo12bo$17boo25boo200bobo11boo$
+44bo203bo$11boo29bobo203boo$12bo29boo188boo$12bobo218bo$13boo215b3o$
+230bo$96boo3boo143boo$97bo3bo144bobo$94b3o5b3o143bo$94bo9bo143boo$171b
+oo$124boo45bo31bobo$125bo43bobo30boboo$122b3o3boboo37boo13bo15b3o16bo$
+122bobb4oboo50b3o14bo4boo11b3o$125bo55bo17b5obo10bo$95bo31booboobboo6b
+oo37boo20bo12boo20boo$93b3o32bobo4bo6bobo26boo26boo3bo24boo7boo$92bo
+35bobb4o9bo27bo26bobo3bo24bo$92boo35bobobbobo7boo26bobo25bo3boo24bobo$
+130bo4boo36boo4boo44boo4boo$178bobbo44bo20boo$6boo171boo45bobo18bo$7bo
+125boo56boo34boo16bobo$7bobo123boo56boo52boo$5booboo158boo$6bo91boo52b
+oo14boo$4bobo91boo35boo16bo$bb3oboo20boo105boo10boob3o$bo26bo75boo42bo
+bo$obbooboo18bobo75bo43bo$booboboo18boo74bobo41bobo$bbo99boo42boo29boo
+3boo32boo$bbo147boo26bo3bo20boo11boo$boobo145boo23b3o5b3o18bo$obboo
+151boo17bo9bo15b3o35boo$oo23boo130bo43bo37boobboo$25bo131bobo83bobo$
+26b3o129boo60boo23bo$28bo192bo23boo$77boo139b3o$78bo58boo79bo$3boo70b
+3o59boo$4bo70bo$b3o122boo$bo83boo38bobbo$85boo39bobo$127bo$$104boo$
+104boo3bo49boo15boo$108bobo48boo15bobo$109bobo66bo$111bo32boo32boo$59b
+o51boo31boo$57b3o30boo$32boo22bo34bo77bo$32bo23boo30b3o76b3o$30bobo55b
+o77bo$30boo134boo$6boo$6boo3$62boo$62boo$$8boo58boo$9bo58bo$6b3o57bobo
+20boo44bo$6bo59boo13boo6bo45b3o35boo$7boo72boo4bobo48bo34boo$8bo78boo
+4boo42boo$8bobo81bobo$9boo79b3obobo$89bo5boobboo67boo$89boo8boo67boo$
+172boo$41boo129boo$42bo34boo$39b3o35boo49boo$9bo29bo88boo36boo$7b3o
+141boo13boo$6bo42boo100bobo$6boo41boo102bo$141boo10boo$141bo$131boo9b
+3o$111boo19bo11bo$111bobo17bo$113bo17boo$113boo$33boo$8boo23boo19boo
+50boo$7bobbo44bo50bobo$7bobo42b3o53bo$8bo43bo46boo7boo$99boo3$94boo$
+94bobo$96bo$96boo$92boo$11b3o69boo7bo$11bo71boo8b3o$12bo82bo8$22b3o$
+22bo$23bo!
