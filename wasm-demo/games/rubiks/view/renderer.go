@@ -6,9 +6,9 @@ import (
 	"math"
 	"syscall/js"
 
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/listener"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
@@ -38,9 +38,9 @@ type BufferSet struct {
 	CCount   int
 }
 
-var _ util.Animator = &CubeRenderer{}
+var _ common.Animator = &CubeRenderer{}
 
-func (cc *CubeRenderer) Init(c *util.GameContext) {
+func (cc *CubeRenderer) Init(c *common.GameContext) {
 	if cc.program == nil {
 		cc.createShaders(c)
 	}
@@ -54,12 +54,12 @@ func (cc *CubeRenderer) Init(c *util.GameContext) {
 	cc.createBuffers(c)
 }
 
-func (cc CubeRenderer) InitListeners(c *util.GameContext) {
-	util.RegisterListeners(c, cc.CubeCubeContext, model.CubeController{Context: cc.CubeCubeContext}, listener.CubeActionHandler{})
+func (cc CubeRenderer) InitListeners(c *common.GameContext) {
+	common.RegisterListeners(c, cc.CubeCubeContext, model.CubeController{Context: cc.CubeCubeContext}, listener.CubeActionHandler{})
 	listener.RegisterButtons(c, cc.CubeCubeContext)
 }
 
-func (cc *CubeRenderer) Render(c *util.GameContext) {
+func (cc *CubeRenderer) Render(c *common.GameContext) {
 	gl := c.GL
 	program := cc.program
 	animationInProgress := cc.AnimationHandler.Tick(c.IntervalT)
@@ -99,7 +99,7 @@ func (cc *CubeRenderer) Render(c *util.GameContext) {
 	gl.DrawElements(webgl.TRIANGLES, cc.bufferSet.ICount, webgl.UNSIGNED_SHORT, 0)
 }
 
-func (cc *CubeRenderer) createShaders(c *util.GameContext) {
+func (cc *CubeRenderer) createShaders(c *common.GameContext) {
 	gl := c.GL
 
 	vShader := gl.CreateShader(webgl.VERTEX_SHADER)
@@ -129,7 +129,7 @@ func (cc *CubeRenderer) createShaders(c *util.GameContext) {
 	cc.program = program
 }
 
-func (cc *CubeRenderer) createBuffers(c *util.GameContext) {
+func (cc *CubeRenderer) createBuffers(c *common.GameContext) {
 	shapeGroup := model.GetBuffers(cc.AnimationHandler, cc.Origin)
 
 	vertices := jsconv.Float32ToJs(shapeGroup.VerticesArray)
@@ -151,7 +151,7 @@ func (cc *CubeRenderer) createBuffers(c *util.GameContext) {
 	}
 }
 
-func (cc *CubeRenderer) bindAttribute(c *util.GameContext, buffer *webgl.Buffer, name string, stride int) {
+func (cc *CubeRenderer) bindAttribute(c *common.GameContext, buffer *webgl.Buffer, name string, stride int) {
 	c.GL.BindBuffer(webgl.ARRAY_BUFFER, buffer)
 	vPosition := c.GL.GetAttribLocation(cc.program, name)
 	c.GL.VertexAttribPointer(uint(vPosition), stride, webgl.FLOAT, false, 0, 0)
@@ -159,7 +159,7 @@ func (cc *CubeRenderer) bindAttribute(c *util.GameContext, buffer *webgl.Buffer,
 	c.GL.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 }
 
-func bindToBuffer(c *util.GameContext, target uint, data js.Value) *webgl.Buffer {
+func bindToBuffer(c *common.GameContext, target uint, data js.Value) *webgl.Buffer {
 	buffer := c.GL.CreateBuffer()
 	c.GL.BindBuffer(target, buffer)
 	c.GL.BufferData2(target, webgl.UnionFromJS(data), webgl.STATIC_DRAW)

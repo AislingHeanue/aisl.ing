@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
 type CanvasActionHandler struct{}
 
-var _ util.ActionHandler[any, any] = CanvasActionHandler{}
+var _ common.ActionHandler[any, any] = CanvasActionHandler{}
 
 func GetRelativeMousePosition(e *domcore.Event) (float32, float32) {
 	relativeX := float32(e.JSValue().Get("offsetX").Float())
@@ -18,7 +18,7 @@ func GetRelativeMousePosition(e *domcore.Event) (float32, float32) {
 	return float32(relativeX), float32(relativeY)
 }
 
-func GetRelativeTouchPosition(c *util.GameContext, e *domcore.Event) (float32, float32) {
+func GetRelativeTouchPosition(c *common.GameContext, e *domcore.Event) (float32, float32) {
 	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
 	touch := e.JSValue().Get("touches").Get("0")
 	offsetX := touch.Get("clientX").Float() - rect.Get("left").Float()
@@ -35,7 +35,7 @@ func GetDistanceBetweenTouches(e *domcore.Event) float32 {
 	return float32(math.Hypot(float64(x1-x2), float64(y1-y2)))
 }
 
-func setZoom(c *util.GameContext, zoom float32) {
+func setZoom(c *common.GameContext, zoom float32) {
 	if !c.ZoomEnabled {
 		return
 	}
@@ -55,14 +55,14 @@ func setZoom(c *util.GameContext, zoom float32) {
 	c.DY *= zoom / oldZoom
 }
 
-func (a CanvasActionHandler) Click(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) Click(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	c.AnchorX, c.AnchorY = GetRelativeMousePosition(e)
 	c.AnchorDX = c.DX
 	c.AnchorDY = c.DY
 	c.MouseDown = true
 }
 
-func (a CanvasActionHandler) Drag(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) Drag(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	if c.MouseDown && c.PanningEnabled {
 		e.PreventDefault()
 		mouseX, mouseY := GetRelativeMousePosition(e)
@@ -71,7 +71,7 @@ func (a CanvasActionHandler) Drag(c *util.GameContext, context *any, controller 
 	}
 }
 
-func (a CanvasActionHandler) DragTouch(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) DragTouch(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	if c.MouseDown && c.PanningEnabled {
 		mouseX, mouseY := GetRelativeTouchPosition(c, e)
 		c.DX = (c.AnchorDX - float32(c.Window.DevicePixelRatio())*(c.AnchorX-mouseX))
@@ -83,11 +83,11 @@ func (a CanvasActionHandler) DragTouch(c *util.GameContext, context *any, contro
 	}
 }
 
-func (a CanvasActionHandler) MouseUp(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) MouseUp(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	c.MouseDown = false
 }
 
-func (a CanvasActionHandler) Touch(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) Touch(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	fmt.Println("touch")
 	if e.JSValue().Get("touches").Length() == 2 {
 		// start zooming
@@ -106,12 +106,12 @@ func (a CanvasActionHandler) Touch(c *util.GameContext, context *any, controller
 	}
 }
 
-func (a CanvasActionHandler) TouchUp(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) TouchUp(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	c.MouseDown = false
 	c.Zooming = false
 }
 
-func (a CanvasActionHandler) Keyboard(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) Keyboard(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	switch e.JSValue().Get("key").String() {
 	// pause simulation
 	case "0":
@@ -130,7 +130,7 @@ func (a CanvasActionHandler) Keyboard(c *util.GameContext, context *any, control
 	}
 }
 
-func (a CanvasActionHandler) Resize(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+func (a CanvasActionHandler) Resize(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	InitCanvas(c)
 }
 

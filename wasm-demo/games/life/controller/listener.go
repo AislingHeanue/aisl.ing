@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gowebapi/webapi/dom/domcore"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 )
 
 type LifeContext struct {
@@ -20,39 +20,39 @@ type LifeContext struct {
 }
 
 type LifeController interface {
-	Reset(c *util.GameContext)
-	Random(c *util.GameContext)
-	ResizeBuffers(c *util.GameContext)
-	OpenFile(c *util.GameContext, path string)
-	OpenRandomFile(c *util.GameContext)
+	Reset(c *common.GameContext)
+	Random(c *common.GameContext)
+	ResizeBuffers(c *common.GameContext)
+	OpenFile(c *common.GameContext, path string)
+	OpenRandomFile(c *common.GameContext)
 }
 
 type LifeActionHandler struct{}
 
-var _ util.ActionHandler[LifeContext, LifeController] = LifeActionHandler{}
+var _ common.ActionHandler[LifeContext, LifeController] = LifeActionHandler{}
 
-func (l LifeActionHandler) Click(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) Click(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) Drag(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) Drag(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) DragTouch(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) DragTouch(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) MouseUp(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) MouseUp(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) Resize(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) Resize(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) Touch(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) Touch(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) TouchUp(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) TouchUp(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 }
 
-func (l LifeActionHandler) Keyboard(c *util.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
+func (l LifeActionHandler) Keyboard(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 	switch e.JSValue().Get("key").String() {
 	// pause simulation
 	case " ":

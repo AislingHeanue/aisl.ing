@@ -7,7 +7,6 @@ import (
 
 	common "github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/controller"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 
@@ -53,14 +52,14 @@ type LifeGame struct {
 
 var _ common.GameInfo = &LifeGame{}
 
-func (lg *LifeGame) Init(c *util.GameContext) {
+func (lg *LifeGame) Init(c *common.GameContext) {
 	lg.Random(c)
 
 	lg.T = -1
 }
 
-func (lg *LifeGame) InitListeners(c *util.GameContext) {
-	util.RegisterListeners(c, lg.LifeContext, controller.LifeController(lg), controller.LifeActionHandler{})
+func (lg *LifeGame) InitListeners(c *common.GameContext) {
+	common.RegisterListeners(c, lg.LifeContext, controller.LifeController(lg), controller.LifeActionHandler{})
 }
 
 func (lg *LifeGame) GetFragmentSource() string {
@@ -79,11 +78,11 @@ func (lg *LifeGame) SetParent(parent *common.ShaderGame) {
 	lg.Parent = parent
 }
 
-func (lg *LifeGame) Tick(c *util.GameContext) {
+func (lg *LifeGame) Tick(c *common.GameContext) {
 	lg.T++
 }
 
-func (lg *LifeGame) AttachAttributes(c *util.GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
+func (lg *LifeGame) AttachAttributes(c *common.GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
 	gl := c.GL
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)

@@ -1,12 +1,13 @@
 package canvas
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	"github.com/gowebapi/webapi/html/canvas"
+
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 )
 
-func InitCanvas(c *util.GameContext) {
+func InitCanvas(c *common.GameContext) {
 	res := c.Window.JSValue().Call("resizeCanvas", float32(c.ResolutionScale), true)
 	c.Height = float32(res.Get("height").Float())
 	c.Width = float32(res.Get("width").Float())

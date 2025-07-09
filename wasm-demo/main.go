@@ -9,7 +9,6 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 )
@@ -17,7 +16,7 @@ import (
 var done chan struct{}
 
 func main() {
-	contexts := map[string]util.GameContext{
+	contexts := map[string]common.GameContext{
 		"rubiks": {
 			Square:   true,
 			Window:   webapi.GetWindow(),
@@ -62,7 +61,7 @@ func main() {
 	c := contexts[os.Args[0]]
 
 	canvas.InitCanvas(&c)
-	util.RegisterListeners(&c, nil, nil, canvas.CanvasActionHandler{})
+	common.RegisterListeners(&c, nil, nil, canvas.CanvasActionHandler{})
 	c.Animator.Init(&c)
 	c.Animator.InitListeners(&c)
 	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(&c)))
@@ -70,7 +69,7 @@ func main() {
 	<-done
 }
 
-func wrapAnimator(c *util.GameContext) func(float64) {
+func wrapAnimator(c *common.GameContext) func(float64) {
 	return func(time float64) {
 		c.IntervalT = (float32(time) / 1000) - c.T // milliseconds to seconds
 		c.T = float32(time) / 1000
@@ -79,4 +78,3 @@ func wrapAnimator(c *util.GameContext) func(float64) {
 	}
 
 }
-

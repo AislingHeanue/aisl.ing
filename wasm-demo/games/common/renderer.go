@@ -7,8 +7,6 @@ import (
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 	webapicanvas "github.com/gowebapi/webapi/html/canvas"
-
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 )
 
 //go:embed shaders/display.frag
@@ -33,19 +31,19 @@ type ShaderGame struct {
 }
 
 type GameInfo interface {
-	AttachAttributes(c *util.GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture)
-	Init(c *util.GameContext)
-	InitListeners(c *util.GameContext)
+	AttachAttributes(c *GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture)
+	Init(c *GameContext)
+	InitListeners(c *GameContext)
 	GetTps() float32
 	GetVertexSource() string
 	GetFragmentSource() string
 	SetParent(parent *ShaderGame)
-	Tick(c *util.GameContext)
+	Tick(c *GameContext)
 }
 
-var _ util.Animator = &ShaderGame{}
+var _ Animator = &ShaderGame{}
 
-func (g *ShaderGame) Init(c *util.GameContext) {
+func (g *ShaderGame) Init(c *GameContext) {
 	g.createShaders(c, g.GetVertexSource(), g.GetFragmentSource())
 	g.CreateBuffers(c)
 
@@ -59,19 +57,19 @@ func (g *ShaderGame) Init(c *util.GameContext) {
 	g.GameInfo.Init(c)
 }
 
-func (g *ShaderGame) InitListeners(c *util.GameContext) {
+func (g *ShaderGame) InitListeners(c *GameContext) {
 	g.GameInfo.InitListeners(c)
 }
 
-func (g *ShaderGame) zoomY(c *util.GameContext) float32 {
+func (g *ShaderGame) zoomY(c *GameContext) float32 {
 	return c.Zoom * c.Height / float32(c.PixelsHeight)
 }
 
-func (g *ShaderGame) zoomX(c *util.GameContext) float32 {
+func (g *ShaderGame) zoomX(c *GameContext) float32 {
 	return c.Zoom * c.Width / float32(c.PixelsWidth)
 }
 
-func (g *ShaderGame) zoom(c *util.GameContext) float32 {
+func (g *ShaderGame) zoom(c *GameContext) float32 {
 	return min(g.zoomX(c), g.zoomY(c))
 }
 
@@ -80,7 +78,7 @@ func (g *ShaderGame) swapTextures() {
 	g.readTexture, g.writeTexture = g.writeTexture, g.readTexture
 }
 
-func (g *ShaderGame) createShaders(c *util.GameContext, vertexSource, fragmentSource string) {
+func (g *ShaderGame) createShaders(c *GameContext, vertexSource, fragmentSource string) {
 	gl := c.GL
 
 	vShader := gl.CreateShader(webgl.VERTEX_SHADER)
@@ -121,7 +119,7 @@ func (g *ShaderGame) createShaders(c *util.GameContext, vertexSource, fragmentSo
 	}
 }
 
-func (g *ShaderGame) CreateBuffers(c *util.GameContext) {
+func (g *ShaderGame) CreateBuffers(c *GameContext) {
 	// this is a fullscreen quad.
 	// this is what's drawn to (ie the coordinates of the framebuffer to draw to)
 	vertexArray := []float32{
@@ -156,7 +154,7 @@ func (g *ShaderGame) CreateBuffers(c *util.GameContext) {
 	g.readFrameBuffer = createFramebuffer(c, g.readTexture)
 }
 
-func createVertexBuffer(c *util.GameContext, vertexArray []float32) *webgl.Buffer {
+func createVertexBuffer(c *GameContext, vertexArray []float32) *webgl.Buffer {
 	vertices := jsconv.Float32ToJs(vertexArray)
 	vertexBuffer := c.GL.CreateBuffer()
 	c.GL.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
@@ -166,7 +164,7 @@ func createVertexBuffer(c *util.GameContext, vertexArray []float32) *webgl.Buffe
 	return vertexBuffer
 }
 
-func createTexture(c *util.GameContext, width int, height int) *webgl.Texture {
+func createTexture(c *GameContext, width int, height int) *webgl.Texture {
 	t := c.GL.CreateTexture()
 	c.GL.BindTexture(webgl.TEXTURE_2D, t)
 	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), width, height, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
@@ -179,7 +177,7 @@ func createTexture(c *util.GameContext, width int, height int) *webgl.Texture {
 	return t
 }
 
-func createFramebuffer(c *util.GameContext, texture *webgl.Texture) *webgl.Framebuffer {
+func createFramebuffer(c *GameContext, texture *webgl.Texture) *webgl.Framebuffer {
 	frameBuffer := c.GL.CreateFramebuffer()
 	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, frameBuffer)
 	c.GL.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, texture, 0)
@@ -188,7 +186,7 @@ func createFramebuffer(c *util.GameContext, texture *webgl.Texture) *webgl.Frame
 	return frameBuffer
 }
 
-func (g *ShaderGame) renderFrame(c *util.GameContext) {
+func (g *ShaderGame) renderFrame(c *GameContext) {
 	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)
 	c.GL.ClearColor(0.0, 0.0, 0.0, 1.0)
 	c.GL.DrawArrays(webgl.TRIANGLES, 0, g.vCount)
@@ -197,7 +195,7 @@ func (g *ShaderGame) renderFrame(c *util.GameContext) {
 	g.swapTextures()
 }
 
-func (g *ShaderGame) Render(c *util.GameContext) {
+func (g *ShaderGame) Render(c *GameContext) {
 	fmt.Println("rendering")
 	g.cumulativeIntervalT += c.IntervalT
 	tps := g.GetTps()
@@ -206,12 +204,12 @@ func (g *ShaderGame) Render(c *util.GameContext) {
 		g.renderFrame(c)
 
 		g.cumulativeIntervalT -= 1. / tps
-		g.GameInfo.Tick(c)
+		g.Tick(c)
 	}
 	g.drawToCanvas(c)
 }
 
-func (g *ShaderGame) drawToCanvas(c *util.GameContext) {
+func (g *ShaderGame) drawToCanvas(c *GameContext) {
 	// the + c.Width/2 here makes it so that the 'anchor' point for zooming in and out is at the centre of the canvas
 	topLeftDX := c.DX + c.Width/2 - g.zoom(c)*float32(c.PixelsWidth)/2
 	topLeftDY := c.DY + c.Height/2 - g.zoom(c)*float32(c.PixelsHeight)/2
@@ -249,7 +247,7 @@ func (g *ShaderGame) drawToCanvas(c *util.GameContext) {
 	}
 }
 
-func (g *ShaderGame) SetPixelsInTexture(c *util.GameContext, in [][]bool) {
+func (g *ShaderGame) SetPixelsInTexture(c *GameContext, in [][]bool) {
 	c.GL.BindTexture(webgl.TEXTURE_2D, g.writeTexture)
 	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.PixelsWidth, c.PixelsHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(setupPixelArray(in))))
 	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
