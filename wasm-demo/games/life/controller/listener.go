@@ -12,6 +12,9 @@ type LifeContext struct {
 	Tps            float32
 	NeedsRestart   bool // will probably remove this one
 	Loop           bool
+	T              int
+	TrailLength    int
+	ColourPeriod   int
 
 	OpenFileName string
 }

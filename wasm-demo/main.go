@@ -7,6 +7,7 @@ import (
 	"github.com/gowebapi/webapi/html/htmlcommon"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 
@@ -38,13 +39,15 @@ func main() {
 			Document: webapi.GetWindow().Document(),
 			// DisplayCanvas:   webapi.GetWindow().Document().GetElementById("wasm-canvas"),
 			ResolutionScale: 0.5,
-			Animator: life.New(
-				life.LifeOptions{
-					Tps:          30,
-					Loop:         true,
-					TrailLength:  25,
-					ColourPeriod: 25,
-				}),
+			Animator: &common.ShaderGame{
+				GameInfo: life.New(
+					life.LifeOptions{
+						Tps:          30,
+						Loop:         true,
+						TrailLength:  25,
+						ColourPeriod: 50,
+					}),
+			},
 			PixelsHeight:    200,
 			PixelsWidth:     100,
 			Zoom:            1,
@@ -76,3 +79,4 @@ func wrapAnimator(c *util.GameContext) func(float64) {
 	}
 
 }
+

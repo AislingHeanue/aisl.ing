@@ -1,0 +1,282 @@
+package common
+
+import (
+	_ "embed"
+	"fmt"
+
+	"github.com/gowebapi/webapi/core/jsconv"
+	"github.com/gowebapi/webapi/graphics/webgl"
+	webapicanvas "github.com/gowebapi/webapi/html/canvas"
+
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
+)
+
+//go:embed shaders/display.frag
+var fDisplayShaderSource string
+
+type ShaderGame struct {
+	GameInfo
+	mainProgram    *webgl.Program
+	displayProgram *webgl.Program
+
+	vertexBuffer  *webgl.Buffer
+	textureBuffer *webgl.Buffer
+
+	vCount int
+
+	writeFrameBuffer *webgl.Framebuffer
+	readFrameBuffer  *webgl.Framebuffer
+	readTexture      *webgl.Texture
+	writeTexture     *webgl.Texture
+
+	cumulativeIntervalT float32
+}
+
+type GameInfo interface {
+	AttachAttributes(c *util.GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture)
+	Init(c *util.GameContext)
+	InitListeners(c *util.GameContext)
+	GetTps() float32
+	GetVertexSource() string
+	GetFragmentSource() string
+	SetParent(parent *ShaderGame)
+	Tick(c *util.GameContext)
+}
+
+var _ util.Animator = &ShaderGame{}
+
+func (g *ShaderGame) Init(c *util.GameContext) {
+	g.createShaders(c, g.GetVertexSource(), g.GetFragmentSource())
+	g.CreateBuffers(c)
+
+	if g.zoom(c) < 0 {
+		panic("I refuse to create an infinite loop no thank you")
+	}
+	c.DX = 0 // default offset position of the grid is 0,0
+	c.DY = 0
+
+	g.SetParent(g)
+	g.GameInfo.Init(c)
+}
+
+func (g *ShaderGame) InitListeners(c *util.GameContext) {
+	g.GameInfo.InitListeners(c)
+}
+
+func (g *ShaderGame) zoomY(c *util.GameContext) float32 {
+	return c.Zoom * c.Height / float32(c.PixelsHeight)
+}
+
+func (g *ShaderGame) zoomX(c *util.GameContext) float32 {
+	return c.Zoom * c.Width / float32(c.PixelsWidth)
+}
+
+func (g *ShaderGame) zoom(c *util.GameContext) float32 {
+	return min(g.zoomX(c), g.zoomY(c))
+}
+
+func (g *ShaderGame) swapTextures() {
+	g.writeFrameBuffer, g.readFrameBuffer = g.readFrameBuffer, g.writeFrameBuffer
+	g.readTexture, g.writeTexture = g.writeTexture, g.readTexture
+}
+
+func (g *ShaderGame) createShaders(c *util.GameContext, vertexSource, fragmentSource string) {
+	gl := c.GL
+
+	vShader := gl.CreateShader(webgl.VERTEX_SHADER)
+	gl.ShaderSource(vShader, vertexSource)
+	gl.CompileShader(vShader)
+	if !gl.GetShaderParameter(vShader, webgl.COMPILE_STATUS).Bool() {
+		fmt.Printf("Error in life.vert: %v\n", *gl.GetShaderInfoLog(vShader))
+	}
+
+	fShader := gl.CreateShader(webgl.FRAGMENT_SHADER)
+	gl.ShaderSource(fShader, fragmentSource)
+	gl.CompileShader(fShader)
+	if !gl.GetShaderParameter(fShader, webgl.COMPILE_STATUS).Bool() {
+		fmt.Printf("Error in life.frag: %v\n", *gl.GetShaderInfoLog(fShader))
+	}
+
+	g.mainProgram = gl.CreateProgram()
+	gl.AttachShader(g.mainProgram, vShader)
+	gl.AttachShader(g.mainProgram, fShader)
+	gl.LinkProgram(g.mainProgram)
+	if !gl.GetProgramParameter(g.mainProgram, webgl.LINK_STATUS).Bool() {
+		fmt.Printf("Error in linking life: %v\n", *gl.GetProgramInfoLog(g.mainProgram))
+	}
+
+	fDisplayShader := gl.CreateShader(webgl.FRAGMENT_SHADER)
+	gl.ShaderSource(fDisplayShader, fDisplayShaderSource)
+	gl.CompileShader(fDisplayShader)
+	if !gl.GetShaderParameter(fDisplayShader, webgl.COMPILE_STATUS).Bool() {
+		fmt.Printf("Error in display.frag: %v\n", *gl.GetShaderInfoLog(fDisplayShader))
+	}
+
+	g.displayProgram = gl.CreateProgram()
+	gl.AttachShader(g.displayProgram, vShader)
+	gl.AttachShader(g.displayProgram, fDisplayShader)
+	gl.LinkProgram(g.displayProgram)
+	if !gl.GetProgramParameter(g.displayProgram, webgl.LINK_STATUS).Bool() {
+		fmt.Printf("Error in linking display %v\n", *gl.GetProgramInfoLog(g.displayProgram))
+	}
+}
+
+func (g *ShaderGame) CreateBuffers(c *util.GameContext) {
+	// this is a fullscreen quad.
+	// this is what's drawn to (ie the coordinates of the framebuffer to draw to)
+	vertexArray := []float32{
+		-1.0, -1.0,
+		1.0, -1.0,
+		-1.0, 1.0,
+		-1.0, 1.0,
+		1.0, -1.0,
+		1.0, 1.0,
+	}
+	g.vertexBuffer = createVertexBuffer(c, vertexArray)
+	g.vCount = 6
+
+	// this is another fullscreen quad
+	// this one is for reading the full contents of the previous frame.
+	textureArray := []float32{
+		0.0, 0.0,
+		1.0, 0.0,
+		0.0, 1.0,
+		0.0, 1.0,
+		1.0, 0.0,
+		1.0, 1.0,
+	}
+	g.textureBuffer = createVertexBuffer(c, textureArray)
+
+	// create the textures to store the contents of previous frames.
+	g.readTexture = createTexture(c, c.PixelsWidth, c.PixelsHeight)
+	g.writeTexture = createTexture(c, c.PixelsWidth, c.PixelsHeight)
+
+	// the first framebuffer blits to the second texture and vice versa.
+	g.writeFrameBuffer = createFramebuffer(c, g.writeTexture)
+	g.readFrameBuffer = createFramebuffer(c, g.readTexture)
+}
+
+func createVertexBuffer(c *util.GameContext, vertexArray []float32) *webgl.Buffer {
+	vertices := jsconv.Float32ToJs(vertexArray)
+	vertexBuffer := c.GL.CreateBuffer()
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
+	c.GL.BufferData2(webgl.ARRAY_BUFFER, webgl.UnionFromJS(vertices), webgl.STATIC_DRAW)
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
+
+	return vertexBuffer
+}
+
+func createTexture(c *util.GameContext, width int, height int) *webgl.Texture {
+	t := c.GL.CreateTexture()
+	c.GL.BindTexture(webgl.TEXTURE_2D, t)
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), width, height, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, &webgl.Union{})
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, int(webgl.CLAMP_TO_EDGE))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, int(webgl.NEAREST))
+	c.GL.TexParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, int(webgl.NEAREST))
+	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+
+	return t
+}
+
+func createFramebuffer(c *util.GameContext, texture *webgl.Texture) *webgl.Framebuffer {
+	frameBuffer := c.GL.CreateFramebuffer()
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, frameBuffer)
+	c.GL.FramebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, texture, 0)
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+
+	return frameBuffer
+}
+
+func (g *ShaderGame) renderFrame(c *util.GameContext) {
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)
+	c.GL.ClearColor(0.0, 0.0, 0.0, 1.0)
+	c.GL.DrawArrays(webgl.TRIANGLES, 0, g.vCount)
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+
+	g.swapTextures()
+}
+
+func (g *ShaderGame) Render(c *util.GameContext) {
+	fmt.Println("rendering")
+	g.cumulativeIntervalT += c.IntervalT
+	tps := g.GetTps()
+	for g.cumulativeIntervalT > (1 / tps) {
+		g.AttachAttributes(c, g.mainProgram, g.vertexBuffer, g.textureBuffer, g.readTexture)
+		g.renderFrame(c)
+
+		g.cumulativeIntervalT -= 1. / tps
+		g.GameInfo.Tick(c)
+	}
+	g.drawToCanvas(c)
+}
+
+func (g *ShaderGame) drawToCanvas(c *util.GameContext) {
+	// the + c.Width/2 here makes it so that the 'anchor' point for zooming in and out is at the centre of the canvas
+	topLeftDX := c.DX + c.Width/2 - g.zoom(c)*float32(c.PixelsWidth)/2
+	topLeftDY := c.DY + c.Height/2 - g.zoom(c)*float32(c.PixelsHeight)/2
+	// bound check DX and DY and make sure they're within a valid range to be able to draw each part of all the visible canvases.
+	for topLeftDX > 0 {
+		topLeftDX -= float32(c.PixelsWidth) * g.zoom(c)
+	}
+	for topLeftDY > 0 {
+		topLeftDY -= float32(c.PixelsHeight) * g.zoom(c)
+	}
+
+	union := webgl.Union{
+		Value: jsconv.UInt8ToJs(make([]uint8, c.PixelsHeight*c.PixelsWidth*4)),
+	}
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.readFrameBuffer)
+	c.GL.ReadPixels(0, 0, c.PixelsWidth, c.PixelsHeight, webgl.RGBA, webgl.UNSIGNED_BYTE, &union)
+	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+
+	imageData := c.ZoomCtx.CreateImageData(c.PixelsWidth, c.PixelsHeight)
+	imageData.Data().JSValue().Call("set", union.JSValue())
+	c.ZoomCtx.PutImageData(imageData, 0, 0)
+	c.DisplayCtx.ClearRect(0, 0, float64(c.Width), float64(c.Height))
+	// tile horizontally if one instance of the grid does not cover the canvas
+	for currentDx := topLeftDX; currentDx < c.Width; currentDx += float32(c.PixelsWidth) * g.zoom(c) {
+		// and vertically
+		for currentDy := topLeftDY; currentDy < c.Height; currentDy += float32(c.PixelsHeight) * g.zoom(c) {
+			c.DisplayCtx.DrawImage3(
+				webapicanvas.UnionFromJS(c.ZoomCanvas.JSValue()),
+				0, 0, // start coords in grid being captured from
+				float64((c.Width-currentDx)/g.zoom(c)), float64((c.Height-currentDy)/g.zoom(c)),
+				float64(currentDx), float64(currentDy), // start coords in grid being displayed to
+				float64(c.Width-currentDx), float64(c.Height-currentDy),
+			)
+		}
+	}
+}
+
+func (g *ShaderGame) SetPixelsInTexture(c *util.GameContext, in [][]bool) {
+	c.GL.BindTexture(webgl.TEXTURE_2D, g.writeTexture)
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.PixelsWidth, c.PixelsHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(setupPixelArray(in))))
+	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+
+	g.swapTextures()
+}
+
+func setupPixelArray(m [][]bool) []uint8 {
+	on := []uint8{255, 255, 255, 255}
+	off := []uint8{0, 0, 0, 0}
+	out := make([]uint8, 4*len(m)*len(m[0]))
+	width := len(m[0])
+	for i := range m {
+		for j := range m[i] {
+			if m[i][j] {
+				out[4*(i*width+j)+0] = on[0]
+				out[4*(i*width+j)+1] = on[1]
+				out[4*(i*width+j)+2] = on[2]
+				out[4*(i*width+j)+3] = on[3]
+			} else {
+				out[4*(i*width+j)+0] = off[0]
+				out[4*(i*width+j)+1] = off[1]
+				out[4*(i*width+j)+2] = off[2]
+				out[4*(i*width+j)+3] = off[3]
+			}
+		}
+	}
+
+	return out
+}
