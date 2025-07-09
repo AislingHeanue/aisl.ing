@@ -1,14 +1,12 @@
-package controller
+package model
 
 import (
 	"fmt"
 	"math/rand"
-
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 )
 
 type CubeController struct {
-	ccc *model.CubeCubeContext
+	Context *CubeCubeContext
 }
 
 type Turn string
@@ -18,20 +16,20 @@ func (cc *CubeController) QueueEvent(turns ...Turn) {
 		if len(t) == 2 {
 			switch string(t[1]) {
 			case "'":
-				cc.ccc.AnimationHandler.AddEvent(string(t[0]), true)
+				cc.Context.AnimationHandler.AddEvent(string(t[0]), true)
 			case "2":
-				cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
-				cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
+				cc.Context.AnimationHandler.AddEvent(string(t[0]), false)
+				cc.Context.AnimationHandler.AddEvent(string(t[0]), false)
 			}
 		} else if len(t) == 1 {
-			cc.ccc.AnimationHandler.AddEvent(string(t[0]), false)
+			cc.Context.AnimationHandler.AddEvent(string(t[0]), false)
 		}
 	}
 }
 
 func (cc *CubeController) ResetAngles() {
-	cc.ccc.AngleX = 0
-	cc.ccc.AngleY = 0
+	cc.Context.AngleX = 0
+	cc.Context.AngleY = 0
 }
 
 func (cc *CubeController) Shuffle() {

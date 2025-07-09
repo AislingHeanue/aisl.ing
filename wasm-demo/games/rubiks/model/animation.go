@@ -96,7 +96,7 @@ func (a *RubiksAnimationHandler) Tick(intervalT float32) bool {
 	// If there is at least one event left in the queue that isn't the maximum value,
 	// we can assume that more ticks need to be done before
 	// the queue is cleared.
-	a.done = eventsRemaining != 0
+	a.done = eventsRemaining == 0
 
 	// true: at least one face was ticked
 	return true

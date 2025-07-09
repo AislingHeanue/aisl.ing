@@ -6,7 +6,7 @@ import (
 	"math"
 	"syscall/js"
 
-	cubeController "github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/controller"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/listener"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/core/jsconv"
@@ -14,13 +14,11 @@ import (
 )
 
 type CubeRenderer struct {
-	TotalSideLength   float32
-	SideLength        float32
-	GapProportion     float32
-	SideLengthWithGap float32
-	Origin            model.Point
-	Dimension         int
-	TurnSeconds       float32
+	TotalSideLength float32
+	GapProportion   float32
+	Origin          model.Point
+	Dimension       int
+	TurnSeconds     float32
 
 	bufferSet *BufferSet
 	program   *webgl.Program
@@ -46,14 +44,19 @@ func (cc *CubeRenderer) Init(c *util.GameContext) {
 	if cc.program == nil {
 		cc.createShaders(c)
 	}
-}
 
-func (cc CubeRenderer) Dimensions() (int, int) {
-	return 0, 0
+	sideLength := cc.TotalSideLength / ((1+cc.GapProportion)*float32(cc.Dimension) - cc.GapProportion)
+	sideLengthWithGap := sideLength + cc.GapProportion*sideLength
+
+	cc.AnimationHandler.FlushAll()
+	cc.AnimationHandler.RubiksCube = model.NewRubiksCube(cc.Dimension, cc.Origin, sideLength, cc.TotalSideLength, sideLengthWithGap)
+
+	cc.createBuffers(c)
 }
 
 func (cc CubeRenderer) InitListeners(c *util.GameContext) {
-	cubeController.InitListeners(c, cc.CubeCubeContext)
+	util.RegisterListeners(c, cc.CubeCubeContext, model.CubeController{Context: cc.CubeCubeContext}, listener.CubeActionHandler{})
+	listener.RegisterButtons(c, cc.CubeCubeContext)
 }
 
 func (cc *CubeRenderer) Render(c *util.GameContext) {

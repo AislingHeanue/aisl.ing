@@ -50,7 +50,7 @@ type RubiksCube struct {
 	Dimension int
 }
 
-func NewRubiksCube(d int, origin Point, sideLength float32, totalSideLength float32, sideLengthWithGap float32) RubiksCube {
+func NewRubiksCube(d int, origin Point, sideLength float32, totalSideLength float32, sideLengthWithGap float32) *RubiksCube {
 	data := make([][][]Cube, d)
 	for i := range data {
 		data[i] = make([][]Cube, d)
@@ -74,7 +74,7 @@ func NewRubiksCube(d int, origin Point, sideLength float32, totalSideLength floa
 		}
 	}
 
-	return RubiksCube{Dimension: d, Data: data}
+	return &RubiksCube{Dimension: d, Data: data}
 }
 
 func cubeColours(x, y, z, dimension int) ([]color.RGBA, bool) {

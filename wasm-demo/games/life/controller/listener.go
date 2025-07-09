@@ -16,8 +16,6 @@ type LifeContext struct {
 	OpenFileName string
 }
 
-type ListenerKind int
-
 type LifeController interface {
 	Reset(c *util.GameContext)
 	Random(c *util.GameContext)

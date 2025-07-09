@@ -12,13 +12,13 @@ type CanvasActionHandler struct{}
 
 var _ util.ActionHandler[any, any] = CanvasActionHandler{}
 
-func getRelativeMousePosition(e *domcore.Event) (float32, float32) {
+func GetRelativeMousePosition(e *domcore.Event) (float32, float32) {
 	relativeX := float32(e.JSValue().Get("offsetX").Float())
 	relativeY := float32(e.JSValue().Get("offsetY").Float())
 	return float32(relativeX), float32(relativeY)
 }
 
-func getRelativeTouchPosition(c *util.GameContext, e *domcore.Event) (float32, float32) {
+func GetRelativeTouchPosition(c *util.GameContext, e *domcore.Event) (float32, float32) {
 	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
 	touch := e.JSValue().Get("touches").Get("0")
 	offsetX := touch.Get("clientX").Float() - rect.Get("left").Float()
@@ -26,7 +26,7 @@ func getRelativeTouchPosition(c *util.GameContext, e *domcore.Event) (float32, f
 	return float32(offsetX), float32(offsetY)
 }
 
-func getDistanceBetweenTouches(e *domcore.Event) float32 {
+func GetDistanceBetweenTouches(e *domcore.Event) float32 {
 	touches := e.JSValue().Get("touches")
 	x1 := touches.Get("0").Get("clientX").Float()
 	y1 := touches.Get("0").Get("clientY").Float()
@@ -56,7 +56,7 @@ func setZoom(c *util.GameContext, zoom float32) {
 }
 
 func (a CanvasActionHandler) Click(c *util.GameContext, context *any, controller any, e *domcore.Event) {
-	c.AnchorX, c.AnchorY = getRelativeMousePosition(e)
+	c.AnchorX, c.AnchorY = GetRelativeMousePosition(e)
 	c.AnchorDX = c.DX
 	c.AnchorDY = c.DY
 	c.MouseDown = true
@@ -65,7 +65,7 @@ func (a CanvasActionHandler) Click(c *util.GameContext, context *any, controller
 func (a CanvasActionHandler) Drag(c *util.GameContext, context *any, controller any, e *domcore.Event) {
 	if c.MouseDown && c.PanningEnabled {
 		e.PreventDefault()
-		mouseX, mouseY := getRelativeMousePosition(e)
+		mouseX, mouseY := GetRelativeMousePosition(e)
 		c.DX = (c.AnchorDX - (c.AnchorX - mouseX))
 		c.DY = (c.AnchorDY - (c.AnchorY - mouseY))
 	}
@@ -73,12 +73,12 @@ func (a CanvasActionHandler) Drag(c *util.GameContext, context *any, controller 
 
 func (a CanvasActionHandler) DragTouch(c *util.GameContext, context *any, controller any, e *domcore.Event) {
 	if c.MouseDown && c.PanningEnabled {
-		mouseX, mouseY := getRelativeTouchPosition(c, e)
+		mouseX, mouseY := GetRelativeTouchPosition(c, e)
 		c.DX = (c.AnchorDX - float32(c.Window.DevicePixelRatio())*(c.AnchorX-mouseX))
 		c.DY = (c.AnchorDY - float32(c.Window.DevicePixelRatio())*(c.AnchorY-mouseY))
 	}
 	if c.Zooming && c.ZoomEnabled {
-		distance := getDistanceBetweenTouches(e)
+		distance := GetDistanceBetweenTouches(e)
 		setZoom(c, c.AnchorZoom*(distance/c.AnchorPinchDistance))
 	}
 }
@@ -94,11 +94,11 @@ func (a CanvasActionHandler) Touch(c *util.GameContext, context *any, controller
 		c.Zooming = true
 		// don't drag and zoom at the same time because it's probably complicated
 		c.MouseDown = false
-		c.AnchorPinchDistance = getDistanceBetweenTouches(e)
+		c.AnchorPinchDistance = GetDistanceBetweenTouches(e)
 		c.AnchorZoom = c.Zoom
 		e.PreventDefault()
 	} else {
-		c.AnchorX, c.AnchorY = getRelativeTouchPosition(c, e)
+		c.AnchorX, c.AnchorY = GetRelativeTouchPosition(c, e)
 		c.AnchorDX = c.DX
 		c.AnchorDY = c.DY
 		c.MouseDown = true
