@@ -21,7 +21,9 @@ func main() {
 			Square:          true,
 			Window:          webapi.GetWindow(),
 			Document:        webapi.GetWindow().Document(),
-			ResolutionScale: 1, // FIXME: Scale does not work right in the JS code.
+			ResolutionScale: 1.7,
+			AutoSizePixels:  true,
+			SmoothImage:     true,
 			Animator: &common.ShaderGame{
 				Is3D: true,
 				GameInfo: rubiks.New(
@@ -34,20 +36,22 @@ func main() {
 					},
 				),
 			},
+			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
 		"life": {
 			Square:   true,
 			Window:   webapi.GetWindow(),
 			Document: webapi.GetWindow().Document(),
 			// DisplayCanvas:   webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-			ResolutionScale: 0.5,
+			ResolutionScale: 1.4,
 			Animator: &common.ShaderGame{
 				GameInfo: life.New(
 					life.LifeOptions{
-						Tps:          30,
 						Loop:         true,
 						TrailLength:  25,
 						ColourPeriod: 50,
+						Tps:          30,
 					}),
 			},
 			PixelsHeight:    200,

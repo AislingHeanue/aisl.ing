@@ -8,7 +8,8 @@ declare global {
     webglCanvas: HTMLCanvasElement,
     zoomCanvas: HTMLCanvasElement,
     customHeight: number,
-    customWidth: number
+    customWidth: number,
+    smoothImage: boolean
   ): {
     gl: WebGLRenderingContext,
     zoomContext: CanvasRenderingContext2D,
@@ -58,7 +59,7 @@ export default function WasmCanvas({ game }: { game: string }) {
     let width = displayedWidth
 
     if (scale != 0) {
-      const pixelRatio = window.devicePixelRatio
+      const pixelRatio = window.devicePixelRatio * scale
       height = Math.floor(pixelRatio * displayedHeight)
       width = Math.floor(pixelRatio * displayedWidth)
     }
@@ -79,7 +80,8 @@ export default function WasmCanvas({ game }: { game: string }) {
     webglCanvas: HTMLCanvasElement,
     zoomCanvas: HTMLCanvasElement,
     customHeight: number,
-    customWidth: number
+    customWidth: number,
+    smoothImage: boolean
   ) {
     const mainCanvas = canvasRef.current!
 
@@ -92,7 +94,8 @@ export default function WasmCanvas({ game }: { game: string }) {
     const gl = webglCanvas.getContext("webgl", { "alpha": false })!
     const zoomCtx = zoomCanvas.getContext("2d", { "alpha": false })
     const displayCtx = mainCanvas.getContext("2d", { "alpha": false })
-    displayCtx!.imageSmoothingEnabled = false
+    displayCtx!.imageSmoothingEnabled = smoothImage
+    zoomCtx!.imageSmoothingEnabled = smoothImage
 
     gl.viewport(0, 0, customWidth, customHeight)
 

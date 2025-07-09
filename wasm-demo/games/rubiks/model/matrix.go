@@ -22,9 +22,9 @@ func PerspectiveMatrix(fov float32, ratio float32, nearZ float32, farZ float32) 
 	f := 1 / Tan(fov/2)
 	r := 1 / (farZ - nearZ)
 	return &Mat4{
-		{f / ratio, 0, 0, 0},
-		{0, f, 0, 0},
-		{0, 0, r * (nearZ + farZ), 1},
+		{f, 0, 0, 0},
+		{0, -f, 0, 0},
+		{0, 0, r * (nearZ + farZ), 2 * r * (nearZ + farZ)},
 		{0, 0, 0, 1},
 	}
 }
@@ -46,9 +46,9 @@ func (m Mat4) Rotate(angle float32, axis Axis) *Mat4 {
 
 func (m1 Mat4) MatrixDot(m2 Mat4) *Mat4 {
 	out := &Mat4{}
-	for i := range []int{0, 1, 2, 3} {
-		for j := range []int{0, 1, 2, 3} {
-			for k := range []int{0, 1, 2, 3} {
+	for i := range 4 {
+		for j := range 4 {
+			for k := range 4 {
 				out[i][j] += m1[i][k] * m2[k][j]
 			}
 		}
@@ -95,4 +95,3 @@ func getRotationMat4(angle float32, axis Axis) Mat4 {
 		return Mat4{}
 	}
 }
-

@@ -13,6 +13,7 @@ type Animator interface {
 	Init(*GameContext)
 	InitListeners(*GameContext)
 	Render(*GameContext)
+	RefreshBuffers(*GameContext)
 }
 
 type GameContext struct {
@@ -24,18 +25,20 @@ type GameContext struct {
 	RenderingCanvas *dom.Element
 	Document        *webapi.Document
 	Window          *webapi.Window
-	ResolutionScale float32
 
-	Square         bool
-	Height         float32
-	Width          float32
-	T              float32
-	IntervalT      float32
-	GL             *webgl.RenderingContext
-	ZoomCtx        *canvas.CanvasRenderingContext2D
-	DisplayCtx     *canvas.CanvasRenderingContext2D
-	ZoomEnabled    bool
-	PanningEnabled bool
+	ResolutionScale float32
+	SmoothImage     bool
+	AutoSizePixels  bool
+	Square          bool
+	Height          float32
+	Width           float32
+	T               float32
+	IntervalT       float32
+	GL              *webgl.RenderingContext
+	ZoomCtx         *canvas.CanvasRenderingContext2D
+	DisplayCtx      *canvas.CanvasRenderingContext2D
+	ZoomEnabled     bool
+	PanningEnabled  bool
 
 	DX                  float32
 	DY                  float32

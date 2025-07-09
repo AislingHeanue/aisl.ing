@@ -47,12 +47,15 @@ type CubeRenderer struct {
 
 var _ common.GameInfo = &CubeRenderer{}
 
-func (cc *CubeRenderer) Init(c *common.GameContext) {
+func (cc *CubeRenderer) PreSetup(c *common.GameContext) {
 	sideLength := cc.TotalSideLength / ((1+cc.GapProportion)*float32(cc.Dimension) - cc.GapProportion)
 	sideLengthWithGap := sideLength + cc.GapProportion*sideLength
 
 	cc.AnimationHandler.FlushAll()
 	cc.AnimationHandler.RubiksCube = model.NewRubiksCube(cc.Dimension, cc.Origin, sideLength, cc.TotalSideLength, sideLengthWithGap)
+}
+
+func (cc *CubeRenderer) PostSetup(c *common.GameContext) {
 }
 
 func (cc *CubeRenderer) InitListeners(c *common.GameContext) {
@@ -82,6 +85,10 @@ func (cc *CubeRenderer) Tick(c *common.GameContext) bool {
 
 func (cc *CubeRenderer) GetDrawShape(c *common.GameContext) common.DrawShape {
 	return model.GetBuffers(cc.AnimationHandler, cc.Origin)
+}
+
+func (cc *CubeRenderer) CanRunBetweenFrames() bool {
+	return false
 }
 
 func (cc *CubeRenderer) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {

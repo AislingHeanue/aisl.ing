@@ -132,5 +132,5 @@ func (a CanvasActionHandler) Keyboard(c *common.GameContext, context *any, contr
 
 func (a CanvasActionHandler) Resize(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	InitCanvas(c)
+	c.Animator.RefreshBuffers(c)
 }
-

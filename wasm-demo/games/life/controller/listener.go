@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"github.com/gowebapi/webapi/dom/domcore"
-
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/gowebapi/webapi/dom/domcore"
 )
 
 type LifeContext struct {
@@ -76,3 +75,4 @@ func (l LifeActionHandler) Keyboard(c *common.GameContext, context *LifeContext,
 		controller.OpenFile(c, context.OpenFileName)
 	}
 }
+

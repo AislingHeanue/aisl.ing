@@ -52,7 +52,10 @@ type LifeGame struct {
 
 var _ common.GameInfo = &LifeGame{}
 
-func (lg *LifeGame) Init(c *common.GameContext) {
+func (lg *LifeGame) PreSetup(c *common.GameContext) {
+}
+
+func (lg *LifeGame) PostSetup(c *common.GameContext) {
 	lg.Random(c)
 
 	lg.T = -1
@@ -90,6 +93,10 @@ func (lg *LifeGame) Tick(c *common.GameContext) bool {
 
 func (lg *LifeGame) GetVCount() int {
 	return 6 // This corresponds to the size of parent.writeBuffer
+}
+
+func (lg *LifeGame) CanRunBetweenFrames() bool {
+	return true
 }
 
 func (lg *LifeGame) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
