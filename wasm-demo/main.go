@@ -9,6 +9,7 @@ import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/mandelbrot"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 )
@@ -40,10 +41,9 @@ func main() {
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 		},
 		"life": {
-			Square:   true,
-			Window:   webapi.GetWindow(),
-			Document: webapi.GetWindow().Document(),
-			// DisplayCanvas:   webapi.GetWindow().Document().GetElementById("wasm-canvas"),
+			Square:          true,
+			Window:          webapi.GetWindow(),
+			Document:        webapi.GetWindow().Document(),
 			ResolutionScale: 1.4,
 			Animator: &common.ShaderGame{
 				GameInfo: life.New(
@@ -56,6 +56,23 @@ func main() {
 			},
 			PixelsHeight:    200,
 			PixelsWidth:     100,
+			Zoom:            1,
+			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			ZoomEnabled:     true,
+			PanningEnabled:  true,
+		},
+		"mandelbrot": {
+			Square:          true,
+			Window:          webapi.GetWindow(),
+			Document:        webapi.GetWindow().Document(),
+			ResolutionScale: 1.4,
+			Animator: &common.ShaderGame{
+				GameInfo: mandelbrot.New(
+					mandelbrot.MandelbrotOptions{}),
+			},
+			PixelsHeight:    2000,
+			PixelsWidth:     2000,
 			Zoom:            1,
 			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
