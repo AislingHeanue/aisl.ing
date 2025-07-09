@@ -1,28 +1,136 @@
 package canvas
 
 import (
+	"fmt"
+	"math"
+
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
-func RegisterListeners(c *GameContext) {
-	c.Window.AddEventListener("resize", domcore.NewEventListener(&CanvasListener{c, RESIZE}), nil)
+type CanvasActionHandler struct{}
+
+var _ util.ActionHandler[any, any] = CanvasActionHandler{}
+
+func getRelativeMousePosition(e *domcore.Event) (float32, float32) {
+	relativeX := float32(e.JSValue().Get("offsetX").Float())
+	relativeY := float32(e.JSValue().Get("offsetY").Float())
+	return float32(relativeX), float32(relativeY)
 }
 
-type ListenerKind int
-
-const (
-	RESIZE ListenerKind = iota
-)
-
-type CanvasListener struct {
-	c    *GameContext
-	kind ListenerKind
+func getRelativeTouchPosition(c *util.GameContext, e *domcore.Event) (float32, float32) {
+	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
+	touch := e.JSValue().Get("touches").Get("0")
+	offsetX := touch.Get("clientX").Float() - rect.Get("left").Float()
+	offsetY := touch.Get("clientY").Float() - rect.Get("top").Float()
+	return float32(offsetX), float32(offsetY)
 }
 
-func (l *CanvasListener) HandleEvent(e *domcore.Event) {
-	switch l.kind {
-	case RESIZE:
-		println("confused")
-		InitCanvas(l.c)
+func getDistanceBetweenTouches(e *domcore.Event) float32 {
+	touches := e.JSValue().Get("touches")
+	x1 := touches.Get("0").Get("clientX").Float()
+	y1 := touches.Get("0").Get("clientY").Float()
+	x2 := touches.Get("1").Get("clientX").Float()
+	y2 := touches.Get("1").Get("clientY").Float()
+	return float32(math.Hypot(float64(x1-x2), float64(y1-y2)))
+}
+
+func setZoom(c *util.GameContext, zoom float32) {
+	if !c.ZoomEnabled {
+		return
+	}
+
+	oldZoom := c.Zoom
+	// cap max zoom in
+	if zoom > oldZoom && zoom > 20 {
+		return
+	}
+	// cap max zoom out
+	if zoom < oldZoom && zoom < 0.2 {
+		return
+	}
+	c.Zoom = zoom
+	// scale DX and DY so that the 'anchor' of the zoom is always in the centre of the screen.
+	c.DX *= zoom / oldZoom
+	c.DY *= zoom / oldZoom
+}
+
+func (a CanvasActionHandler) Click(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	c.AnchorX, c.AnchorY = getRelativeMousePosition(e)
+	c.AnchorDX = c.DX
+	c.AnchorDY = c.DY
+	c.MouseDown = true
+}
+
+func (a CanvasActionHandler) Drag(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	if c.MouseDown && c.PanningEnabled {
+		e.PreventDefault()
+		mouseX, mouseY := getRelativeMousePosition(e)
+		c.DX = (c.AnchorDX - (c.AnchorX - mouseX))
+		c.DY = (c.AnchorDY - (c.AnchorY - mouseY))
 	}
 }
+
+func (a CanvasActionHandler) DragTouch(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	if c.MouseDown && c.PanningEnabled {
+		mouseX, mouseY := getRelativeTouchPosition(c, e)
+		c.DX = (c.AnchorDX - float32(c.Window.DevicePixelRatio())*(c.AnchorX-mouseX))
+		c.DY = (c.AnchorDY - float32(c.Window.DevicePixelRatio())*(c.AnchorY-mouseY))
+	}
+	if c.Zooming && c.ZoomEnabled {
+		distance := getDistanceBetweenTouches(e)
+		setZoom(c, c.AnchorZoom*(distance/c.AnchorPinchDistance))
+	}
+}
+
+func (a CanvasActionHandler) MouseUp(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	c.MouseDown = false
+}
+
+func (a CanvasActionHandler) Touch(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	fmt.Println("touch")
+	if e.JSValue().Get("touches").Length() == 2 {
+		// start zooming
+		c.Zooming = true
+		// don't drag and zoom at the same time because it's probably complicated
+		c.MouseDown = false
+		c.AnchorPinchDistance = getDistanceBetweenTouches(e)
+		c.AnchorZoom = c.Zoom
+		e.PreventDefault()
+	} else {
+		c.AnchorX, c.AnchorY = getRelativeTouchPosition(c, e)
+		c.AnchorDX = c.DX
+		c.AnchorDY = c.DY
+		c.MouseDown = true
+		e.PreventDefault()
+	}
+}
+
+func (a CanvasActionHandler) TouchUp(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	c.MouseDown = false
+	c.Zooming = false
+}
+
+func (a CanvasActionHandler) Keyboard(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	switch e.JSValue().Get("key").String() {
+	// pause simulation
+	case "0":
+		setZoom(c, 1)
+	// zoom out
+	case "-":
+		setZoom(c, 9/10.*c.Zoom)
+	// zoom in (+)
+	case "=":
+		setZoom(c, 10/9.*c.Zoom)
+	// reset zoom
+	// recentre
+	case "o":
+		c.DX = 0
+		c.DY = 0
+	}
+}
+
+func (a CanvasActionHandler) Resize(c *util.GameContext, context *any, controller any, e *domcore.Event) {
+	InitCanvas(c)
+}
+

@@ -3,8 +3,8 @@ package controller
 import (
 	"strings"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
@@ -20,23 +20,23 @@ const (
 	KEYBOARD
 )
 
-func InitListeners(c *canvas.GameContext, ccc *model.CubeCubeContext) {
-	canvas.AddListener(c, "mousedown", &CubeListener{c, ccc, CLICK})
-	canvas.AddListener(c, "mousemove", &CubeListener{c, ccc, MOUSE_MOVE})
-	canvas.AddListener(c, "mouseup", &CubeListener{c, ccc, MOUSE_UP})
-	canvas.AddListener(c, "mouseleave", &CubeListener{c, ccc, MOUSE_UP})
+func InitListeners(c *util.GameContext, ccc *model.CubeCubeContext) {
+	util.AddListener(c, "mousedown", &CubeListener{c, ccc, CLICK})
+	util.AddListener(c, "mousemove", &CubeListener{c, ccc, MOUSE_MOVE})
+	util.AddListener(c, "mouseup", &CubeListener{c, ccc, MOUSE_UP})
+	util.AddListener(c, "mouseleave", &CubeListener{c, ccc, MOUSE_UP})
 
-	canvas.AddListener(c, "touchstart", &CubeListener{c, ccc, TOUCH})
-	canvas.AddListener(c, "touchmove", &CubeListener{c, ccc, TOUCH_MOVE})
-	canvas.AddListener(c, "touchend", &CubeListener{c, ccc, TOUCH_UP})
-	canvas.AddListener(c, "touchcancel", &CubeListener{c, ccc, TOUCH_UP})
+	util.AddListener(c, "touchstart", &CubeListener{c, ccc, TOUCH})
+	util.AddListener(c, "touchmove", &CubeListener{c, ccc, TOUCH_MOVE})
+	util.AddListener(c, "touchend", &CubeListener{c, ccc, TOUCH_UP})
+	util.AddListener(c, "touchcancel", &CubeListener{c, ccc, TOUCH_UP})
 
 	c.Window.AddEventListener("keydown", domcore.NewEventListener(&CubeListener{c, ccc, KEYBOARD}), nil)
 	registerButtons(c, ccc)
 }
 
 type CubeListener struct {
-	c    *canvas.GameContext
+	c    *util.GameContext
 	ccc  *model.CubeCubeContext
 	kind ListenerKind
 }
@@ -60,14 +60,14 @@ func (l *CubeListener) HandleEvent(e *domcore.Event) {
 	}
 }
 
-func click(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
+func click(c *util.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	ccc.AnchorX, ccc.AnchorY = getRelativeMousePosition(c, e)
 	ccc.AnchorAngleX = ccc.AngleX
 	ccc.AnchorAngleY = ccc.AngleY
 	ccc.MouseDown = true
 }
 
-func touch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
+func touch(c *util.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	ccc.AnchorX, ccc.AnchorY = getRelativeTouchPosition(c, e)
 	ccc.AnchorAngleX = ccc.AngleX
 	ccc.AnchorAngleY = ccc.AngleY
@@ -76,7 +76,7 @@ func touch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) 
 	// lockScroll(c)
 }
 
-func dragCanvas(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
+func dragCanvas(c *util.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	if ccc.MouseDown {
 		e.PreventDefault()
 		mouseX, mouseY := getRelativeMousePosition(c, e)
@@ -85,7 +85,7 @@ func dragCanvas(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Ev
 	}
 }
 
-func dragCanvasTouch(c *canvas.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
+func dragCanvasTouch(c *util.GameContext, ccc *model.CubeCubeContext, e *domcore.Event) {
 	if ccc.MouseDown {
 		mouseX, mouseY := getRelativeTouchPosition(c, e)
 		ccc.AngleX = (ccc.AnchorAngleX + 5*(ccc.AnchorY-mouseY)/c.ResolutionScale)
@@ -102,13 +102,13 @@ func touchUp(ccc *model.CubeCubeContext) {
 	// unlockScroll(c)
 }
 
-func getRelativeMousePosition(c *canvas.GameContext, click *domcore.Event) (float32, float32) {
+func getRelativeMousePosition(c *util.GameContext, click *domcore.Event) (float32, float32) {
 	relativeX := float32(click.JSValue().Get("offsetX").Float()) / c.Width
 	relativeY := float32(click.JSValue().Get("offsetY").Float()) / c.Height
 	return float32(relativeX), float32(relativeY)
 }
 
-func getRelativeTouchPosition(c *canvas.GameContext, touch *domcore.Event) (float32, float32) {
+func getRelativeTouchPosition(c *util.GameContext, touch *domcore.Event) (float32, float32) {
 	rect := c.RenderingCanvas.JSValue().Call("getBoundingClientRect")
 	touchInfo := touch.JSValue().Get("touches").Get("0") // only care about the first touch point
 	offsetX := touchInfo.Get("clientX").Float() - rect.Get("left").Float()

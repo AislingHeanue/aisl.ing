@@ -8,6 +8,7 @@ import (
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks"
 )
@@ -15,7 +16,7 @@ import (
 var done chan struct{}
 
 func main() {
-	contexts := map[string]canvas.GameContext{
+	contexts := map[string]util.GameContext{
 		"rubiks": {
 			Square:   true,
 			Window:   webapi.GetWindow(),
@@ -39,16 +40,18 @@ func main() {
 			ResolutionScale: 0.5,
 			Animator: life.New(
 				life.LifeOptions{
-					CellHeight:   200,
-					CellWidth:    100,
-					Zoom:         1,
 					Tps:          30,
 					Loop:         true,
 					TrailLength:  25,
 					ColourPeriod: 25,
 				}),
+			PixelsHeight:    200,
+			PixelsWidth:     100,
+			Zoom:            1,
 			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
 			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			ZoomEnabled:     true,
+			PanningEnabled:  true,
 		},
 	}
 	// parser.ReadFile("oversized/41dots.lif")
@@ -56,7 +59,7 @@ func main() {
 	c := contexts[os.Args[0]]
 
 	canvas.InitCanvas(&c)
-	canvas.RegisterListeners(&c)
+	util.RegisterListeners(&c, nil, nil, canvas.CanvasActionHandler{})
 	c.Animator.Init(&c)
 	c.Animator.InitListeners(&c)
 	c.Window.RequestAnimationFrame(htmlcommon.FrameRequestCallbackToJS(wrapAnimator(&c)))
@@ -64,7 +67,7 @@ func main() {
 	<-done
 }
 
-func wrapAnimator(c *canvas.GameContext) func(float64) {
+func wrapAnimator(c *util.GameContext) func(float64) {
 	return func(time float64) {
 		c.IntervalT = (float32(time) / 1000) - c.T // milliseconds to seconds
 		c.T = float32(time) / 1000
@@ -73,4 +76,3 @@ func wrapAnimator(c *canvas.GameContext) func(float64) {
 	}
 
 }
-

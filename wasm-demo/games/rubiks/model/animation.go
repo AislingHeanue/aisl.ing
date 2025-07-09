@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -124,8 +123,8 @@ func (a *RubiksAnimationHandler) DoEvent(event RubiksEvent, origin Point) {
 		x := coord[0]
 		y := coord[1]
 		z := coord[2]
-		fmt.Println(event.timeElapsed)
-		fmt.Println(a.MaxTime)
+		// fmt.Println(event.timeElapsed)
+		// fmt.Println(a.MaxTime)
 		a.CopyRubiksCube.Data[x][y][z] = a.RubiksCube.Data[x][y][z].Rotate(origin, float32(float64(event.timeElapsed)*rotationScale*math.Pi/float64(2*a.MaxTime)), info.axis)
 	}
 

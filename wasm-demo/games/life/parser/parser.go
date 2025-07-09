@@ -28,8 +28,6 @@ type ParsedStuff struct {
 }
 
 func ReadRandomFile() ([][]bool, string) {
-	// FIXME: bring back the oversized folder from the collection, some of them are probably cool.
-	// actually oversized files can be pruned later
 	folder, err := files.ReadDir("patterns")
 	if err != nil {
 		fmt.Println(err)
@@ -41,9 +39,6 @@ func ReadRandomFile() ([][]bool, string) {
 		if !subfolderEntry.IsDir() {
 			continue
 		}
-		// if subfolderEntry.Name() != "synthesis" {
-		// 	continue
-		// }
 		subfolder, err := files.ReadDir(filepath.Join("patterns", subfolderEntry.Name()))
 
 		if err != nil {

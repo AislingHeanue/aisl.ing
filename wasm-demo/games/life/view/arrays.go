@@ -6,13 +6,15 @@ import (
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/util"
 )
 
-func (lg *LifeGame) setPixelsInTexture(c *canvas.GameContext, in [][]bool) {
+func (lg *LifeGame) setPixelsInTexture(c *util.GameContext, in [][]bool) {
 	c.GL.BindTexture(webgl.TEXTURE_2D, lg.writeTexture)
-	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), lg.CellWidth, lg.CellHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(setupPixelArray(in))))
+	c.GL.TexImage2D(webgl.TEXTURE_2D, 0, int(webgl.RGBA), c.PixelsWidth, c.PixelsHeight, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, webgl.UnionFromJS(jsconv.UInt8ToJs(setupPixelArray(in))))
 	c.GL.BindTexture(webgl.TEXTURE_2D, &webgl.Texture{})
+
+	lg.swapTextures()
 }
 
 func emptyArray(width int, height int) [][]bool {
