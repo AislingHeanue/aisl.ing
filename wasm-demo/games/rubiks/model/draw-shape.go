@@ -1,17 +1,9 @@
 package model
 
-type DrawShape struct {
-	Points        []*Point
-	VerticesArray []float32
-	IndicesArray  []uint16
-	ColourArray   []float32
-	VCount        int
-	ICount        int
-	CCount        int
-}
+import "github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 
-func GetBuffers(a *RubiksAnimationHandler, origin Point) DrawShape {
-	var out DrawShape
+func GetBuffers(a *RubiksAnimationHandler, origin Point) common.DrawShape {
+	var out common.DrawShape
 
 	// handle any animations in progress
 	a.CopyRubiksCube = a.RubiksCube.Copy()

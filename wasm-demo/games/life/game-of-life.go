@@ -62,6 +62,10 @@ func (lg *LifeGame) InitListeners(c *common.GameContext) {
 	common.RegisterListeners(c, lg.LifeContext, controller.LifeController(lg), controller.LifeActionHandler{})
 }
 
+func (lg *LifeGame) GetDrawShape(c *common.GameContext) common.DrawShape {
+	return common.DrawShape{}
+}
+
 func (lg *LifeGame) GetFragmentSource() string {
 	return fLifeShaderSource
 }
@@ -78,23 +82,28 @@ func (lg *LifeGame) SetParent(parent *common.ShaderGame) {
 	lg.Parent = parent
 }
 
-func (lg *LifeGame) Tick(c *common.GameContext) {
+func (lg *LifeGame) Tick(c *common.GameContext) bool {
 	lg.T++
+
+	return false
 }
 
-func (lg *LifeGame) AttachAttributes(c *common.GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
+func (lg *LifeGame) GetVCount() int {
+	return 6 // This corresponds to the size of parent.writeBuffer
+}
+
+func (lg *LifeGame) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
 	gl := c.GL
 
-	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
+	gl.BindBuffer(webgl.ARRAY_BUFFER, writeBuffer)
 	vPosition := gl.GetAttribLocation(program, "aPosition")
 	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vPosition))
 
-	gl.BindBuffer(webgl.ARRAY_BUFFER, textureBuffer)
+	gl.BindBuffer(webgl.ARRAY_BUFFER, readBuffer)
 	tPosition := gl.GetAttribLocation(program, "aTexCoord")
 	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(tPosition))
-	gl.UseProgram(program)
 
 	decayLoc := gl.GetUniformLocation(program, "uDecay")
 	gl.Uniform1f(decayLoc, 0.66/float32(lg.TrailLength))
@@ -157,4 +166,3 @@ func randomArray(width int, height int) [][]bool {
 
 	return m
 }
-

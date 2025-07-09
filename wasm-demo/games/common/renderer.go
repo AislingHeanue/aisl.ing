@@ -3,6 +3,7 @@ package common
 import (
 	_ "embed"
 	"fmt"
+	"syscall/js"
 
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"
@@ -14,47 +15,81 @@ var fDisplayShaderSource string
 
 type ShaderGame struct {
 	GameInfo
+	Is3D           bool
 	mainProgram    *webgl.Program
 	displayProgram *webgl.Program
 
-	vertexBuffer  *webgl.Buffer
-	textureBuffer *webgl.Buffer
-
 	vCount int
 
+	// for 2D stuff
+	writeBuffer      *webgl.Buffer
+	readBuffer       *webgl.Buffer
 	writeFrameBuffer *webgl.Framebuffer
 	readFrameBuffer  *webgl.Framebuffer
-	readTexture      *webgl.Texture
 	writeTexture     *webgl.Texture
+	readTexture      *webgl.Texture
+
+	// for 3D stuff
+	bufferSet *BufferSet
 
 	cumulativeIntervalT float32
 }
 
+type BufferSet struct {
+	Vertices *webgl.Buffer
+	Indices  *webgl.Buffer
+	Colours  *webgl.Buffer
+	VCount   int
+	ICount   int
+	CCount   int
+}
+
+type DrawShape struct {
+	VerticesArray []float32
+	IndicesArray  []uint16
+	ColourArray   []float32
+	VCount        int
+	ICount        int
+	CCount        int
+}
+
 type GameInfo interface {
-	AttachAttributes(c *GameContext, program *webgl.Program, vertexBuffer, textureBuffer *webgl.Buffer, samplerTexture *webgl.Texture)
+	AttachAttributes(c *GameContext, program *webgl.Program, writeBuffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture)
 	Init(c *GameContext)
 	InitListeners(c *GameContext)
 	GetTps() float32
 	GetVertexSource() string
 	GetFragmentSource() string
 	SetParent(parent *ShaderGame)
-	Tick(c *GameContext)
+	Tick(c *GameContext) bool // true = buffers need to be remade
+	GetDrawShape(c *GameContext) DrawShape
 }
 
 var _ Animator = &ShaderGame{}
 
 func (g *ShaderGame) Init(c *GameContext) {
 	g.createShaders(c, g.GetVertexSource(), g.GetFragmentSource())
-	g.CreateBuffers(c)
+	// for game of life, buffers must exist before calling init
+	if !g.Is3D {
+		g.CreateBuffers(c)
+	}
 
 	if g.zoom(c) < 0 {
 		panic("I refuse to create an infinite loop no thank you")
 	}
 	c.DX = 0 // default offset position of the grid is 0,0
 	c.DY = 0
+	if g.Is3D {
+		c.GL.Enable(webgl.DEPTH_TEST)
+		c.GL.DepthFunc(webgl.LEQUAL)
+	}
 
 	g.SetParent(g)
 	g.GameInfo.Init(c)
+	// for rubiks cube, the model code (Go code) must first create the cubes
+	if g.Is3D {
+		g.CreateBuffers(c)
+	}
 }
 
 func (g *ShaderGame) InitListeners(c *GameContext) {
@@ -80,19 +115,20 @@ func (g *ShaderGame) swapTextures() {
 
 func (g *ShaderGame) createShaders(c *GameContext, vertexSource, fragmentSource string) {
 	gl := c.GL
+	fmt.Println(vertexSource)
 
 	vShader := gl.CreateShader(webgl.VERTEX_SHADER)
 	gl.ShaderSource(vShader, vertexSource)
 	gl.CompileShader(vShader)
 	if !gl.GetShaderParameter(vShader, webgl.COMPILE_STATUS).Bool() {
-		fmt.Printf("Error in life.vert: %v\n", *gl.GetShaderInfoLog(vShader))
+		fmt.Printf("Error in vertex shader: %v\n", *gl.GetShaderInfoLog(vShader))
 	}
 
 	fShader := gl.CreateShader(webgl.FRAGMENT_SHADER)
 	gl.ShaderSource(fShader, fragmentSource)
 	gl.CompileShader(fShader)
 	if !gl.GetShaderParameter(fShader, webgl.COMPILE_STATUS).Bool() {
-		fmt.Printf("Error in life.frag: %v\n", *gl.GetShaderInfoLog(fShader))
+		fmt.Printf("Error in fragment shader: %v\n", *gl.GetShaderInfoLog(fShader))
 	}
 
 	g.mainProgram = gl.CreateProgram()
@@ -100,29 +136,53 @@ func (g *ShaderGame) createShaders(c *GameContext, vertexSource, fragmentSource 
 	gl.AttachShader(g.mainProgram, fShader)
 	gl.LinkProgram(g.mainProgram)
 	if !gl.GetProgramParameter(g.mainProgram, webgl.LINK_STATUS).Bool() {
-		fmt.Printf("Error in linking life: %v\n", *gl.GetProgramInfoLog(g.mainProgram))
+		fmt.Printf("Error in linking program: %v\n", *gl.GetProgramInfoLog(g.mainProgram))
 	}
 
-	fDisplayShader := gl.CreateShader(webgl.FRAGMENT_SHADER)
-	gl.ShaderSource(fDisplayShader, fDisplayShaderSource)
-	gl.CompileShader(fDisplayShader)
-	if !gl.GetShaderParameter(fDisplayShader, webgl.COMPILE_STATUS).Bool() {
-		fmt.Printf("Error in display.frag: %v\n", *gl.GetShaderInfoLog(fDisplayShader))
-	}
+	if !g.Is3D {
+		fDisplayShader := gl.CreateShader(webgl.FRAGMENT_SHADER)
+		gl.ShaderSource(fDisplayShader, fDisplayShaderSource)
+		gl.CompileShader(fDisplayShader)
+		if !gl.GetShaderParameter(fDisplayShader, webgl.COMPILE_STATUS).Bool() {
+			fmt.Printf("Error in display.frag: %v\n", *gl.GetShaderInfoLog(fDisplayShader))
+		}
 
-	g.displayProgram = gl.CreateProgram()
-	gl.AttachShader(g.displayProgram, vShader)
-	gl.AttachShader(g.displayProgram, fDisplayShader)
-	gl.LinkProgram(g.displayProgram)
-	if !gl.GetProgramParameter(g.displayProgram, webgl.LINK_STATUS).Bool() {
-		fmt.Printf("Error in linking display %v\n", *gl.GetProgramInfoLog(g.displayProgram))
+		g.displayProgram = gl.CreateProgram()
+		gl.AttachShader(g.displayProgram, vShader)
+		gl.AttachShader(g.displayProgram, fDisplayShader)
+		gl.LinkProgram(g.displayProgram)
+		if !gl.GetProgramParameter(g.displayProgram, webgl.LINK_STATUS).Bool() {
+			fmt.Printf("Error in linking display %v\n", *gl.GetProgramInfoLog(g.displayProgram))
+		}
 	}
 }
 
 func (g *ShaderGame) CreateBuffers(c *GameContext) {
+	if g.Is3D {
+		drawShape := g.GetDrawShape(c)
+
+		vertices := jsconv.Float32ToJs(drawShape.VerticesArray)
+		vertexBuffer := bindToBuffer(c, webgl.ARRAY_BUFFER, vertices)
+
+		indices := jsconv.UInt16ToJs(drawShape.IndicesArray)
+		indexBuffer := bindToBuffer(c, webgl.ELEMENT_ARRAY_BUFFER, indices)
+
+		colours := jsconv.Float32ToJs(drawShape.ColourArray)
+		colourBuffer := bindToBuffer(c, webgl.ARRAY_BUFFER, colours)
+
+		g.bufferSet = &BufferSet{
+			Vertices: vertexBuffer,
+			Indices:  indexBuffer,
+			Colours:  colourBuffer,
+			VCount:   drawShape.VCount,
+			ICount:   drawShape.ICount,
+			CCount:   drawShape.CCount,
+		}
+		return
+	}
 	// this is a fullscreen quad.
 	// this is what's drawn to (ie the coordinates of the framebuffer to draw to)
-	vertexArray := []float32{
+	writeArray := []float32{
 		-1.0, -1.0,
 		1.0, -1.0,
 		-1.0, 1.0,
@@ -130,12 +190,12 @@ func (g *ShaderGame) CreateBuffers(c *GameContext) {
 		1.0, -1.0,
 		1.0, 1.0,
 	}
-	g.vertexBuffer = createVertexBuffer(c, vertexArray)
+	g.writeBuffer = createVertexBuffer(c, writeArray)
 	g.vCount = 6
 
 	// this is another fullscreen quad
 	// this one is for reading the full contents of the previous frame.
-	textureArray := []float32{
+	readArray := []float32{
 		0.0, 0.0,
 		1.0, 0.0,
 		0.0, 1.0,
@@ -143,13 +203,12 @@ func (g *ShaderGame) CreateBuffers(c *GameContext) {
 		1.0, 0.0,
 		1.0, 1.0,
 	}
-	g.textureBuffer = createVertexBuffer(c, textureArray)
+	g.readBuffer = createVertexBuffer(c, readArray)
 
 	// create the textures to store the contents of previous frames.
-	g.readTexture = createTexture(c, c.PixelsWidth, c.PixelsHeight)
 	g.writeTexture = createTexture(c, c.PixelsWidth, c.PixelsHeight)
+	g.readTexture = createTexture(c, c.PixelsWidth, c.PixelsHeight)
 
-	// the first framebuffer blits to the second texture and vice versa.
 	g.writeFrameBuffer = createFramebuffer(c, g.writeTexture)
 	g.readFrameBuffer = createFramebuffer(c, g.readTexture)
 }
@@ -186,30 +245,72 @@ func createFramebuffer(c *GameContext, texture *webgl.Texture) *webgl.Framebuffe
 	return frameBuffer
 }
 
-func (g *ShaderGame) renderFrame(c *GameContext) {
-	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)
-	c.GL.ClearColor(0.0, 0.0, 0.0, 1.0)
-	c.GL.DrawArrays(webgl.TRIANGLES, 0, g.vCount)
-	c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+func bindToBuffer(c *GameContext, target uint, data js.Value) *webgl.Buffer {
+	buffer := c.GL.CreateBuffer()
+	c.GL.BindBuffer(target, buffer)
+	c.GL.BufferData2(target, webgl.UnionFromJS(data), webgl.STATIC_DRAW)
+	c.GL.BindBuffer(target, &webgl.Buffer{})
 
-	g.swapTextures()
+	return buffer
 }
 
 func (g *ShaderGame) Render(c *GameContext) {
-	fmt.Println("rendering")
+	c.GL.UseProgram(g.mainProgram)
 	g.cumulativeIntervalT += c.IntervalT
 	tps := g.GetTps()
 	for g.cumulativeIntervalT > (1 / tps) {
-		g.AttachAttributes(c, g.mainProgram, g.vertexBuffer, g.textureBuffer, g.readTexture)
-		g.renderFrame(c)
+		if !g.Is3D {
+			g.AttachAttributes(c, g.mainProgram, g.writeBuffer, g.readBuffer, g.readTexture)
+			g.renderFrame(c)
+		}
+		if g.Tick(c) {
+			g.CreateBuffers(c)
+		}
 
 		g.cumulativeIntervalT -= 1. / tps
-		g.Tick(c)
 	}
-	g.drawToCanvas(c)
+	if g.Is3D {
+		g.AttachAttributes(c, g.mainProgram, g.writeBuffer, g.readBuffer, g.readTexture)
+		g.renderFrame(c)
+	} else {
+		g.drawToCanvas(c)
+	}
+}
+
+func (g *ShaderGame) renderFrame(c *GameContext) {
+	if g.Is3D {
+		c.GL.ClearColor(0.9, 0.9, 0.9, 1.0)
+		c.GL.ClearDepth(1.0) // clear all objects
+		c.GL.Clear(webgl.COLOR_BUFFER_BIT)
+
+		// point the program to the vertex buffer object we've bound
+		g.bindArrayBuffer(c, g.mainProgram, g.bufferSet.Vertices, "aVertexPosition", 3)
+		g.bindArrayBuffer(c, g.mainProgram, g.bufferSet.Colours, "aVertexColour", 4)
+
+		c.GL.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, g.bufferSet.Indices)
+		c.GL.DrawElements(webgl.TRIANGLES, g.bufferSet.ICount, webgl.UNSIGNED_SHORT, 0)
+	} else {
+		c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)
+		c.GL.ClearColor(0.0, 0.0, 0.0, 1.0)
+		c.GL.DrawArrays(webgl.TRIANGLES, 0, g.vCount)
+		c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
+
+		g.swapTextures()
+	}
+}
+
+func (g *ShaderGame) bindArrayBuffer(c *GameContext, program *webgl.Program, buffer *webgl.Buffer, name string, stride int) {
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, buffer)
+	attributeLocation := c.GL.GetAttribLocation(program, name)
+	c.GL.VertexAttribPointer(uint(attributeLocation), stride, webgl.FLOAT, false, 0, 0)
+	c.GL.EnableVertexAttribArray(uint(attributeLocation))
+	c.GL.BindBuffer(webgl.ARRAY_BUFFER, &webgl.Buffer{})
 }
 
 func (g *ShaderGame) drawToCanvas(c *GameContext) {
+	if g.Is3D {
+		return
+	}
 	// the + c.Width/2 here makes it so that the 'anchor' point for zooming in and out is at the centre of the canvas
 	topLeftDX := c.DX + c.Width/2 - g.zoom(c)*float32(c.PixelsWidth)/2
 	topLeftDY := c.DY + c.Height/2 - g.zoom(c)*float32(c.PixelsHeight)/2
@@ -278,3 +379,4 @@ func setupPixelArray(m [][]bool) []uint8 {
 
 	return out
 }
+

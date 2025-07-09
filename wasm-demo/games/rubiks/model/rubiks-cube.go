@@ -2,6 +2,8 @@ package model
 
 import (
 	"image/color"
+
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
 )
 
 type turnInfo struct {
@@ -123,8 +125,8 @@ func (r RubiksCube) Copy() RubiksCube {
 	return RubiksCube{Dimension: r.Dimension, Data: data}
 }
 
-func (r RubiksCube) FlattenBuffers() []DrawShape {
-	cubes := []DrawShape{}
+func (r RubiksCube) FlattenBuffers() []common.DrawShape {
+	cubes := []common.DrawShape{}
 	for x := range r.Dimension {
 		for y := range r.Dimension {
 			for z := range r.Dimension {
@@ -245,8 +247,8 @@ func (r *RubiksCube) Turn(face Face, reverse bool) {
 	*r = newR
 }
 
-func (c Cube) GetBuffers() DrawShape {
-	var out DrawShape
+func (c Cube) GetBuffers() common.DrawShape {
+	var out common.DrawShape
 
 	out.VerticesArray = make([]float32, 72)
 	for i, index := range c.VertexArrayIndices {

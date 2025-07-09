@@ -18,19 +18,22 @@ var done chan struct{}
 func main() {
 	contexts := map[string]common.GameContext{
 		"rubiks": {
-			Square:   true,
-			Window:   webapi.GetWindow(),
-			Document: webapi.GetWindow().Document(),
-			// RenderingCanvas: webapi.GetWindow().Document().GetElementById("wasm-canvas"),
-			ResolutionScale: 1,
-			Animator: rubiks.New(
-				rubiks.CubeCubeOptions{
-					TurnSeconds:     0.18,
-					Dimension:       3,
-					TotalSideLength: 0.5,
-					GapProportion:   0.07,
-				},
-			),
+			Square:          true,
+			Window:          webapi.GetWindow(),
+			Document:        webapi.GetWindow().Document(),
+			ResolutionScale: 1, // FIXME: Scale does not work right in the JS code.
+			Animator: &common.ShaderGame{
+				Is3D: true,
+				GameInfo: rubiks.New(
+					rubiks.CubeCubeOptions{
+						TurnSeconds:     0.18,
+						Dimension:       3,
+						TotalSideLength: 0.5,
+						GapProportion:   0.07,
+						Tps:             60,
+					},
+				),
+			},
 		},
 		"life": {
 			Square:   true,

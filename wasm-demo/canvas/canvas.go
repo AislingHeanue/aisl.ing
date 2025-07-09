@@ -24,3 +24,4 @@ func InitCanvas(c *common.GameContext) {
 		c.GL = webgl.RenderingContextFromJS(res.Get("gl"))
 	}
 }
+
