@@ -86,42 +86,42 @@ func (lg *LifeGame) AttachAttributes(c *common.GameContext, program *webgl.Progr
 	gl := c.GL
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, vertexBuffer)
-	vPosition := gl.GetAttribLocation(program, "a_position")
+	vPosition := gl.GetAttribLocation(program, "aPosition")
 	gl.VertexAttribPointer(uint(vPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(vPosition))
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, textureBuffer)
-	tPosition := gl.GetAttribLocation(program, "a_tex_coord")
+	tPosition := gl.GetAttribLocation(program, "aTexCoord")
 	gl.VertexAttribPointer(uint(tPosition), 2, webgl.FLOAT, false, 0, 0)
 	gl.EnableVertexAttribArray(uint(tPosition))
 	gl.UseProgram(program)
 
-	decayLoc := gl.GetUniformLocation(program, "u_decay")
+	decayLoc := gl.GetUniformLocation(program, "uDecay")
 	gl.Uniform1f(decayLoc, 0.66/float32(lg.TrailLength))
 
-	boundaryLoc := gl.GetUniformLocation(program, "u_boundary_loop")
+	boundaryLoc := gl.GetUniformLocation(program, "uBoundaryLoop")
 	boundaryLoop := 0.
 	if lg.Loop {
 		boundaryLoop = 1.
 	}
 	gl.Uniform1f(boundaryLoc, float32(boundaryLoop))
 
-	initialDecayLoc := gl.GetUniformLocation(program, "u_initial_decay")
+	initialDecayLoc := gl.GetUniformLocation(program, "uInitialDecay")
 	gl.Uniform1f(initialDecayLoc, 0.33)
 
-	deadColourLoc := gl.GetUniformLocation(program, "u_new_dead_colour")
+	deadColourLoc := gl.GetUniformLocation(program, "uNewDeadColour")
 
 	r, g, b := lg.getDeadColour()
 	gl.Uniform3f(deadColourLoc, r, g, b)
 
 	gl.BindTexture(webgl.TEXTURE_2D, samplerTexture)
-	samplerLocation := gl.GetUniformLocation(program, "u_sampler")
+	samplerLocation := gl.GetUniformLocation(program, "uSampler")
 	gl.Uniform1i(samplerLocation, 0)
 
-	sizeLoc := gl.GetUniformLocation(program, "u_size")
+	sizeLoc := gl.GetUniformLocation(program, "uSize")
 	gl.Uniform2f(sizeLoc, float32(c.PixelsWidth), float32(c.PixelsHeight))
 
-	pausedLoc := gl.GetUniformLocation(program, "u_paused")
+	pausedLoc := gl.GetUniformLocation(program, "uPaused")
 	paused := 0.
 	if lg.Paused {
 		paused = 1.
@@ -157,3 +157,4 @@ func randomArray(width int, height int) [][]bool {
 
 	return m
 }
+
