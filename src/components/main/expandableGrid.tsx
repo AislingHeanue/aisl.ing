@@ -35,7 +35,7 @@ const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
             h-0
             [&:nth-child(-n+4)]:md:max-lg:h-auto
             [&:nth-child(-n+3)]:lg:h-auto
-            [&:nth-child(-n+2)]:sm:max-md:h-auto
+            [&:nth-child(-n+2)]:max-md:h-auto
             "
           >
             {item}

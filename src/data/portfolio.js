@@ -57,7 +57,7 @@ const portfolio = [
   },
   {
     title: "Advent of Code Solutions",
-    imgURL: "/assets/AoC Screenshot.png",
+    imgURL: "/assets/AoC Screenshot 2.png",
     summary: "Collection of my Advent of Code solutions. WIP: need to make a presentable README for that repo.",
     stack: ["Rust", "Go", "Python"],
     link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/",
