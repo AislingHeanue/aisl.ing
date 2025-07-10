@@ -1,9 +1,7 @@
-"use client"
-import dynamic from "next/dynamic";
 import portfolio from "../../data/portfolio";
 import PortfolioItem from "./portfolioItem";
+import ExpandableGrid from "./expandableGrid";
 
-const ExpandableGrid = dynamic(() => import("./expandableGrid"), { ssr: false })
 
 export default function Portfolio() {
   return (
