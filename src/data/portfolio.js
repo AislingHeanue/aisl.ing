@@ -1,11 +1,4 @@
 const portfolio = [
-  //{
-  //    title: "Collatz Tree Interactive Demo",
-  //    imgURL: "assets/Collatz Screenshot.png",
-  //    stack: ["Javascript","Tailwind"],
-  //    link: "/collatz/",
-  //    internal:true
-  //},
   {
     title: "TerraSchema: A Terraform to JSON Schema generator",
     imgURL: "/assets/TerraSchema.png",
@@ -23,26 +16,52 @@ const portfolio = [
     internal: true
   },
   {
+    title: "Particle Game (Android app)",
+    imgURL: "/assets/Particle Game Screenshot.jpg",
+    summary: "Toy app I made which uses the device's gyroscope to simulate particle movements and collisions. WIP.",
+    stack: ["Flutter", "Flame"],
+    link: "https://github.com/AislingHeanue/particle_game",
+    internal: false
+  },
+  {
+    title: "Mandelbrot Set Demo",
+    imgURL: "/assets/Mandelbrot Screenshot.png",
+    summary: "Browser demo for viewing and zooming into the Mandelbrot set.",
+    stack: ["Go", "Wasm", "WebGL"],
+    link: "/mandelbrot/",
+    internal: true
+  },
+  {
+    title: "Conway's Game of Life",
+    imgURL: "/assets/Game of Life Screenshot.png",
+    summary: "Browser demo which allows loading different Game of Life patterns. Interface WIP.",
+    stack: ["Go", "Wasm", "WebGL"],
+    link: "/game-of-life/",
+    internal: true
+  },
+  {
     title: "Quantum Computing Circuits",
     imgURL: "/assets/Quantum Screenshot.png",
-    summary: "The result of my undergraduate thesis. Uses Qisket to implement Shor's algorithm.",
+    summary: "Programming work done for my undergraduate thesis. Uses Qisket to implement Shor's algorithm.",
     stack: ["Python", "Qiskit"],
     link: "https://github.com/AislingHeanue/Quantum-Computing-Circuits",
     internal: false
+  },
+  {
+    title: "Collatz Tree Generator",
+    imgURL: "/assets/Collatz Screenshot.png",
+    summary: "Interactively generates vector graphics based on a famous maths problem",
+    stack: ["Typescript", "React"],
+    link: "/collatz/",
+    internal: true
+  },
+  {
+    title: "Advent of Code Solutions",
+    imgURL: "/assets/AoC Screenshot.png",
+    summary: "Collection of my Advent of Code solutions. WIP: need to make a presentable README for that repo.",
+    stack: ["Rust", "Go", "Python"],
+    link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/",
+    internal: false
   }
-  //{
-  //    title: "Conway's Game of Life",
-  //    imgURL: "assets/Game of Life Screenshot.png",
-  //    stack: ["Go","Ebiten"],
-  //    link: "https://github.com/AislingHeanue/Misc-Projects",
-  //    internal:false
-  //},
-  //{
-  //    title: "Advent of Code Solutions",
-  //    imgURL: "assets/AoC Screenshot.png",
-  //    stack: ["Go","Python"],
-  //    link: "https://github.com/AislingHeanue/Advent-Of-Code/blob/master/",
-  //    internal:false
-  //}
 ]
 export default portfolio

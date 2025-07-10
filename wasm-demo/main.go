@@ -43,10 +43,14 @@ func main() {
 			PanningEnabled: true,
 		},
 		"mandelbrot": {
-			ResolutionScale: 1,
-			Game:            mandelbrot.New(mandelbrot.MandelbrotOptions{}),
-			ZoomEnabled:     false,
-			PanningEnabled:  false,
+			ResolutionScale: 1.6,
+			Game: mandelbrot.New(mandelbrot.MandelbrotOptions{
+				CentreX: -0.75,
+				CentreY: 0,
+				Zoom:    1,
+			}),
+			ZoomEnabled:    false,
+			PanningEnabled: false,
 		},
 	}
 	// parser.ReadFile("oversized/41dots.lif")

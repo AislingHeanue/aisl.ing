@@ -61,6 +61,6 @@ type GameContext struct {
 	IsInitialised bool
 }
 
-func (c *GameContext) Log(value js.Value) {
-	js.Global().Get("console").Call("log", value)
+func (c *GameContext) Log(value any) {
+	js.Global().Get("console").Call("log", js.ValueOf(value))
 }

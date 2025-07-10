@@ -15,7 +15,7 @@ export default function PortfolioItem({ title, summary, imgUrl, stack, link, int
       href={link}
       target={internal ? "_self" : "_blank"}
       rel={internal ? "" : "noopener"}
-      className="border-2 relative border-stone-900 dark:border-white rounded-md overflow-hidden"
+    // className="border-2 relative border-stone-900 dark:border-white rounded-md overflow-hidden"
     >
       <div className="w-full relative h-52 cursor-pointer">
         <Image

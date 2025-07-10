@@ -1,25 +1,24 @@
 precision highp float;
+uniform float uZoom;
+uniform vec2 uCentre;
 varying vec2 vTexCoord;
 
 vec3 colour(float number) {
     const float PI = 3.14159265359;
     return vec3(
-        0.5 + 0.5 * sin(number / 100. + 5. * PI / 3.),
-        0.5 + 0.5 * sin(number / 100.),
-        0.5 + 0.5 * sin(number / 100. + 3. * PI / 3.));
+        0.5 + 0.5 * sin(number / 50. + 5. * PI / 3.),
+        0.5 + 0.5 * sin(number / 50.),
+        0.5 + 0.5 * sin(number / 50. + 3. * PI / 3.));
 }
 
 void main() {
-    const float E = 2.71828182845904;
-    vec2 centre = vec2(-.74364386269, .13182590271);
-    float zoom = 100000.;
-    float x0 = (vTexCoord.x * 2.5 / zoom) - (1.25 / zoom) + centre.x;
-    float y0 = (vTexCoord.y * 2.5 / zoom) - (1.25 / zoom) + centre.y;
+    float x0 = (vTexCoord.x * 2.5 / uZoom) - (1.25 / uZoom) + uCentre.x;
+    float y0 = (vTexCoord.y * 2.5 / uZoom) - (1.25 / uZoom) + uCentre.y;
     float x = 0.;
     float y = 0.;
     float temp = 0.;
     int iteration = 0;
-    const int maxIterations = 5000;
+    const int maxIterations = 3000;
 
     for (int i = 0; i <= maxIterations; i++) {
         temp = x * x - y * y + x0;
