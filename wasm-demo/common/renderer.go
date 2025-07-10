@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"syscall/js"
-	// "time"
 
 	"github.com/gowebapi/webapi/core/jsconv"
 	"github.com/gowebapi/webapi/graphics/webgl"

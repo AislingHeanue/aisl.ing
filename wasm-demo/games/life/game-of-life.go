@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	common "github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	common "github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/controller"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )

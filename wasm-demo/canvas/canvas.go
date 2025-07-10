@@ -4,7 +4,7 @@ import (
 	"github.com/gowebapi/webapi/graphics/webgl"
 	"github.com/gowebapi/webapi/html/canvas"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 )
 
 func InitCanvas(c *common.GameContext) {

@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"math"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/listener"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/graphics/webgl"

@@ -1,6 +1,6 @@
 package model
 
-import "github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+import "github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 
 func GetBuffers(a *RubiksAnimationHandler, origin Point) common.DrawShape {
 	var out common.DrawShape

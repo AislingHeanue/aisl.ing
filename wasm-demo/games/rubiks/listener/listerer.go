@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/dom/domcore"
 )

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 

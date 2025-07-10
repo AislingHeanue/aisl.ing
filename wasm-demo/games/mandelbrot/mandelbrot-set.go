@@ -3,7 +3,7 @@ package mandelbrot
 import (
 	_ "embed"
 
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 

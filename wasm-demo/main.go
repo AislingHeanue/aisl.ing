@@ -7,7 +7,7 @@ import (
 	"github.com/gowebapi/webapi/html/htmlcommon"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/mandelbrot"
 
