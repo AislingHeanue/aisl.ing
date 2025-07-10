@@ -74,7 +74,8 @@ func RegisterListeners[Context, Controller any](c *GameContext, context *Context
 	AddListenerToCanvas(c, "mousedown", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, CLICK, d}))
 	AddListenerToCanvas(c, "mousemove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_MOVE, d}))
 	AddListenerToCanvas(c, "mouseup", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, d}))
-	AddListenerToCanvas(c, "mouseleave", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, d}))
+	// disable mouseleave for the time being. Dragging while outside the bounds of the canvas is nicer because it doesn't interrupt the user.
+	// AddListenerToCanvas(c, "mouseleave", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, d}))
 
 	AddListenerToCanvas(c, "touchstart", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH, d}))
 	AddListenerToCanvas(c, "touchmove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_MOVE, d}))
