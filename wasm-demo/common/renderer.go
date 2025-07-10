@@ -18,7 +18,6 @@ var fDisplayShaderSource string
 
 type ShaderGame struct {
 	GameInfo
-	Is3D           bool
 	mainProgram    *webgl.Program
 	displayProgram *webgl.Program
 
@@ -85,7 +84,7 @@ func (g *ShaderGame) Init(c *GameContext) {
 	}
 	c.DX = 0 // default offset position of the grid is 0,0
 	c.DY = 0
-	if g.Is3D {
+	if c.Is3D {
 		c.GL.Enable(webgl.DEPTH_TEST)
 		c.GL.DepthFunc(webgl.LEQUAL)
 	}
@@ -168,7 +167,7 @@ func (g *ShaderGame) createShaders(c *GameContext, vertexSource, fragmentSource 
 }
 
 func (g *ShaderGame) CreateBuffers(c *GameContext) {
-	if g.Is3D {
+	if c.Is3D {
 		drawShape := g.GetDrawShape(c)
 
 		vertices := jsconv.Float32ToJs(drawShape.VerticesArray)
@@ -309,7 +308,7 @@ func (g *ShaderGame) runProgram(c *GameContext, buffersStale bool) {
 }
 
 func (g *ShaderGame) renderFrame(c *GameContext) {
-	if g.Is3D {
+	if c.Is3D {
 		c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)
 		c.GL.ClearColor(0.9, 0.9, 0.9, 1.0)
 		c.GL.ClearDepth(1.0) // clear all objects

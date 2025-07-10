@@ -1,5 +1,7 @@
 package common
 
+import "github.com/gowebapi/webapi/dom/domcore"
+
 type DefaultGame struct {
 	Parent *ShaderGame
 }
@@ -40,3 +42,46 @@ func (d *DefaultGame) SetParent(parent *ShaderGame) {
 func (d *DefaultGame) Tick(c *GameContext) bool {
 	return false
 }
+
+type DefaultActionHandler[Context, Controller any] struct{}
+
+type a struct{}
+type b struct{}
+
+var _ ActionHandler[a, b] = DefaultActionHandler[a, b]{}
+
+// Click implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) Click(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// Drag implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) Drag(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// DragTouch implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) DragTouch(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// Keyboard implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) Keyboard(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// MouseUp implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) MouseUp(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// Resize implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) Resize(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// Touch implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) Touch(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+// TouchUp implements ActionHandler.
+func (d DefaultActionHandler[Context, Controller]) TouchUp(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+
+func (d DefaultActionHandler[Context, Controller]) Wheel(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
+}
+

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -33,7 +32,7 @@ func (cc *CubeController) ResetAngles() {
 }
 
 func (cc *CubeController) Shuffle() {
-	fmt.Println("shuffling!")
+	// fmt.Println("shuffling!")
 	previousFace := ""
 	face := ""
 	faces := []string{"u", "d", "b", "f", "l", "r"}

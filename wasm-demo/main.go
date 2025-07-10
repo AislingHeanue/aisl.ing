@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/html/htmlcommon"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/canvas"
@@ -19,65 +18,35 @@ var done chan struct{}
 func main() {
 	contexts := map[string]common.GameContext{
 		"rubiks": {
-			Square:          true,
-			Window:          webapi.GetWindow(),
-			Document:        webapi.GetWindow().Document(),
 			ResolutionScale: 1.7,
-			AutoSizePixels:  true,
 			SmoothImage:     true,
-			Animator: &common.ShaderGame{
-				Is3D: true,
-				GameInfo: rubiks.New(
-					rubiks.CubeCubeOptions{
-						TurnSeconds:     0.18,
-						Dimension:       3,
-						TotalSideLength: 0.5,
-						GapProportion:   0.07,
-						Tps:             60,
-					},
-				),
-			},
-			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
-			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
+			Is3D:            true,
+			Game: rubiks.New(rubiks.CubeCubeOptions{
+				TurnSeconds:     0.18,
+				Dimension:       3,
+				TotalSideLength: 0.5,
+				GapProportion:   0.07,
+				Tps:             60,
+			}),
 		},
 		"life": {
-			Square:          true,
-			Window:          webapi.GetWindow(),
-			Document:        webapi.GetWindow().Document(),
 			ResolutionScale: 1.4,
-			Animator: &common.ShaderGame{
-				GameInfo: life.New(
-					life.LifeOptions{
-						Loop:         true,
-						TrailLength:  25,
-						ColourPeriod: 50,
-						Tps:          30,
-					}),
-			},
-			PixelsHeight:    200,
-			PixelsWidth:     100,
-			Zoom:            1,
-			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
-			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
-			ZoomEnabled:     true,
-			PanningEnabled:  true,
+			Game: life.New(life.LifeOptions{
+				Loop:         true,
+				TrailLength:  25,
+				ColourPeriod: 50,
+				Tps:          30,
+			}),
+			PixelsHeight:   200,
+			PixelsWidth:    100,
+			ZoomEnabled:    true,
+			PanningEnabled: true,
 		},
 		"mandelbrot": {
-			Square:          true,
-			Window:          webapi.GetWindow(),
-			Document:        webapi.GetWindow().Document(),
-			ResolutionScale: 1.4,
-			Animator: &common.ShaderGame{
-				GameInfo: mandelbrot.New(
-					mandelbrot.MandelbrotOptions{}),
-			},
-			PixelsHeight:    2000,
-			PixelsWidth:     2000,
-			Zoom:            1,
-			RenderingCanvas: webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
-			ZoomCanvas:      webapi.GetWindow().Document().CreateElement("canvas", &webapi.Union{}),
-			ZoomEnabled:     true,
-			PanningEnabled:  true,
+			ResolutionScale: 1,
+			Game:            mandelbrot.New(mandelbrot.MandelbrotOptions{}),
+			ZoomEnabled:     false,
+			PanningEnabled:  false,
 		},
 	}
 	// parser.ReadFile("oversized/41dots.lif")

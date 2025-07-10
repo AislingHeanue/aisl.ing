@@ -1,4 +1,4 @@
-package listener
+package rubiks
 
 import (
 	"strings"
@@ -9,7 +9,9 @@ import (
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
-type CubeActionHandler struct{}
+type CubeActionHandler struct {
+	common.DefaultActionHandler[model.CubeCubeContext, model.CubeController]
+}
 
 var _ common.ActionHandler[model.CubeCubeContext, model.CubeController] = CubeActionHandler{}
 
@@ -34,18 +36,9 @@ func (l CubeActionHandler) DragTouch(c *common.GameContext, context *model.CubeC
 	}
 }
 
-func (l CubeActionHandler) MouseUp(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
-}
-
-func (l CubeActionHandler) Resize(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
-}
-
 func (l CubeActionHandler) Touch(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
 	context.AnchorAngleX = context.AngleX
 	context.AnchorAngleY = context.AngleY
-}
-
-func (l CubeActionHandler) TouchUp(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
 }
 
 func (l CubeActionHandler) Keyboard(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {

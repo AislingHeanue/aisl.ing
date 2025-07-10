@@ -6,7 +6,6 @@ import (
 	"math/rand"
 
 	common "github.com/AislingHeanue/aisling-codes/wasm-demo/common"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/life/controller"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
 
@@ -29,7 +28,7 @@ var fLifeShaderSource string
 
 func New(lo LifeOptions) *LifeGame {
 	return &LifeGame{
-		LifeContext: &controller.LifeContext{
+		LifeContext: &LifeContext{
 			Tps:          lo.Tps,
 			Loop:         lo.Loop,
 			TrailLength:  lo.TrailLength,
@@ -47,7 +46,7 @@ type LifeOptions struct {
 
 type LifeGame struct {
 	Parent *common.ShaderGame
-	*controller.LifeContext
+	*LifeContext
 }
 
 var _ common.GameInfo = &LifeGame{}
@@ -62,7 +61,7 @@ func (lg *LifeGame) PostSetup(c *common.GameContext) {
 }
 
 func (lg *LifeGame) InitListeners(c *common.GameContext) {
-	common.RegisterListeners(c, lg.LifeContext, controller.LifeController(lg), controller.LifeActionHandler{})
+	common.RegisterListeners(c, lg.LifeContext, LifeController(lg), LifeActionHandler{})
 }
 
 func (lg *LifeGame) GetDrawShape(c *common.GameContext) common.DrawShape {

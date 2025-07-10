@@ -1,6 +1,8 @@
 package common
 
 import (
+	"syscall/js"
+
 	"github.com/gowebapi/webapi"
 	"github.com/gowebapi/webapi/dom"
 	"github.com/gowebapi/webapi/graphics/webgl"
@@ -18,6 +20,7 @@ type Animator interface {
 
 type GameContext struct {
 	Animator Animator
+	Game     GameInfo
 	// the canvas actually being displayed to
 	// optional intermediate canvas to facilitate zooming
 	ZoomCanvas *dom.Element
@@ -39,6 +42,7 @@ type GameContext struct {
 	DisplayCtx      *canvas.CanvasRenderingContext2D
 	ZoomEnabled     bool
 	PanningEnabled  bool
+	Is3D            bool
 
 	DX                  float32
 	DY                  float32
@@ -53,4 +57,10 @@ type GameContext struct {
 	AnchorPinchDistance float32
 	PixelsHeight        int
 	PixelsWidth         int
+
+	IsInitialised bool
+}
+
+func (c *GameContext) Log(value js.Value) {
+	js.Global().Get("console").Call("log", value)
 }

@@ -1,4 +1,4 @@
-package controller
+package life
 
 import (
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
@@ -26,30 +26,11 @@ type LifeController interface {
 	OpenRandomFile(c *common.GameContext)
 }
 
-type LifeActionHandler struct{}
+type LifeActionHandler struct {
+	common.DefaultActionHandler[LifeContext, LifeController]
+}
 
 var _ common.ActionHandler[LifeContext, LifeController] = LifeActionHandler{}
-
-func (l LifeActionHandler) Click(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) Drag(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) DragTouch(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) MouseUp(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) Resize(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) Touch(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
-
-func (l LifeActionHandler) TouchUp(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
-}
 
 func (l LifeActionHandler) Keyboard(c *common.GameContext, context *LifeContext, controller LifeController, e *domcore.Event) {
 	switch e.JSValue().Get("key").String() {
@@ -75,4 +56,3 @@ func (l LifeActionHandler) Keyboard(c *common.GameContext, context *LifeContext,
 		controller.OpenFile(c, context.OpenFileName)
 	}
 }
-

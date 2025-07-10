@@ -15,6 +15,7 @@ const (
 	TOUCH_UP
 	KEYBOARD
 	RESIZE
+	WHEEL
 )
 
 type ActionHandler[Context any, Controller any] interface {
@@ -26,6 +27,7 @@ type ActionHandler[Context any, Controller any] interface {
 	TouchUp(c *GameContext, context *Context, controller Controller, e *domcore.Event)
 	Keyboard(c *GameContext, context *Context, controller Controller, e *domcore.Event)
 	Resize(c *GameContext, context *Context, controller Controller, e *domcore.Event)
+	Wheel(c *GameContext, context *Context, controller Controller, e *domcore.Event)
 }
 
 type Listener[Context any, Controller any] struct {
@@ -62,24 +64,29 @@ func (l *Listener[Context, Controller]) HandleEvent(e *domcore.Event) {
 	case KEYBOARD:
 		// fmt.Println("keyboard")
 		l.impl.Keyboard(l.c, l.context, l.controller, e)
+	case WHEEL:
+		// fmt.Println("wheel")
+		l.impl.Wheel(l.c, l.context, l.controller, e)
 	}
 }
 
-func AddListener(c *GameContext, event string, listener domcore.EventListener) {
-	c.Window.JSValue().Call("canvasEventListener", event, domcore.NewEventListener(listener).JSValue())
+func RegisterListeners[Context, Controller any](c *GameContext, context *Context, controller Controller, d ActionHandler[Context, Controller]) {
+	AddListenerToCanvas(c, "mousedown", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, CLICK, d}))
+	AddListenerToCanvas(c, "mousemove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_MOVE, d}))
+	AddListenerToCanvas(c, "mouseup", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, d}))
+	AddListenerToCanvas(c, "mouseleave", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, d}))
+
+	AddListenerToCanvas(c, "touchstart", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH, d}))
+	AddListenerToCanvas(c, "touchmove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_MOVE, d}))
+	AddListenerToCanvas(c, "touchend", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_UP, d}))
+	AddListenerToCanvas(c, "touchcancel", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_UP, d}))
+
+	AddListenerToCanvas(c, "wheel", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, WHEEL, d}))
+
+	c.Document.AddEventListener("keydown", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, KEYBOARD, d}), nil)
+	c.Window.AddEventListener("resize", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, RESIZE, d}), nil)
 }
 
-func RegisterListeners[Context any, Controller any](c *GameContext, context *Context, controller Controller, impl ActionHandler[Context, Controller]) {
-	AddListener(c, "mousedown", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, CLICK, impl}))
-	AddListener(c, "mousemove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_MOVE, impl}))
-	AddListener(c, "mouseup", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, impl}))
-	AddListener(c, "mouseleave", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, MOUSE_UP, impl}))
-
-	AddListener(c, "touchstart", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH, impl}))
-	AddListener(c, "touchmove", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_MOVE, impl}))
-	AddListener(c, "touchend", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_UP, impl}))
-	AddListener(c, "touchcancel", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, TOUCH_UP, impl}))
-
-	c.Document.AddEventListener("keydown", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, KEYBOARD, impl}), nil)
-	c.Window.AddEventListener("resize", domcore.NewEventListener(&Listener[Context, Controller]{c, context, controller, RESIZE, impl}), nil)
+func AddListenerToCanvas(c *GameContext, event string, listener domcore.EventListener) {
+	c.Window.JSValue().Call("canvasEventListener", event, domcore.NewEventListener(listener).JSValue())
 }

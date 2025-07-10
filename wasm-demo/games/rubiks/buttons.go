@@ -1,8 +1,8 @@
-package listener
+package rubiks
 
 import (
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
+	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 

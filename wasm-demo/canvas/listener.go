@@ -1,14 +1,15 @@
 package canvas
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
 	"github.com/gowebapi/webapi/dom/domcore"
 )
 
-type CanvasActionHandler struct{}
+type CanvasActionHandler struct {
+	common.DefaultActionHandler[any, any]
+}
 
 var _ common.ActionHandler[any, any] = CanvasActionHandler{}
 
@@ -88,7 +89,7 @@ func (a CanvasActionHandler) MouseUp(c *common.GameContext, context *any, contro
 }
 
 func (a CanvasActionHandler) Touch(c *common.GameContext, context *any, controller any, e *domcore.Event) {
-	fmt.Println("touch")
+	// fmt.Println("touch")
 	if e.JSValue().Get("touches").Length() == 2 {
 		// start zooming
 		c.Zooming = true
@@ -132,5 +133,15 @@ func (a CanvasActionHandler) Keyboard(c *common.GameContext, context *any, contr
 
 func (a CanvasActionHandler) Resize(c *common.GameContext, context *any, controller any, e *domcore.Event) {
 	InitCanvas(c)
-	c.Animator.RefreshBuffers(c)
+	if c.AutoSizePixels {
+		c.Animator.RefreshBuffers(c)
+	}
+}
+
+func (a CanvasActionHandler) Wheel(c *common.GameContext, context *any, controller any, e *domcore.Event) {
+	if c.ZoomEnabled {
+		e.PreventDefault()
+	}
+	deltaY := e.JSValue().Get("deltaY").Float()
+	setZoom(c, float32(math.Pow(1.1, -deltaY/180))*c.Zoom)
 }

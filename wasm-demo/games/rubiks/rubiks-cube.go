@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/common"
-	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/listener"
 	"github.com/AislingHeanue/aisling-codes/wasm-demo/games/rubiks/model"
 	"github.com/gowebapi/webapi/graphics/webgl"
 )
@@ -41,6 +40,7 @@ type CubeCubeOptions struct {
 }
 
 type CubeRenderer struct {
+	common.DefaultGame
 	Parent *common.ShaderGame
 	*model.CubeCubeContext
 }
@@ -55,12 +55,9 @@ func (cc *CubeRenderer) PreSetup(c *common.GameContext) {
 	cc.AnimationHandler.RubiksCube = model.NewRubiksCube(cc.Dimension, cc.Origin, sideLength, cc.TotalSideLength, sideLengthWithGap)
 }
 
-func (cc *CubeRenderer) PostSetup(c *common.GameContext) {
-}
-
 func (cc *CubeRenderer) InitListeners(c *common.GameContext) {
-	common.RegisterListeners(c, cc.CubeCubeContext, model.CubeController{Context: cc.CubeCubeContext}, listener.CubeActionHandler{})
-	listener.RegisterButtons(c, cc.CubeCubeContext)
+	common.RegisterListeners(c, cc.CubeCubeContext, model.CubeController{Context: cc.CubeCubeContext}, CubeActionHandler{})
+	RegisterButtons(c, cc.CubeCubeContext)
 }
 
 func (cc *CubeRenderer) GetFragmentSource() string {
@@ -85,10 +82,6 @@ func (cc *CubeRenderer) Tick(c *common.GameContext) bool {
 
 func (cc *CubeRenderer) GetDrawShape(c *common.GameContext) common.DrawShape {
 	return model.GetBuffers(cc.AnimationHandler, cc.Origin)
-}
-
-func (cc *CubeRenderer) CanRunBetweenFrames() bool {
-	return false
 }
 
 func (cc *CubeRenderer) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
