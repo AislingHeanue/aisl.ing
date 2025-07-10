@@ -1,6 +1,5 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react';
-import AnimateHeight from 'react-animate-height';
 // import { Transition } from 'react-transition-group';
 
 interface GridWithShowMoreProps {
