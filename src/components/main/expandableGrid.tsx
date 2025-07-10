@@ -58,7 +58,7 @@ const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
         )
       })}
       < button
-        className="col-start-1 col-span-1 md:col-span-2 lg:col-start-2 lg:col-span-1 bg-stone-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-4xl"
+        className="col-start-1 col-span-1 md:col-span-2 lg:col-start-2 lg:col-span-1 bg-stone-500 hover:bg-stone-400 text-white font-bold py-2 px-4 rounded-4xl"
         onClick={() => toggleHeight()}
       >
         {height != 0 ? 'Show Fewer' : 'Show More'}
