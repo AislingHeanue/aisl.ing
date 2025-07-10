@@ -1,10 +1,6 @@
 "use client"
-import React, { useEffect, useRef, useState } from 'react';
-// import { Transition } from 'react-transition-group';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 
-interface GridWithShowMoreProps {
-  items: React.ReactNode[];
-}
 const updateItems = () => {
   if (typeof window !== 'undefined') {
     if (window.innerWidth >= 1024) { // lg breakpoint: 1024px and up
@@ -18,11 +14,8 @@ const updateItems = () => {
   return 0
 }
 
-const GridWithShowMore: React.FC<GridWithShowMoreProps> = ({ items }) => {
-  // const nodeRef = React.useRef(null)
-  // const visibleItems = showAll ? items : items.slice(0, numInitialItems);
+const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
   const [height, setHeight] = useState(0 as number | 'auto')
-  // const [duration, setDuration] = useState(0)
   const [initialItems, setInitialItems] = useState(3)
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -64,17 +57,14 @@ const GridWithShowMore: React.FC<GridWithShowMoreProps> = ({ items }) => {
           </div>
         )
       })}
-
       < button
         className="col-start-1 col-span-1 md:col-span-2 lg:col-start-2 lg:col-span-1 bg-stone-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-4xl"
         onClick={() => toggleHeight()}
       >
         {height != 0 ? 'Show Fewer' : 'Show More'}
       </button>
-
-
     </div >
   );
 };
 
-export default GridWithShowMore;
+export default ExpandableGrid;
