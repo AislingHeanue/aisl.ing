@@ -49,7 +49,7 @@ func main() {
 				CentreY:    0,
 				Zoom:       1,
 				Iterations: 800,
-				FpsTarget:  30,
+				FpsTarget:  24,
 			}),
 			ZoomEnabled:    false,
 			PanningEnabled: false,
