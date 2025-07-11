@@ -43,13 +43,14 @@ func (a MandelbrotActionHandler) Wheel(c *common.GameContext, context *Mandelbro
 	} else {
 		setZoom(context, math.Pow(1.1, -deltaY/180)*context.Zoom)
 	}
+	c.Log(context.Zoom)
 }
 
 func setZoom(context *MandelbrotContext, zoom float64) {
 	oldZoom := context.Zoom
 
 	// cap max zoom in
-	if zoom > oldZoom && zoom > 100000 {
+	if zoom > oldZoom && zoom > 40000 {
 		return
 	}
 	// cap max zoom out
