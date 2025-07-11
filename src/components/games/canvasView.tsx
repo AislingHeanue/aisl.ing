@@ -21,22 +21,26 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               <Title>{title}</Title>
             </div>
             <div className="col-span-2 h-fit mt-2 lg:row-span-1">
-              <button
-                type="button"
-                className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 w-full"
+              <Link href="/">
+                <button
+                  type="button"
+                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 w-full"
+                >
+                  Back Home
+                </button>
+              </Link>
+              <a
+                href={source}
+                target="_blank"
+                rel="noopener"
               >
-                <Link href="/">Back Home</Link>
-              </button>
-              <button
-                type="button"
-                className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 pl-2 pr-2 w-full"
-              >
-                <a
-                  href={source}
-                  target="_blank"
-                  rel="noopener"
-                >Source Code</a>
-              </button>
+                <button
+                  type="button"
+                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 pl-2 pr-2 w-full"
+                >
+                  Source Code
+                </button>
+              </a>
             </div>
             <div className=" w-full col-span-5 h-full lg:row-span-10">
               <div className="h-full w-full lg:scrollbar lg:scrollbar-thumb-stone-600 lg:scrollbar-track-stone-700 lg:overflow-auto lg:pr-3 lg:overflow-y-auto col-span-3" >
