@@ -43,7 +43,7 @@ func (a MandelbrotActionHandler) Wheel(c *common.GameContext, context *Mandelbro
 	} else {
 		setZoom(context, math.Pow(1.1, -deltaY/180)*context.Zoom)
 	}
-	c.Log(context.Zoom)
+	// c.Log(context.Zoom)
 }
 
 func setZoom(context *MandelbrotContext, zoom float64) {
