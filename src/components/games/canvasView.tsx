@@ -15,7 +15,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
   return (
     <>
       <div className="lg:w-[59.5%] md:w-5/6 mx-auto lg:h-full">
-        <div className="grid lg:grid-cols-3 lg:grid-rows-11 md:grid-cols-1 gap-4 flex h-full pt-4">
+        <div className="grid lg:grid-cols-3 lg:grid-rows-11 md:grid-cols-1 gap-4 h-full pt-4">
           <div className="col-span-1 grid grid-cols-5 lg:grid-rows-11 h-full lg:row-span-11 gap-4">
             <div className="col-span-3 h-fit lg:row-span-1">
               <Title>{title}</Title>
@@ -24,7 +24,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               <Link href="/">
                 <button
                   type="button"
-                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 w-full"
+                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded w-full"
                 >
                   Back Home
                 </button>
@@ -36,7 +36,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               >
                 <button
                   type="button"
-                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded ml-1 pl-2 pr-2 w-full"
+                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded pl-2 pr-2 w-full"
                 >
                   Source Code
                 </button>
