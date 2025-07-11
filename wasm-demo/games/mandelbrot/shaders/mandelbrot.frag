@@ -1,5 +1,6 @@
 precision highp float;
 uniform float uZoom;
+uniform int uMaxIterations;
 uniform vec2 uCentre;
 varying vec2 vTexCoord;
 
@@ -16,23 +17,25 @@ void main() {
     float y0 = (vTexCoord.y * 2.5 / uZoom) - (1.25 / uZoom) + uCentre.y;
     float x = 0.;
     float y = 0.;
-    float temp = 0.;
+    float x2 = 0.;
+    float y2 = 0.;
+    float w = 0.;
     int iteration = 0;
-    const int maxIterations = 3000;
 
-    for (int i = 0; i <= maxIterations; i++) {
-        temp = x * x - y * y + x0;
+    for (int i = 0; i <= 3000; i++) {
         y = 2. * x * y + y0;
-        x = temp;
+        x = x2 - y2 + x0;
+        x2 = x * x;
+        y2 = y * y;
 
         iteration = i;
-        if (x * x + y * y > pow(2., 8.)) {
+        if (x2 + y2 > pow(2., 8.) || iteration >= uMaxIterations) {
             break;
         }
     }
 
     float iterationFloat = float(iteration);
-    if (iteration < maxIterations) {
+    if (iteration < uMaxIterations) {
         float logZn = log(x * x + y * y) / 2.;
         float nu = log(logZn / log(2.)) / log(2.); // nu is between 0 and 1
         iterationFloat = float(iteration) + 1. - nu;
@@ -47,3 +50,4 @@ void main() {
 
     // gl_FragColor = vec4(colour1 + (colour2 - colour1) * mod(iterationFloat, 1.), 1.0);
 }
+

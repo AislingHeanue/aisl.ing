@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
 	// output: 'export', // single-page application
 	distDir: './dist',
 	reactStrictMode: true,
+	allowedDevOrigins: ['localhost', '192.168.0.*'],
 	async redirects() {
 		return [
 			{

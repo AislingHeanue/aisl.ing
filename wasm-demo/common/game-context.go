@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"syscall/js"
 
 	"github.com/gowebapi/webapi"
@@ -63,4 +64,8 @@ type GameContext struct {
 
 func (c *GameContext) Log(value any) {
 	js.Global().Get("console").Call("log", js.ValueOf(value))
+}
+
+func (c *GameContext) Logf(format string, args ...any) {
+	js.Global().Get("console").Call("log", js.ValueOf(fmt.Sprintf(format+"\n", args...)))
 }

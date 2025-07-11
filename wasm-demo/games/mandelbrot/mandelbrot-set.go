@@ -16,17 +16,21 @@ var fragmentSource string
 func New(opts MandelbrotOptions) *Mandelbrot {
 	return &Mandelbrot{
 		MandelbrotContext: &MandelbrotContext{
-			CentreX: opts.CentreX,
-			CentreY: opts.CentreY,
-			Zoom:    opts.Zoom,
+			CentreX:    opts.CentreX,
+			CentreY:    opts.CentreY,
+			Zoom:       opts.Zoom,
+			Iterations: opts.Iterations,
+			FpsTarget:  opts.FpsTarget,
 		},
 	}
 }
 
 type MandelbrotOptions struct {
-	CentreX float64
-	CentreY float64
-	Zoom    float64
+	CentreX    float64
+	CentreY    float64
+	Zoom       float64
+	Iterations int
+	FpsTarget  int
 }
 
 type Mandelbrot struct {
@@ -41,6 +45,15 @@ func (m *Mandelbrot) InitListeners(c *common.GameContext) {
 // AttachAttributes implements common.GameInfo.
 func (m *Mandelbrot) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer *webgl.Buffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
 	gl := c.GL
+	currentFps := 1 / c.IntervalT
+	if currentFps < 0.5*float32(m.FpsTarget) && m.Iterations > 400 {
+		m.Iterations = max(m.Iterations*4/5, 400)
+		// c.Logf("Decreasing max iterations to %d", m.Iterations)
+	}
+	if currentFps > 1.7*float32(m.FpsTarget) && m.Iterations < 3000 {
+		m.Iterations = min(m.Iterations*5/4, 3000)
+		// c.Logf("Increasing max iterations to %d", m.Iterations)
+	}
 
 	gl.BindBuffer(webgl.ARRAY_BUFFER, writeBuffer)
 	vPosition := gl.GetAttribLocation(program, "aPosition")
@@ -57,6 +70,9 @@ func (m *Mandelbrot) AttachAttributes(c *common.GameContext, program *webgl.Prog
 
 	centreLoc := gl.GetUniformLocation(program, "uCentre")
 	gl.Uniform2f(centreLoc, float32(m.CentreX), float32(m.CentreY))
+
+	iterLoc := gl.GetUniformLocation(program, "uMaxIterations")
+	gl.Uniform1i(iterLoc, m.Iterations)
 }
 
 func (m *Mandelbrot) GetFragmentSource() string {

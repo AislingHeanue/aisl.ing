@@ -21,6 +21,8 @@ type MandelbrotContext struct {
 	CentreX       float64
 	CentreY       float64
 	Zoom          float64
+	Iterations    int
+	FpsTarget     int
 }
 type MandelbrotController struct{}
 
@@ -38,7 +40,6 @@ func (a MandelbrotActionHandler) Wheel(c *common.GameContext, context *Mandelbro
 
 		context.CentreX = context.CentreX + 2.5*c.Window.DevicePixelRatio()*float64((canvasCentreX-mouseX)*c.ResolutionScale/c.Width)/context.Zoom
 		context.CentreY = context.CentreY + 2.5*c.Window.DevicePixelRatio()*float64((canvasCentreY-mouseY)*c.ResolutionScale/c.Height)/context.Zoom
-		c.Log(context.Zoom)
 	} else {
 		setZoom(context, math.Pow(1.1, -deltaY/180)*context.Zoom)
 	}
