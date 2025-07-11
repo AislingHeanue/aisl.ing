@@ -14,13 +14,13 @@ export type CanvasViewProps = {
 export default function CanvasView({ title, source, controller, game }: CanvasViewProps) {
   return (
     <>
-      <div className="lg:w-[59.5%] md:w-5/6 mx-auto lg:h-full">
-        <div className="grid lg:grid-cols-3 lg:grid-rows-11 md:grid-cols-1 gap-4 h-full pt-4">
-          <div className="col-span-1 grid grid-cols-5 lg:grid-rows-11 h-full lg:row-span-11 gap-4">
-            <div className="col-span-3 h-fit lg:row-span-1">
+      <div className="lg:w-[59.5%] sm:w-11/12 max-sm:w-full mx-auto lg:h-full">
+        <div className="grid lg:grid-cols-3 lg:grid-rows-9 md:grid-cols-1 gap-x-4 h-full pt-2">
+          <div className="col-span-1 grid grid-cols-5 lg:grid-rows-2 h-full lg:row-span-1 overflow-y-auto scrollbar scrollbar-thumb-stone-600 scrollbar-track-stone-700">
+            <div className="col-span-3 row-span-2 overflow-x-auto scrollbar scrollbar-thumb-stone-600 scrollbar-track-stone-700 overflow-y-clip">
               <Title>{title}</Title>
             </div>
-            <div className="col-span-2 h-fit mt-2 lg:row-span-1">
+            <div className="col-span-2 mt-2 lg:row-span-1">
               <Link href="/">
                 <button
                   type="button"
@@ -42,18 +42,17 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
                 </button>
               </a>
             </div>
-            <div className=" w-full col-span-5 h-full lg:row-span-10">
-              <div className="h-full w-full lg:scrollbar lg:scrollbar-thumb-stone-600 lg:scrollbar-track-stone-700 lg:overflow-auto lg:pr-3 lg:overflow-y-auto col-span-3" >
-                {controller}
-              </div>
+          </div >
+          <div className=" w-full col-span-1 col-start-1 h-full lg:row-span-10">
+            <div className="h-full w-full lg:scrollbar lg:scrollbar-thumb-stone-600 lg:scrollbar-track-stone-700 lg:overflow-x-hidden lg:pr-3 lg:overflow-y-auto col-span-3" >
+              {controller}
             </div>
           </div>
-          <div className="lg:col-span-2 lg:row-span-1"></div>
-          <div className="lg:col-span-2 lg:row-span-10 flex w-full max-h-full aspect-square">
+          <div className="lg:col-span-2 lg:row-span-8 lg:row-start-2 lg:col-start-2 flex w-full max-h-full aspect-square">
             {game}
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 };
