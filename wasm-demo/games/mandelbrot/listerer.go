@@ -78,8 +78,8 @@ func (a MandelbrotActionHandler) Drag(c *common.GameContext, context *Mandelbrot
 func (a MandelbrotActionHandler) DragTouch(c *common.GameContext, context *MandelbrotContext, controller MandelbrotController, e *domcore.Event) {
 	if c.MouseDown {
 		mouseX, mouseY := canvas.GetRelativeTouchPosition(c, e)
-		context.CentreX = context.AnchorCentreX + c.Window.DevicePixelRatio()*float64((c.AnchorX-mouseX)*c.ResolutionScale/c.Width)/context.Zoom
-		context.CentreY = context.AnchorCentreY + c.Window.DevicePixelRatio()*float64((c.AnchorY-mouseY)*c.ResolutionScale/c.Height)/context.Zoom
+		context.CentreX = context.AnchorCentreX + 2.5*c.Window.DevicePixelRatio()*float64((c.AnchorX-mouseX)*c.ResolutionScale/c.Width)/context.Zoom
+		context.CentreY = context.AnchorCentreY + 2.5*c.Window.DevicePixelRatio()*float64((c.AnchorY-mouseY)*c.ResolutionScale/c.Height)/context.Zoom
 		context.FrameUpToDate = false
 	}
 
