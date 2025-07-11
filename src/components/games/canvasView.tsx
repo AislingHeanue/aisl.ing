@@ -17,7 +17,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
       <div className="lg:w-[59.5%] sm:w-11/12 max-sm:w-full mx-auto lg:h-full">
         <div className="grid lg:grid-cols-3 lg:grid-rows-9 md:grid-cols-1 gap-x-4 h-full pt-2">
           <div className="col-span-1 grid grid-cols-5 lg:grid-rows-2 h-full lg:row-span-1 overflow-y-auto scrollbar scrollbar-thumb-stone-600 scrollbar-track-stone-700">
-            <div className="col-span-3 row-span-2 overflow-x-auto scrollbar scrollbar-thumb-stone-600 scrollbar-track-stone-700 overflow-y-clip">
+            <div className="col-span-3 h-fit overflow-x-auto scrollbar scrollbar-thumb-stone-600 scrollbar-track-stone-700 overflow-y-clip">
               <Title>{title}</Title>
             </div>
             <div className="col-span-2 mt-2 lg:row-span-1">
