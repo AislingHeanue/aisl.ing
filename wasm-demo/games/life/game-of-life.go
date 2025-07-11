@@ -46,13 +46,11 @@ type LifeOptions struct {
 
 type LifeGame struct {
 	Parent *common.ShaderGame
+	common.DefaultGame
 	*LifeContext
 }
 
 var _ common.GameInfo = &LifeGame{}
-
-func (lg *LifeGame) PreSetup(c *common.GameContext) {
-}
 
 func (lg *LifeGame) PostSetup(c *common.GameContext) {
 	lg.Random(c)
@@ -62,10 +60,6 @@ func (lg *LifeGame) PostSetup(c *common.GameContext) {
 
 func (lg *LifeGame) InitListeners(c *common.GameContext) {
 	common.RegisterListeners(c, lg.LifeContext, LifeController(lg), LifeActionHandler{})
-}
-
-func (lg *LifeGame) GetDrawShape(c *common.GameContext) common.DrawShape {
-	return common.DrawShape{}
 }
 
 func (lg *LifeGame) GetFragmentSource() string {
@@ -88,10 +82,6 @@ func (lg *LifeGame) Tick(c *common.GameContext) bool {
 	lg.T++
 
 	return false
-}
-
-func (lg *LifeGame) GetVCount() int {
-	return 6 // This corresponds to the size of parent.writeBuffer
 }
 
 func (lg *LifeGame) CanRunBetweenFrames() bool {

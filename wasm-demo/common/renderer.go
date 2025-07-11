@@ -69,6 +69,7 @@ type GameInfo interface {
 	Tick(c *GameContext) bool // true = buffers need to be remade
 	GetDrawShape(c *GameContext) DrawShape
 	CanRunBetweenFrames() bool // decides whether the program (shader code) is allowed to iterate more than once per frame.
+	SkipThisFrame(c *GameContext) bool
 }
 
 var _ Animator = &ShaderGame{}
@@ -303,8 +304,10 @@ func (g *ShaderGame) runProgram(c *GameContext, buffersStale bool) {
 	if buffersStale {
 		g.CreateBuffers(c)
 	}
-	g.AttachAttributes(c, g.mainProgram, g.writeBuffer, g.readBuffer, g.readTexture)
-	g.renderFrame(c)
+	if !g.SkipThisFrame(c) {
+		g.AttachAttributes(c, g.mainProgram, g.writeBuffer, g.readBuffer, g.readTexture)
+		g.renderFrame(c)
+	}
 }
 
 func (g *ShaderGame) renderFrame(c *GameContext) {

@@ -43,6 +43,10 @@ func (d *DefaultGame) Tick(c *GameContext) bool {
 	return false
 }
 
+func (d *DefaultGame) SkipThisFrame(c *GameContext) bool {
+	return false
+}
+
 type DefaultActionHandler[Context, Controller any] struct{}
 
 type a struct{}
@@ -84,4 +88,3 @@ func (d DefaultActionHandler[Context, Controller]) TouchUp(c *GameContext, conte
 
 func (d DefaultActionHandler[Context, Controller]) Wheel(c *GameContext, context *Context, controller Controller, e *domcore.Event) {
 }
-

@@ -23,6 +23,7 @@ type MandelbrotContext struct {
 	Zoom          float64
 	Iterations    int
 	FpsTarget     int
+	FrameUpToDate bool
 }
 type MandelbrotController struct{}
 
@@ -43,7 +44,6 @@ func (a MandelbrotActionHandler) Wheel(c *common.GameContext, context *Mandelbro
 	} else {
 		setZoom(context, math.Pow(1.1, -deltaY/180)*context.Zoom)
 	}
-	// c.Log(context.Zoom)
 }
 
 func setZoom(context *MandelbrotContext, zoom float64) {
@@ -58,6 +58,7 @@ func setZoom(context *MandelbrotContext, zoom float64) {
 		return
 	}
 	context.Zoom = zoom
+	context.FrameUpToDate = false
 }
 
 func (a MandelbrotActionHandler) Click(c *common.GameContext, context *MandelbrotContext, controller MandelbrotController, e *domcore.Event) {
@@ -70,6 +71,7 @@ func (a MandelbrotActionHandler) Drag(c *common.GameContext, context *Mandelbrot
 		mouseX, mouseY := canvas.GetRelativeMousePosition(e)
 		context.CentreX = context.AnchorCentreX + 2.5*c.Window.DevicePixelRatio()*float64((c.AnchorX-mouseX)*c.ResolutionScale/c.Width)/context.Zoom
 		context.CentreY = context.AnchorCentreY + 2.5*c.Window.DevicePixelRatio()*float64((c.AnchorY-mouseY)*c.ResolutionScale/c.Height)/context.Zoom
+		context.FrameUpToDate = false
 	}
 }
 
@@ -78,6 +80,7 @@ func (a MandelbrotActionHandler) DragTouch(c *common.GameContext, context *Mande
 		mouseX, mouseY := canvas.GetRelativeTouchPosition(c, e)
 		context.CentreX = context.AnchorCentreX + c.Window.DevicePixelRatio()*float64((c.AnchorX-mouseX)*c.ResolutionScale/c.Width)/context.Zoom
 		context.CentreY = context.AnchorCentreY + c.Window.DevicePixelRatio()*float64((c.AnchorY-mouseY)*c.ResolutionScale/c.Height)/context.Zoom
+		context.FrameUpToDate = false
 	}
 
 	if c.Zooming {
@@ -114,4 +117,8 @@ func (a MandelbrotActionHandler) Keyboard(c *common.GameContext, context *Mandel
 	case "=":
 		setZoom(context, 10/9.*context.Zoom)
 	}
+}
+
+func (a MandelbrotActionHandler) Resize(c *common.GameContext, context *MandelbrotContext, controller MandelbrotController, e *domcore.Event) {
+	context.FrameUpToDate = false
 }

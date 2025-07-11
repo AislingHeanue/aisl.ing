@@ -42,6 +42,10 @@ func (m *Mandelbrot) InitListeners(c *common.GameContext) {
 	common.RegisterListeners(c, m.MandelbrotContext, MandelbrotController{}, MandelbrotActionHandler{})
 }
 
+func (m *Mandelbrot) SkipThisFrame(c *common.GameContext) bool {
+	return m.FrameUpToDate
+}
+
 // AttachAttributes implements common.GameInfo.
 func (m *Mandelbrot) AttachAttributes(c *common.GameContext, program *webgl.Program, writeBuffer *webgl.Buffer, readBuffer *webgl.Buffer, samplerTexture *webgl.Texture) {
 	gl := c.GL
@@ -73,6 +77,7 @@ func (m *Mandelbrot) AttachAttributes(c *common.GameContext, program *webgl.Prog
 
 	iterLoc := gl.GetUniformLocation(program, "uMaxIterations")
 	gl.Uniform1i(iterLoc, m.Iterations)
+	m.FrameUpToDate = true
 }
 
 func (m *Mandelbrot) GetFragmentSource() string {
