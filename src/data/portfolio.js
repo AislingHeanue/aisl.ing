@@ -16,6 +16,14 @@ const portfolio = [
     internal: true
   },
   {
+    title: "C Compiler",
+    imgURL: "/assets/dinosaur.jpg",
+    summary: "Based on \"Writing a C Compiler\" by Nora Sandler. Also implements the C preprocessor and several advanced language features.",
+    stack: ["Rust"],
+    link: "https://github.com/AislingHeanue/c-compiler",
+    internal: false
+  },
+  {
     title: "Particle Game (Android app)",
     imgURL: "/assets/Particle Game Screenshot.jpg",
     summary: "Toy app I made which uses the device's gyroscope to simulate particle movements and collisions. WIP.",
