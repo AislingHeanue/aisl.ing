@@ -43,18 +43,22 @@ type BufferSet struct {
 	Vertices *webgl.Buffer
 	Indices  *webgl.Buffer
 	Colours  *webgl.Buffer
+	Edges    *webgl.Buffer
 	VCount   int
 	ICount   int
 	CCount   int
+	ECount   int
 }
 
 type DrawShape struct {
 	VerticesArray []float32
 	IndicesArray  []uint16
 	ColourArray   []float32
+	EdgeIndices   []uint16
 	VCount        int
 	ICount        int
 	CCount        int
+	ECount        int
 }
 
 type GameInfo interface {
@@ -180,13 +184,18 @@ func (g *ShaderGame) CreateBuffers(c *GameContext) {
 		colours := jsconv.Float32ToJs(drawShape.ColourArray)
 		colourBuffer := bindToBuffer(c, webgl.ARRAY_BUFFER, colours)
 
+		edges := jsconv.UInt16ToJs(drawShape.EdgeIndices)
+		edgeBuffer := bindToBuffer(c, webgl.ELEMENT_ARRAY_BUFFER, edges)
+
 		g.bufferSet = &BufferSet{
 			Vertices: vertexBuffer,
 			Indices:  indexBuffer,
 			Colours:  colourBuffer,
+			Edges:    edgeBuffer,
 			VCount:   drawShape.VCount,
 			ICount:   drawShape.ICount,
 			CCount:   drawShape.CCount,
+			ECount:   drawShape.ECount,
 		}
 	}
 	// this is a fullscreen quad.
@@ -322,8 +331,23 @@ func (g *ShaderGame) renderFrame(c *GameContext) {
 		g.bindArrayBuffer(c, g.mainProgram, g.bufferSet.Vertices, "aVertexPosition", 3)
 		g.bindArrayBuffer(c, g.mainProgram, g.bufferSet.Colours, "aVertexColour", 4)
 
+		useUniformLoc := c.GL.GetUniformLocation(g.mainProgram, "useUniformColour")
+		c.GL.Uniform1f(useUniformLoc, 0.)
+
 		c.GL.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, g.bufferSet.Indices)
 		c.GL.DrawElements(webgl.TRIANGLES, g.bufferSet.ICount, webgl.UNSIGNED_SHORT, 0)
+		if c.EdgeWidth != 0 {
+			c.GL.LineWidth(c.EdgeWidth) // thickness of the border
+			c.GL.BindBuffer(webgl.ELEMENT_ARRAY_BUFFER, g.bufferSet.Edges)
+
+			colourLoc := c.GL.GetUniformLocation(g.mainProgram, "uColour")
+			c.GL.Uniform4f(colourLoc, 0., 0., 0., 1.)
+
+			useUniformLoc := c.GL.GetUniformLocation(g.mainProgram, "useUniformColour")
+			c.GL.Uniform1f(useUniformLoc, 1.)
+
+			c.GL.DrawElements(webgl.LINES, g.bufferSet.ECount, webgl.UNSIGNED_SHORT, 0)
+		}
 		c.GL.BindFramebuffer(webgl.FRAMEBUFFER, &webgl.Framebuffer{})
 	} else {
 		c.GL.BindFramebuffer(webgl.FRAMEBUFFER, g.writeFrameBuffer)

@@ -21,11 +21,12 @@ func main() {
 			ResolutionScale: 1.7,
 			SmoothImage:     true,
 			Is3D:            true,
+			EdgeWidth:       20,
 			Game: rubiks.New(rubiks.CubeCubeOptions{
 				TurnSeconds:     0.18,
 				Dimension:       3,
 				TotalSideLength: 0.5,
-				GapProportion:   0.07,
+				GapProportion:   0.02,
 				Tps:             60,
 			}),
 		},

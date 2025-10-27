@@ -280,9 +280,25 @@ func (c Cube) GetBuffers() common.DrawShape {
 	}
 	out.ColourArray = outColours
 
+	out.EdgeIndices = make([]uint16, 48)
+	for j := range 6 {
+		// assume points are connected as 0->1->2->3
+		// then we need 0,1,2,3
+		out.EdgeIndices[8*j] = uint16(4*j + 0)
+		out.EdgeIndices[8*j+1] = uint16(4*j + 1)
+		out.EdgeIndices[8*j+2] = uint16(4*j + 1)
+		out.EdgeIndices[8*j+3] = uint16(4*j + 2)
+		out.EdgeIndices[8*j+4] = uint16(4*j + 2)
+		out.EdgeIndices[8*j+5] = uint16(4*j + 3)
+		out.EdgeIndices[8*j+6] = uint16(4*j + 3)
+		out.EdgeIndices[8*j+7] = uint16(4*j + 0)
+
+	}
+
 	out.VCount = 24
 	out.ICount = 36
 	out.CCount = 24
+	out.ECount = 48
 
 	return out
 }

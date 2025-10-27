@@ -44,6 +44,7 @@ type GameContext struct {
 	ZoomEnabled     bool
 	PanningEnabled  bool
 	Is3D            bool
+	EdgeWidth       float32
 
 	DX                  float32
 	DY                  float32

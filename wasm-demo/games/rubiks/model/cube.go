@@ -17,6 +17,7 @@ type Cube struct {
 	Colours            []color.RGBA
 	VertexArrayIndices []uint16
 	Points             []Point
+	EdgeIndices        []uint16
 }
 
 // creates a new cube at the specified origin in the default rotation.
@@ -85,7 +86,7 @@ func (c *Cube) RotateColoursX(flip bool) {
 	if flip {
 		times = 3
 	}
-	for i := 0; i < times; i++ {
+	for range times {
 		c.Colours[0], c.Colours[1], c.Colours[5], c.Colours[3] =
 			c.Colours[1], c.Colours[5], c.Colours[3], c.Colours[0]
 	}
@@ -96,7 +97,7 @@ func (c *Cube) RotateColours(flip bool, axis Axis) {
 	if flip {
 		times = 3
 	}
-	for i := 0; i < times; i++ {
+	for range times {
 		switch axis {
 		case X:
 			c.Colours[0], c.Colours[1], c.Colours[5], c.Colours[3] =
@@ -116,7 +117,7 @@ func (c *Cube) RotateColoursZ(flip bool) {
 	if flip {
 		times = 3
 	}
-	for i := 0; i < times; i++ {
+	for range times {
 		c.Colours[0], c.Colours[4], c.Colours[5], c.Colours[2] =
 			c.Colours[2], c.Colours[0], c.Colours[4], c.Colours[5]
 	}
