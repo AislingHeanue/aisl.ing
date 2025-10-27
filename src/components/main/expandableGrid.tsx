@@ -1,5 +1,5 @@
 "use client"
-import React, { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 
 const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
   const [height, setHeight] = useState(0 as number | 'auto')
@@ -20,7 +20,7 @@ const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
 
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="heightContainer">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="heightContainer">
       {items.map((item, index) => {
         return (
           <div
@@ -31,7 +31,7 @@ const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
             key={index}
             className="
             transition-[min-height] ease-in-out duration-300
-            border-2 relative border-stone-900 dark:border-white rounded-md overflow-hidden 
+             relative overflow-hidden mx-2 mb-1
             h-0
             [&:nth-child(-n+4)]:md:max-lg:h-auto
             [&:nth-child(-n+3)]:lg:h-auto
@@ -43,7 +43,7 @@ const ExpandableGrid = ({ items }: { items: ReactNode[] }) => {
         )
       })}
       < button
-        className="col-start-1 col-span-1 md:col-span-2 lg:col-start-2 lg:col-span-1 bg-stone-500 hover:bg-stone-400 text-white font-bold py-2 px-4 rounded-4xl"
+        className="col-start-1 col-span-1 md:col-span-2 lg:col-start-2 lg:col-span-1 bg-stone-500 hover:bg-stone-400 text-white font-bold py-2 px-4 rounded-4xl cursor-pointer"
         onClick={() => toggleHeight()}
       >
         {height != 0 ? 'Show Fewer' : 'Show More'}

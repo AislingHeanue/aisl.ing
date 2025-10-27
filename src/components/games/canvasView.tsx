@@ -1,4 +1,4 @@
-"use client"
+"use server"
 import { ReactNode } from "react";
 import Title from "../layout/title"
 import Link from "next/link";
@@ -11,7 +11,7 @@ export type CanvasViewProps = {
 }
 // wasm will hook into an existing JS canvas in the document calling it, this canvas
 // should be called wasmCanvas
-export default function CanvasView({ title, source, controller, game }: CanvasViewProps) {
+export default async function CanvasView({ title, source, controller, game }: CanvasViewProps) {
   return (
     <>
       <div className="lg:w-[59.5%] sm:w-11/12 max-sm:w-full mx-auto lg:h-full">
@@ -24,7 +24,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               <Link href="/">
                 <button
                   type="button"
-                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded w-full"
+                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded w-full cursor-pointer"
                 >
                   Back Home
                 </button>
@@ -36,7 +36,7 @@ export default function CanvasView({ title, source, controller, game }: CanvasVi
               >
                 <button
                   type="button"
-                  className="mb-2 fort-semibold text-white bg-stone-600 dark:bg-white dark:text-stone-900 rounded pl-2 pr-2 w-full"
+                  className="mb-2 fort-semibold text-white bg-stone-600  dark:bg-white dark:text-stone-900 rounded pl-2 pr-2 w-full cursor-pointer"
                 >
                   Source Code
                 </button>
