@@ -1,20 +1,15 @@
-import React, { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
+import { cookies } from "next/headers";
 
-export default function RootLayout({ children }: PropsWithChildren) {
-  // TODO: add icon.png and/or favicon.ico to the app folder
+export default async function RootLayout({ children }: PropsWithChildren) {
   // TODO: next/fonts
+
+  const cookieStore = await cookies();
+  const isDark = cookieStore.get("theme")?.value !== "light";
   return (
-    <html lang="en" suppressHydrationWarning={true}>
+    <html lang="en" className={isDark ? "dark" : ""}>
       <head>
         <title>Aisling&apos;s Coding Portfolio</title>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            document.documentElement.classList.toggle(
-              "dark",
-              localStorage.theme === "dark" || (!("theme" in localStorage)),
-            );
-          `,
-        }} />
       </head>
       <body>
         <div id="root" >{children}</div>

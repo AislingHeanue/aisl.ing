@@ -23,16 +23,16 @@ func (l CubeActionHandler) Click(c *common.GameContext, context *model.CubeCubeC
 func (l CubeActionHandler) Drag(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
 	if c.MouseDown {
 		mouseX, mouseY := canvas.GetRelativeMousePosition(e)
-		context.AngleX = (context.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale/c.Width)
-		context.AngleY = (context.AnchorAngleY + 5*(c.AnchorX-mouseX)/c.ResolutionScale/c.Height)
+		context.AngleX = (context.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale/c.Width*float32(c.Window.DevicePixelRatio()))
+		context.AngleY = (context.AnchorAngleY + 5*(c.AnchorX-mouseX)/c.ResolutionScale/c.Height*float32(c.Window.DevicePixelRatio()))
 	}
 }
 
 func (l CubeActionHandler) DragTouch(c *common.GameContext, context *model.CubeCubeContext, controller model.CubeController, e *domcore.Event) {
 	if c.MouseDown {
 		mouseX, mouseY := canvas.GetRelativeTouchPosition(c, e)
-		context.AngleX = (context.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale/c.Width)
-		context.AngleY = (context.AnchorAngleY + 5*(c.AnchorX-mouseX)/c.ResolutionScale/c.Height)
+		context.AngleX = (context.AnchorAngleX + 5*(c.AnchorY-mouseY)/c.ResolutionScale/c.Width*float32(c.Window.DevicePixelRatio()))
+		context.AngleY = (context.AnchorAngleY + 5*(c.AnchorX-mouseX)/c.ResolutionScale/c.Height*float32(c.Window.DevicePixelRatio()))
 	}
 }
 

@@ -20,6 +20,7 @@ func New(cco CubeCubeOptions) *CubeRenderer {
 		CubeCubeContext: &model.CubeCubeContext{
 			AnimationHandler: &model.RubiksAnimationHandler{
 				MaxTime: cco.TurnSeconds,
+				Tps:     cco.Tps,
 			},
 			TotalSideLength: cco.TotalSideLength,
 			GapProportion:   cco.GapProportion,
@@ -77,7 +78,7 @@ func (cc *CubeRenderer) SetParent(parent *common.ShaderGame) {
 }
 
 func (cc *CubeRenderer) Tick(c *common.GameContext) bool {
-	return cc.AnimationHandler.Tick(c.IntervalT)
+	return cc.AnimationHandler.Tick()
 }
 
 func (cc *CubeRenderer) GetDrawShape(c *common.GameContext) common.DrawShape {

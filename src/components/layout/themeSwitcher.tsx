@@ -1,5 +1,6 @@
 "use client"
 
+import { setCookie } from "cookies-next";
 import { useState } from "react";
 
 export default function ThemeSwitcher() {
@@ -41,7 +42,7 @@ export default function ThemeSwitcher() {
 
   const handleThemeSwitch = () => {
     const newDark = document.documentElement.classList.toggle("dark");
-    localStorage.theme = newDark ? "dark" : "light"
+    setCookie("theme", newDark ? "dark" : "light")
     setDark(newDark)
   };
 

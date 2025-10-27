@@ -10,6 +10,7 @@ type RubiksAnimationHandler struct {
 	currentEventIndices        []int
 	EventsWhichNeedToBeRotated []RubiksEvent
 	MaxTime                    float32
+	Tps                        float32
 
 	events []RubiksEvent
 	done   bool
@@ -36,7 +37,7 @@ func (a *RubiksAnimationHandler) AddEvent(face string, reverse bool) bool {
 	return true
 }
 
-func (a *RubiksAnimationHandler) Tick(intervalT float32) bool {
+func (a *RubiksAnimationHandler) Tick() bool {
 	a.currentEventIndices = []int{}
 	// for every event in order
 	for i, event := range a.events {
@@ -67,7 +68,7 @@ func (a *RubiksAnimationHandler) Tick(intervalT float32) bool {
 			}
 			if allowedToMove {
 				a.currentEventIndices = append(a.currentEventIndices, i)
-				a.events[i].timeElapsed += intervalT
+				a.events[i].timeElapsed += 1 / a.Tps
 			}
 		}
 	}
@@ -132,6 +133,6 @@ func (a *RubiksAnimationHandler) DoEvent(event RubiksEvent, origin Point) {
 
 func (a *RubiksAnimationHandler) FlushAll() {
 	for !a.done {
-		a.Tick(10)
+		a.Tick()
 	}
 }
